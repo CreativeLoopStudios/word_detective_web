@@ -1,7 +1,5 @@
 import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -10,6 +8,8 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { RegisterUser } from "./screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -27,7 +27,7 @@ function App() {
     const classes = useStyles();
 
     return (
-        <React.Fragment>
+        <Router>
             <CssBaseline />
             <Container maxWidth="lg">
                 <AppBar position="static">
@@ -45,8 +45,14 @@ function App() {
                         </Typography>
                     </Toolbar>
                 </AppBar>
+
+                <Switch>
+                    <Route path="/">
+                        <RegisterUser />
+                    </Route>
+                </Switch>
             </Container>
-        </React.Fragment>
+        </Router>
     );
 }
 
