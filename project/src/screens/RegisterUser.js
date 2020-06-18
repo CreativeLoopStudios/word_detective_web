@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     makeStyles,
     Paper,
@@ -17,6 +17,11 @@ const useStyles = makeStyles((theme) => ({
 
 function RegisterUser() {
     const classes = useStyles();
+    const [name, setName] = useState("");
+
+    const handleSubmit = (evt) => {
+        evt.preventDefault();
+    };
 
     return (
         <div className={classes.root}>
@@ -30,11 +35,13 @@ function RegisterUser() {
                         id="outlined-basic"
                         label="Seu nome"
                         variant="outlined"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                     />
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Jogar!
                     </Button>
                 </Grid>
