@@ -7,6 +7,9 @@ import {
     TextField,
     Grid,
 } from "@material-ui/core";
+import db from '../database/db';
+import * as firebase from "firebase/app";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,10 +20,15 @@ const useStyles = makeStyles((theme) => ({
 
 function RegisterUser() {
     const classes = useStyles();
+    const history = useHistory();
     const [name, setName] = useState("");
 
-    const handleSubmit = (evt) => {
+    const handleSubmit = async (evt) => {
         evt.preventDefault();
+        await db.updateById('rooms', 'Dy9vm3vNjlIWKc84Ug78', {
+            players: firebase.firestore.FieldValue.arrayUnion(name)
+        });
+        history.push('/lobby');
     };
 
     return (
