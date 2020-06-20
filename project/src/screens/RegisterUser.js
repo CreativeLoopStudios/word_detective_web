@@ -25,9 +25,25 @@ function RegisterUser(props) {
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
-        await props.firebase.updateById('rooms', 'Dy9vm3vNjlIWKc84Ug78', {
-            players: firebase.firestore.FieldValue.arrayUnion(name)
-        });
+
+        const room = (await props.firebase.getItemById('rooms', 'Dy9vm3vNjlIWKc84Ug78')).data();
+        
+        let objToUpdate = {};
+        if(room.host === "") {
+            objToUpdate = {
+                players: firebase.firestore.FieldValue.arrayUnion(name),
+                host: name,
+                word_master: name
+            };
+        } else {
+            objToUpdate = {
+                players: firebase.firestore.FieldValue.arrayUnion(name),
+                word_detectives: firebase.firestore.FieldValue.arrayUnion(name)
+            };
+        }
+
+        await props.firebase.updateById('rooms', 'Dy9vm3vNjlIWKc84Ug78', objToUpdate);
+        
         history.push('/lobby');
     };
 

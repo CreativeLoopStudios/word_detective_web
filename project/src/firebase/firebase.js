@@ -22,7 +22,11 @@ class Firebase {
         if (id) return this.db.collection(collection_name).doc(id);
         return this.db.collection(collection_name);
     };
-    
+
+    getItemById = async (collection_name, id) => {
+        return await this.db.collection(collection_name).doc(id).get();
+    };
+
     updateById = async (collection_name, id, value) => {
         await this.db.collection(collection_name).doc(id).update(value);
     }

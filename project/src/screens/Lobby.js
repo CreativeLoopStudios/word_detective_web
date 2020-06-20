@@ -24,7 +24,6 @@ function Lobby(props) {
     const [players, setPlayers] = useState([]);
 
     useEffect(() => {
-        console.log(props.firebase)
         const unsubscribe = props.firebase.getCollection("rooms").onSnapshot((snapshot) => {
             snapshot.forEach((doc) => {
                 const room = doc.data();
