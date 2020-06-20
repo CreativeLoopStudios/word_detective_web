@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     makeStyles,
     Paper,
@@ -7,6 +7,9 @@ import {
     TextField,
     Grid,
 } from "@material-ui/core";
+import * as firebase from "firebase/app";
+import { useHistory } from "react-router-dom";
+import { withFirebase } from "../firebase/context";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -15,8 +18,18 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function RegisterUser() {
+function RegisterUser(props) {
     const classes = useStyles();
+    const history = useHistory();
+    const [name, setName] = useState("");
+
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();
+        await props.firebase.updateById('rooms', 'Dy9vm3vNjlIWKc84Ug78', {
+            players: firebase.firestore.FieldValue.arrayUnion(name)
+        });
+        history.push('/lobby');
+    };
 
     return (
         <div className={classes.root}>
@@ -30,11 +43,13 @@ function RegisterUser() {
                         id="outlined-basic"
                         label="Seu nome"
                         variant="outlined"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                     />
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Jogar!
                     </Button>
                 </Grid>
@@ -43,4 +58,4 @@ function RegisterUser() {
     );
 }
 
-export default RegisterUser;
+export default withFirebase(RegisterUser);
