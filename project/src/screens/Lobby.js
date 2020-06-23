@@ -1,14 +1,8 @@
-import React, { useState, useEffect } from "react";
-import {
-    makeStyles,
-    Paper,
-    Box,
-    Button,
-    TextField,
-    Grid,
-} from "@material-ui/core";
+import React, { useState, useEffect, useContext } from "react";
+import { makeStyles, Button, Grid } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
+import SessionContext from "../context/Session";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,30 +15,54 @@ function Lobby(props) {
     const classes = useStyles();
     const history = useHistory();
 
+    const sessionContext = useContext(SessionContext);
+
     const [players, setPlayers] = useState([]);
+    const [isHost, setIsHost] = useState(false);
 
     useEffect(() => {
-        console.log(props.firebase)
-        const unsubscribe = props.firebase.getCollection("rooms").onSnapshot((snapshot) => {
-            snapshot.forEach((doc) => {
-                const room = doc.data();
-                setPlayers(room.players);
+        const unsubscribe = props.firebase
+            .getCollection("rooms")
+            .onSnapshot((snapshot) => {
+                snapshot.forEach((doc) => {
+                    const room = doc.data();
+                    setPlayers(room.players);
+
+                    if (room.host === sessionContext.state.playerName) {
+                        setIsHost(true);
+                    } else {
+                        setIsHost(false);
+                    }
+
+                    if (room.isGameBegan) {
+                        history.push("/game");
+                    }
+                });
             });
-        });
         return () => {
             unsubscribe();
         };
     }, [props.firebase]);
 
-    const handleSubmit = () => {
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();
 
+        await props.firebase.updateById(
+            "rooms",
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                isGameBegan: true
+            }
+        );
     };
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12}>
-                    <h1>Lobby</h1>
+                    <h1>
+                        Lobby - Bem vindo, {sessionContext.state.playerName}
+                    </h1>
 
                     <ul>
                         {players.map((player, index) => (
@@ -54,9 +72,17 @@ function Lobby(props) {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
-                        Começar!
-                    </Button>
+                    {isHost && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSubmit}
+                        >
+                            Começar!
+                        </Button>
+                    )}
+
+                    {!isHost && <h3>Aguardando Host</h3>}
                 </Grid>
             </Grid>
         </div>
