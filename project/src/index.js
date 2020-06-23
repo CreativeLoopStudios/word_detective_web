@@ -5,11 +5,14 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import "fontsource-roboto";
 import Firebase, { FirebaseContext } from "./firebase";
+import { SessionContextProvider } from "./context/Session";
 
 ReactDOM.render(
     <React.StrictMode>
         <FirebaseContext.Provider value={new Firebase()}>
-            <App />
+            <SessionContextProvider>
+                <App />
+            </SessionContextProvider>
         </FirebaseContext.Provider>
     </React.StrictMode>,
     document.getElementById("root")
