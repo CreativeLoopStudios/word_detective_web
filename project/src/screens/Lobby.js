@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-    makeStyles,
-    Button,
-    Grid,
-} from "@material-ui/core";
+import { makeStyles, Button, Grid } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
@@ -25,27 +21,34 @@ function Lobby(props) {
     const [isHost, setIsHost] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = props.firebase.getCollection("rooms").onSnapshot((snapshot) => {
-            snapshot.forEach((doc) => {
-                const room = doc.data();
-                setPlayers(room.players);
-                setIsHost(room)
+        const unsubscribe = props.firebase
+            .getCollection("rooms")
+            .onSnapshot((snapshot) => {
+                snapshot.forEach((doc) => {
+                    const room = doc.data();
+                    setPlayers(room.players);
+
+                    if (room.host === sessionContext.state.playerName) {
+                        setIsHost(true);
+                    } else {
+                        setIsHost(false);
+                    }
+                });
             });
-        });
         return () => {
             unsubscribe();
         };
     }, [props.firebase]);
 
-    const handleSubmit = () => {
-
-    };
+    const handleSubmit = () => {};
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12}>
-                    <h1>Lobby - Bem vindo, {sessionContext.state.playerName}</h1>
+                    <h1>
+                        Lobby - Bem vindo, {sessionContext.state.playerName}
+                    </h1>
 
                     <ul>
                         {players.map((player, index) => (
@@ -55,9 +58,17 @@ function Lobby(props) {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
-                        Começar!
-                    </Button>
+                    {isHost && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSubmit}
+                        >
+                            Começar!
+                        </Button>
+                    )}
+
+                    {!isHost && <h3>Aguardando Host</h3>}
                 </Grid>
             </Grid>
         </div>
