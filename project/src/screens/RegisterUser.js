@@ -61,6 +61,20 @@ function RegisterUser(props) {
         history.push("/lobby");
     };
 
+    const resetRoom = async () => {
+        await props.firebase.updateById(
+            "rooms",
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                host: '',
+                isGameBegan: false,
+                players: [],
+                word_detectives: [],
+                word_master: ''
+            }
+        );
+    };
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -85,6 +99,16 @@ function RegisterUser(props) {
                         onClick={handleSubmit}
                     >
                         Jogar!
+                    </Button>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={resetRoom}
+                    >
+                        Resetar Sala
                     </Button>
                 </Grid>
             </Grid>
