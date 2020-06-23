@@ -33,6 +33,10 @@ function Lobby(props) {
                     } else {
                         setIsHost(false);
                     }
+
+                    if (room.isGameBegan) {
+                        history.push("/game");
+                    }
                 });
             });
         return () => {
@@ -40,7 +44,17 @@ function Lobby(props) {
         };
     }, [props.firebase]);
 
-    const handleSubmit = () => {};
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();
+
+        await props.firebase.updateById(
+            "rooms",
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                isGameBegan: true
+            }
+        );
+    };
 
     return (
         <div className={classes.root}>
