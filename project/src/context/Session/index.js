@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { SET_PLAYER_NAME } from '../../actions';
 
 const SessionContext = React.createContext();
@@ -20,7 +20,12 @@ const reducer = (state, action) => {
 };
 
 const SessionContextProvider = (props) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const localState = JSON.parse(localStorage.getItem("SessionContext")) || initialState;
+    const [state, dispatch] = useReducer(reducer, localState);
+
+    useEffect(() => {
+        localStorage.setItem("SessionContext", JSON.stringify(state));
+    });
 
     return (
         <SessionContext.Provider value={{ state, dispatch }}>
