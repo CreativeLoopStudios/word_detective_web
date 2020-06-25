@@ -3,6 +3,7 @@ import { makeStyles, Button, Grid } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
+import { ROOMS_COLLECTION } from "../firebase/collections";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -22,7 +23,7 @@ function Lobby(props) {
 
     useEffect(() => {
         const unsubscribe = props.firebase
-            .getCollection("rooms")
+            .getCollection(ROOMS_COLLECTION)
             .onSnapshot((snapshot) => {
                 snapshot.forEach((doc) => {
                     const room = doc.data();
@@ -48,7 +49,7 @@ function Lobby(props) {
         evt.preventDefault();
 
         await props.firebase.updateById(
-            "rooms",
+            ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 isGameBegan: true

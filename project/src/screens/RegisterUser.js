@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { SET_PLAYER_NAME } from '../actions';
+import { ROOMS_COLLECTION } from "../firebase/collections";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,7 +36,7 @@ function RegisterUser(props) {
         });
 
         const room = (
-            await props.firebase.getItemById("rooms", "Dy9vm3vNjlIWKc84Ug78")
+            await props.firebase.getItemById(ROOMS_COLLECTION, "Dy9vm3vNjlIWKc84Ug78")
         ).data();
 
         let objToUpdate = {};
@@ -53,7 +54,7 @@ function RegisterUser(props) {
         }
 
         await props.firebase.updateById(
-            "rooms",
+            ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             objToUpdate
         );
@@ -63,7 +64,7 @@ function RegisterUser(props) {
 
     const resetRoom = async () => {
         await props.firebase.updateById(
-            "rooms",
+            ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 host: '',
