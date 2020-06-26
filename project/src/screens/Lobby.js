@@ -43,7 +43,7 @@ function Lobby(props) {
         return () => {
             unsubscribe();
         };
-    }, [props.firebase]);
+    }, [props.firebase, history, sessionContext.state.playerName]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();

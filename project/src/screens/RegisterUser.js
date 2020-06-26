@@ -71,7 +71,9 @@ function RegisterUser(props) {
                 isGameBegan: false,
                 players: [],
                 word_detectives: [],
-                word_master: ''
+                word_master: '',
+                rounds: 0,
+                word_of_the_round: ''
             }
         );
     };
