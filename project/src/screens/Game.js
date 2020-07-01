@@ -7,6 +7,7 @@ import {
     CATEGORIES_COLLECTION,
 } from "../firebase/collections";
 import { Math } from "../utils";
+import GameState from "../state_of_play";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -14,8 +15,8 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
     word: {
-        margin: 16
-    }
+        margin: 16,
+    },
 }));
 
 function Game(props) {
@@ -29,17 +30,21 @@ function Game(props) {
 
     const [wordsToChoose, setWordsToChoose] = useState([]);
 
+    const [currentGameState, setCurrentGameState] = useState('');
+
     useEffect(() => {
-        const chooseWordsForWordMaster = async () => {
+        const dealWordsForWordMaster = async () => {
             const categories = await props.firebase
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
-    
+
             let wordsToChooseProto = [];
             for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
                 const randomCategory = Math.randomInt(0, categories.size);
-                const categoryToChooseWord = categories.docs[randomCategory].data();
-    
+                const categoryToChooseWord = categories.docs[
+                    randomCategory
+                ].data();
+
                 const randomWord = Math.randomInt(
                     0,
                     categoryToChooseWord.words.length
@@ -47,7 +52,7 @@ function Game(props) {
                 const word = categoryToChooseWord.words[randomWord];
                 wordsToChooseProto.push(word);
             }
-    
+
             setWordsToChoose(wordsToChooseProto);
         };
 
@@ -56,10 +61,14 @@ function Game(props) {
             .onSnapshot((snapshot) => {
                 snapshot.forEach((doc) => {
                     const room = doc.data();
-                    
+
+                    setCurrentGameState(room.state);
+
                     if (room.word_master === sessionContext.state.playerName) {
                         setIsWordMaster(true);
-                        chooseWordsForWordMaster();
+                        if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
+                            dealWordsForWordMaster();
+                        }
                     } else {
                         setIsWordMaster(false);
                     }
@@ -70,6 +79,45 @@ function Game(props) {
         };
     }, [props.firebase, sessionContext.state.playerName]);
 
+    const chooseWord = async (word) => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
+                word_of_the_round: word,
+            }
+        );
+    };
+
+    const renderChooseWord = () => {
+        if (isWordMaster) {
+            return (
+                <Grid item xs={12}>
+                    <h2>Escolha uma palavra para os detetives:</h2>
+
+                    {wordsToChoose.map((word) => (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            key={word}
+                            className={classes.word}
+                            onClick={() => chooseWord(word)}
+                        >
+                            {word}
+                        </Button>
+                    ))}
+                </Grid>
+            );
+        } else {
+            return (
+                <Grid item xs={12}>
+                    <h3>Aguardando Word Master escolher a palavra</h3>
+                </Grid>
+            );
+        }
+    };
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -77,27 +125,7 @@ function Game(props) {
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
-                <Grid item xs={12}>
-                    <h2>Escolha uma palavra para os detetives:</h2>
-                </Grid>
-
-                <Grid item xs={12}>
-                    {isWordMaster &&
-                        wordsToChoose.map((word) => (
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                key={word}
-                                className={classes.word}
-                            >
-                                {word}
-                            </Button>
-                        ))}
-
-                    {!isWordMaster && (
-                        <h3>Aguardando Word Master escolher a palavra</h3>
-                    )}
-                </Grid>
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && renderChooseWord()}
             </Grid>
         </div>
     );
