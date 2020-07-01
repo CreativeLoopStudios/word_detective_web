@@ -90,7 +90,7 @@ function Game(props) {
         );
     };
 
-    const renderChooseWord = () => {
+    const renderStateWordMasterChooseWord = () => {
         if (isWordMaster) {
             return (
                 <Grid item xs={12}>
@@ -125,7 +125,7 @@ function Game(props) {
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && renderChooseWord()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && renderStateWordMasterChooseWord()}
             </Grid>
         </div>
     );
