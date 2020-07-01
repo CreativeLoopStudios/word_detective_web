@@ -11,6 +11,7 @@ import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { SET_PLAYER_NAME } from '../actions';
 import { ROOMS_COLLECTION } from "../firebase/collections";
+import GameState from '../state_of_play';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -56,7 +57,10 @@ function RegisterUser(props) {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
-            objToUpdate
+            { 
+                ...objToUpdate,
+                state: GameState.WAITING_PLAYERS
+            }
         );
 
         history.push("/lobby");
@@ -68,7 +72,7 @@ function RegisterUser(props) {
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 host: '',
-                isGameBegan: false,
+                state: '',
                 players: [],
                 word_detectives: [],
                 word_master: '',

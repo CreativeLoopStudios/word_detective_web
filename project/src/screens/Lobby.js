@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
+import GameState from "../state_of_play";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,7 +36,7 @@ function Lobby(props) {
                         setIsHost(false);
                     }
 
-                    if (room.isGameBegan) {
+                    if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
                         history.push("/game");
                     }
                 });
@@ -52,7 +53,7 @@ function Lobby(props) {
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
-                isGameBegan: true
+                state: GameState.WORD_MASTER_CHOOSE_WORD
             }
         );
     };
