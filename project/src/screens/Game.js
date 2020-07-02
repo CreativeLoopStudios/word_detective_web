@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid } from "@material-ui/core";
+import { makeStyles, Button, Grid, Avatar } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import {
@@ -17,6 +17,10 @@ const useStyles = makeStyles((theme) => ({
     word: {
         margin: 16,
     },
+    avatarContainer: {
+        display: "flex",
+        flexDirection: 'row'
+    }
 }));
 
 function Game(props) {
@@ -30,7 +34,10 @@ function Game(props) {
 
     const [wordsToChoose, setWordsToChoose] = useState([]);
 
-    const [currentGameState, setCurrentGameState] = useState('');
+    const [currentGameState, setCurrentGameState] = useState("");
+
+    const [wordMaster, setWordMaster] = useState("");
+    const [wordDetectives, setWordDetectives] = useState([]);
 
     useEffect(() => {
         const dealWordsForWordMaster = async () => {
@@ -63,6 +70,8 @@ function Game(props) {
                     const room = doc.data();
 
                     setCurrentGameState(room.state);
+                    setWordMaster(room.word_master);
+                    setWordDetectives(room.word_detectives);
 
                     if (room.word_master === sessionContext.state.playerName) {
                         setIsWordMaster(true);
@@ -87,6 +96,27 @@ function Game(props) {
                 state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                 word_of_the_round: word,
             }
+        );
+    };
+
+    const renderPlayersInfo = () => {
+        return (
+            <>
+                <Grid item xs={2}>
+                    <h2>Word Master</h2>
+                    <Avatar style={{ backgroundColor: "green" }}>
+                        {wordMaster.substring(0, 2)}
+                    </Avatar>
+                </Grid>
+                <Grid item xs={10}>
+                    <h2>Word Detectives</h2>
+                    <div className={classes.avatarContainer}>
+                    {wordDetectives.map((detective) => (
+                        <Avatar>{detective.substring(0, 2)}</Avatar>
+                    ))}
+                    </div>
+                </Grid>
+            </>
         );
     };
 
@@ -121,11 +151,14 @@ function Game(props) {
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
+                {renderPlayersInfo()}
+
                 <Grid item xs={12}>
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && renderStateWordMasterChooseWord()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD &&
+                    renderStateWordMasterChooseWord()}
             </Grid>
         </div>
     );
