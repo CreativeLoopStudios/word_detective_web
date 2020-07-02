@@ -77,7 +77,8 @@ function RegisterUser(props) {
                 word_detectives: [],
                 word_master: '',
                 rounds: 0,
-                word_of_the_round: ''
+                word_of_the_round: '',
+                questions: []
             }
         );
     };
