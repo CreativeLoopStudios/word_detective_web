@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid, Avatar } from "@material-ui/core";
+import { makeStyles, Button, Grid, Avatar, TextField } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
+import * as firebase from "firebase/app";
 import SessionContext from "../context/Session";
 import {
     ROOMS_COLLECTION,
@@ -19,8 +20,8 @@ const useStyles = makeStyles((theme) => ({
     },
     avatarContainer: {
         display: "flex",
-        flexDirection: 'row'
-    }
+        flexDirection: "row",
+    },
 }));
 
 function Game(props) {
@@ -38,6 +39,8 @@ function Game(props) {
 
     const [wordMaster, setWordMaster] = useState("");
     const [wordDetectives, setWordDetectives] = useState([]);
+
+    const [questionInput, setQuestionInput] = useState('');
 
     useEffect(() => {
         const dealWordsForWordMaster = async () => {
@@ -99,6 +102,20 @@ function Game(props) {
         );
     };
 
+    const sendQuestionToWordMaster = async (question) => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                questions: firebase.firestore.FieldValue.arrayUnion({
+                    question: question,
+                    player: sessionContext.state.playerName
+                })
+            }
+        );
+        setQuestionInput('');
+    };
+
     const renderPlayersInfo = () => {
         return (
             <>
@@ -111,9 +128,9 @@ function Game(props) {
                 <Grid item xs={10}>
                     <h2>Word Detectives</h2>
                     <div className={classes.avatarContainer}>
-                    {wordDetectives.map((detective) => (
-                        <Avatar>{detective.substring(0, 2)}</Avatar>
-                    ))}
+                        {wordDetectives.map((detective) => (
+                            <Avatar key={detective}>{detective.substring(0, 2)}</Avatar>
+                        ))}
                     </div>
                 </Grid>
             </>
@@ -142,7 +159,37 @@ function Game(props) {
         } else {
             return (
                 <Grid item xs={12}>
-                    <h3>Aguardando Word Master escolher a palavra</h3>
+                    <h3>Aguarde o Word Master escolher a palavra da rodada</h3>
+                </Grid>
+            );
+        }
+    };
+
+    const renderStateWordDetectivesAskQuestions = () => {
+        if (isWordMaster) {
+            return (
+                <Grid item xs={12}>
+                    <h3>Aguarde os Word Detectives fazerem suas perguntas!</h3>
+                </Grid>
+            );
+        } else {
+            return (
+                <Grid item xs={12}>
+                    <TextField
+                        id="standard-basic"
+                        label="Qual sua pergunta para o Word Master?"
+                        fullWidth
+                        value={questionInput}
+                        onChange={(event) => setQuestionInput(event.target.value)}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        className={classes.word}
+                        onClick={() => sendQuestionToWordMaster(questionInput)}
+                    >
+                        Enviar
+                    </Button>
                 </Grid>
             );
         }
@@ -159,6 +206,9 @@ function Game(props) {
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD &&
                     renderStateWordMasterChooseWord()}
+
+                {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
+                    renderStateWordDetectivesAskQuestions()}
             </Grid>
         </div>
     );
