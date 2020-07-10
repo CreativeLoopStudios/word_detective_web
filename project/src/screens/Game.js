@@ -129,7 +129,7 @@ function Game(props) {
                     <h2>Word Detectives</h2>
                     <div className={classes.avatarContainer}>
                         {wordDetectives.map((detective) => (
-                            <Avatar>{detective.substring(0, 2)}</Avatar>
+                            <Avatar key={detective}>{detective.substring(0, 2)}</Avatar>
                         ))}
                     </div>
                 </Grid>
