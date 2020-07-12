@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { SET_PLAYER_NAME } from '../../actions';
+import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../../actions';
 
 const SessionContext = React.createContext();
 
@@ -13,6 +13,11 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 playerName: action.payload
+            }
+        case SET_HEARTBEAT_DATA:
+            return {
+                ...state,
+                heartbeatData: action.payload
             }
         default:
             throw new Error();
