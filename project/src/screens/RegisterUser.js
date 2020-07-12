@@ -74,12 +74,13 @@ function RegisterUser(props) {
 
                 if (name in room.heartbeats && room.heartbeats[name]) {
                     const lastValue = room.heartbeats[name];
+
+                    // round trip time (latency)
                     const latency = localClockEnd - localClockStart;
-                    const serverClockDiff = localClockEnd - lastValue;
 
                     sessionContext.dispatch({
                         type: SET_HEARTBEAT_DATA,
-                        payload: { lastValue, latency, serverClockDiff },
+                        payload: { lastValue, latency },
                     });
 
                     unsubscribeFromHeartbeat();

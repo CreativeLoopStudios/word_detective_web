@@ -39,8 +39,7 @@ function Lobby(props) {
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
                         const { latency } = sessionContext.state.heartbeatData;
-                        // correct for latency:
-                        const countFrom = 10 - latency;
+                        const countFrom = 10 - latency / 2;
                         doCountdown(countFrom, async () => {
                             history.push("/game");
                         });
@@ -86,7 +85,7 @@ function Lobby(props) {
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
-                state: GameState.WORD_MASTER_CHOOSE_WORD
+                state: GameState.WORD_MASTER_CHOOSE_WORD,
             }
         );
     };
