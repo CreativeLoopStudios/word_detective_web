@@ -9,7 +9,7 @@ import * as firebase from "firebase/app";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
-import { SET_PLAYER_NAME } from '../actions';
+import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from '../state_of_play';
 
@@ -40,28 +40,55 @@ function RegisterUser(props) {
             await props.firebase.getItemById(ROOMS_COLLECTION, "Dy9vm3vNjlIWKc84Ug78")
         ).data();
 
-        let objToUpdate = {};
+        let objToUpdate = null;
         if (room.host === "") {
             objToUpdate = {
-                players: firebase.firestore.FieldValue.arrayUnion(name),
                 host: name,
                 word_master: name,
             };
         } else {
             objToUpdate = {
-                players: firebase.firestore.FieldValue.arrayUnion(name),
                 word_detectives: firebase.firestore.FieldValue.arrayUnion(name),
             };
         }
 
-        await props.firebase.updateById(
+        objToUpdate[`heartbeats.${name}`] = firebase.firestore.FieldValue.serverTimestamp();
+        objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion(name);
+
+        const magicRoomId = "Dy9vm3vNjlIWKc84Ug78";
+
+        const localClockStart = firebase.firestore.Timestamp.now();
+        const updatePromise = props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            magicRoomId,
             { 
                 ...objToUpdate,
                 state: GameState.WAITING_PLAYERS
             }
         );
+
+        // listen to heartbeat
+        const unsubscribeFromHeartbeat = props.firebase.getCollection(ROOMS_COLLECTION, magicRoomId)
+            .onSnapshot((doc) => {
+                const localClockEnd = firebase.firestore.Timestamp.now();
+                const room = doc.data();
+
+                if (name in room.heartbeats && room.heartbeats[name]) {
+                    const lastValue = room.heartbeats[name];
+                    const latency = localClockEnd - localClockStart;
+                    const serverClockDiff = localClockEnd - lastValue;
+                    console.log('updating heartbeat', lastValue, latency);
+
+                    sessionContext.dispatch({
+                        type: SET_HEARTBEAT_DATA,
+                        payload: { lastValue, latency, serverClockDiff },
+                    });
+
+                    unsubscribeFromHeartbeat();
+                }
+            })
+
+        await updatePromise;
 
         history.push("/lobby");
     };
@@ -78,7 +105,8 @@ function RegisterUser(props) {
                 word_master: '',
                 rounds: 0,
                 word_of_the_round: '',
-                questions: []
+                questions: [],
+                heartbeats: {},
             }
         );
     };
