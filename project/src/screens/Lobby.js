@@ -21,6 +21,7 @@ function Lobby(props) {
 
     const [players, setPlayers] = useState([]);
     const [isHost, setIsHost] = useState(false);
+    const [countdown, setCountdown] = useState(0);
 
     useEffect(() => {
         const unsubscribe = props.firebase
@@ -37,14 +38,46 @@ function Lobby(props) {
                     }
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        history.push("/game");
+                        const { latency } = sessionContext.state.heartbeatData;
+                        // correct for latency:
+                        const countFrom = 10 - latency;
+                        doCountdown(countFrom, async () => {
+                            history.push("/game");
+                        });
                     }
                 });
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName]);
+    }, [props.firebase, history, sessionContext.state.playerName, sessionContext.state.heartbeatData]);
+
+    const doCountdown = (counter, callback) => {
+        if (counter <= 0) {
+            return;
+        }
+
+        // first, wait for fractional second
+        const splitSecond = counter % 1;
+        console.log(splitSecond);
+
+        // transform to int
+        counter = (counter - splitSecond) | 0;
+
+        setTimeout(() => {
+            const h = setInterval(() => {
+                setCountdown(counter);
+                if (counter === 0) {
+                    clearInterval(h);
+                    if (callback) {
+                        callback();
+                    }
+                } else {
+                    counter -= 1;
+                }
+            }, 1000);
+        }, splitSecond);
+    }
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -85,6 +118,8 @@ function Lobby(props) {
                     )}
 
                     {!isHost && <h3>Aguardando Host</h3>}
+
+                    {countdown > 0 && <h1>{countdown}</h1>}
                 </Grid>
             </Grid>
         </div>

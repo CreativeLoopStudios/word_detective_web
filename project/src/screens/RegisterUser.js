@@ -36,8 +36,9 @@ function RegisterUser(props) {
             payload: name
         });
 
+        const magicRoomId = "Dy9vm3vNjlIWKc84Ug78";
         const room = (
-            await props.firebase.getItemById(ROOMS_COLLECTION, "Dy9vm3vNjlIWKc84Ug78")
+            await props.firebase.getItemById(ROOMS_COLLECTION, magicRoomId)
         ).data();
 
         let objToUpdate = null;
@@ -54,8 +55,6 @@ function RegisterUser(props) {
 
         objToUpdate[`heartbeats.${name}`] = firebase.firestore.FieldValue.serverTimestamp();
         objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion(name);
-
-        const magicRoomId = "Dy9vm3vNjlIWKc84Ug78";
 
         const localClockStart = firebase.firestore.Timestamp.now();
         const updatePromise = props.firebase.updateById(
@@ -77,7 +76,6 @@ function RegisterUser(props) {
                     const lastValue = room.heartbeats[name];
                     const latency = localClockEnd - localClockStart;
                     const serverClockDiff = localClockEnd - lastValue;
-                    console.log('updating heartbeat', lastValue, latency);
 
                     sessionContext.dispatch({
                         type: SET_HEARTBEAT_DATA,
