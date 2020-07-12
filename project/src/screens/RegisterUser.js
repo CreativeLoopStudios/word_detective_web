@@ -75,12 +75,16 @@ function RegisterUser(props) {
                 if (name in room.heartbeats && room.heartbeats[name]) {
                     const lastValue = room.heartbeats[name];
 
-                    // round trip time (latency)
-                    const latency = localClockEnd - localClockStart;
+                    // round trip time (total latency)
+                    const rtt = localClockEnd - localClockStart;
+                    // time to write something to firestore 
+                    const writeTime = lastValue - localClockStart;
+                    // time to read something from firestore (dissemination)
+                    const readTime = localClockEnd - lastValue;
 
                     sessionContext.dispatch({
                         type: SET_HEARTBEAT_DATA,
-                        payload: { lastValue, latency },
+                        payload: { rtt, writeTime, readTime },
                     });
 
                     unsubscribeFromHeartbeat();

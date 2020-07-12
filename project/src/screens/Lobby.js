@@ -31,15 +31,17 @@ function Lobby(props) {
                     const room = doc.data();
                     setPlayers(room.players);
 
-                    if (room.host === sessionContext.state.playerName) {
-                        setIsHost(true);
-                    } else {
-                        setIsHost(false);
-                    }
+                    const isHost = room.host === sessionContext.state.playerName;
+                    setIsHost(isHost);
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        const { latency } = sessionContext.state.heartbeatData;
-                        const countFrom = 10 - latency / 2;
+                        const { readTime, writeTime } = sessionContext.state.heartbeatData;
+
+                        // discount the readTime (time that the server takes to get an information to this client)
+                        // add the writeTime if this is the host (time to write to firestore server) because the host
+                        // will publish here instantly.
+                        const countFrom = 10 - readTime + (isHost ? writeTime : 0);
+                        console.log(`counting from ${countFrom}`)
                         doCountdown(countFrom, async () => {
                             history.push("/game");
                         });
@@ -58,7 +60,6 @@ function Lobby(props) {
 
         // first, wait for fractional second
         const splitSecond = counter % 1;
-        console.log(splitSecond);
 
         // transform to int
         counter = (counter - splitSecond) | 0;
@@ -80,7 +81,6 @@ function Lobby(props) {
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
-
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
