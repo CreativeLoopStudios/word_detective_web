@@ -5,7 +5,6 @@ import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
-import { withCountdown } from "../hocs";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,8 +22,6 @@ function Lobby(props) {
     const [players, setPlayers] = useState([]);
     const [isHost, setIsHost] = useState(false);
 
-    const { countdown, doCountdown } = props;
-
     useEffect(() => {
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION)
@@ -37,23 +34,14 @@ function Lobby(props) {
                     setIsHost(isHost);
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        const { readTime, writeTime } = sessionContext.state.heartbeatData;
-
-                        // discount the readTime (time that the server takes to get an information to this client)
-                        // add the writeTime if this is the host (time to write to firestore server) because the host
-                        // will publish here instantly.
-                        const countFrom = 10 - readTime + (isHost ? writeTime : 0);
-                        console.log(`counting from ${countFrom}`)
-                        doCountdown(countFrom, async () => {
-                            history.push("/game");
-                        });
+                        history.push("/game");
                     }
                 });
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, doCountdown, history, sessionContext.state.playerName, sessionContext.state.heartbeatData]);
+    }, [props.firebase, history, sessionContext.state.playerName]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -93,12 +81,10 @@ function Lobby(props) {
                     )}
 
                     {!isHost && <h3>Aguardando Host</h3>}
-
-                    {countdown > 0 && <h1>{countdown}</h1>}
                 </Grid>
             </Grid>
         </div>
     );
 }
 
-export default withCountdown(withFirebase(Lobby));
+export default withFirebase(Lobby);
