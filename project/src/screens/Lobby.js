@@ -5,6 +5,7 @@ import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
+import { withCountdown } from "../hocs";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,7 +22,8 @@ function Lobby(props) {
 
     const [players, setPlayers] = useState([]);
     const [isHost, setIsHost] = useState(false);
-    const [countdown, setCountdown] = useState(0);
+
+    const { countdown, doCountdown } = props;
 
     useEffect(() => {
         const unsubscribe = props.firebase
@@ -51,33 +53,7 @@ function Lobby(props) {
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName, sessionContext.state.heartbeatData]);
-
-    const doCountdown = (counter, callback) => {
-        if (counter <= 0) {
-            return;
-        }
-
-        // first, wait for fractional second
-        const splitSecond = counter % 1;
-
-        // transform to int
-        counter = (counter - splitSecond) | 0;
-
-        setTimeout(() => {
-            const h = setInterval(() => {
-                setCountdown(counter);
-                if (counter === 0) {
-                    clearInterval(h);
-                    if (callback) {
-                        callback();
-                    }
-                } else {
-                    counter -= 1;
-                }
-            }, 1000);
-        }, splitSecond);
-    }
+    }, [props.firebase, doCountdown, history, sessionContext.state.playerName, sessionContext.state.heartbeatData]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -125,4 +101,4 @@ function Lobby(props) {
     );
 }
 
-export default withFirebase(Lobby);
+export default withCountdown(withFirebase(Lobby));
