@@ -21,7 +21,6 @@ function Lobby(props) {
 
     const [players, setPlayers] = useState([]);
     const [isHost, setIsHost] = useState(false);
-    const [countdown, setCountdown] = useState(0);
 
     useEffect(() => {
         const unsubscribe = props.firebase
@@ -35,49 +34,14 @@ function Lobby(props) {
                     setIsHost(isHost);
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        const { readTime, writeTime } = sessionContext.state.heartbeatData;
-
-                        // discount the readTime (time that the server takes to get an information to this client)
-                        // add the writeTime if this is the host (time to write to firestore server) because the host
-                        // will publish here instantly.
-                        const countFrom = 10 - readTime + (isHost ? writeTime : 0);
-                        console.log(`counting from ${countFrom}`)
-                        doCountdown(countFrom, async () => {
-                            history.push("/game");
-                        });
+                        history.push("/game");
                     }
                 });
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName, sessionContext.state.heartbeatData]);
-
-    const doCountdown = (counter, callback) => {
-        if (counter <= 0) {
-            return;
-        }
-
-        // first, wait for fractional second
-        const splitSecond = counter % 1;
-
-        // transform to int
-        counter = (counter - splitSecond) | 0;
-
-        setTimeout(() => {
-            const h = setInterval(() => {
-                setCountdown(counter);
-                if (counter === 0) {
-                    clearInterval(h);
-                    if (callback) {
-                        callback();
-                    }
-                } else {
-                    counter -= 1;
-                }
-            }, 1000);
-        }, splitSecond);
-    }
+    }, [props.firebase, history, sessionContext.state.playerName]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -117,8 +81,6 @@ function Lobby(props) {
                     )}
 
                     {!isHost && <h3>Aguardando Host</h3>}
-
-                    {countdown > 0 && <h1>{countdown}</h1>}
                 </Grid>
             </Grid>
         </div>
