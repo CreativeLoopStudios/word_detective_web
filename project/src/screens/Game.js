@@ -9,6 +9,7 @@ import {
 } from "../firebase/collections";
 import { Math } from "../utils";
 import GameState from "../state_of_play";
+import { withCountdown } from "../hocs";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -40,9 +41,13 @@ function Game(props) {
     const [wordMaster, setWordMaster] = useState("");
     const [wordDetectives, setWordDetectives] = useState([]);
 
-    const [questionInput, setQuestionInput] = useState('');
+    const [questionInput, setQuestionInput] = useState("");
+
+    const { countdown, doCountdown } = props;
 
     useEffect(() => {
+        let isCountdownStarted = false;
+
         const dealWordsForWordMaster = async () => {
             const categories = await props.firebase
                 .getCollection(CATEGORIES_COLLECTION)
@@ -71,6 +76,8 @@ function Game(props) {
             .onSnapshot((snapshot) => {
                 snapshot.forEach((doc) => {
                     const room = doc.data();
+                    const isHost =
+                        room.host === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
                     setWordMaster(room.word_master);
@@ -84,12 +91,49 @@ function Game(props) {
                     } else {
                         setIsWordMaster(false);
                     }
+
+                    if (
+                        room.state ===
+                            GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
+                        !isCountdownStarted
+                    ) {
+                        const {
+                            readTime,
+                            writeTime,
+                        } = sessionContext.state.heartbeatData;
+
+                        // discount the readTime (time that the server takes to get an information to this client)
+                        // add the writeTime if this is the host (time to write to firestore server) because the host
+                        // will publish here instantly.
+                        const countFrom =
+                            20 - readTime + (isHost ? writeTime : 0);
+                        console.log(`counting from ${countFrom}`);
+                        doCountdown(countFrom, async () => {
+                            await props.firebase.updateById(
+                                ROOMS_COLLECTION,
+                                "Dy9vm3vNjlIWKc84Ug78",
+                                {
+                                    state:
+                                        GameState.WORD_MASTER_CHOOSE_QUESTION,
+                                }
+                            );
+
+                            isCountdownStarted = false;
+                        });
+
+                        isCountdownStarted = true;
+                    }
                 });
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, sessionContext.state.playerName]);
+    }, [
+        props.firebase,
+        doCountdown,
+        sessionContext.state.playerName,
+        sessionContext.state.heartbeatData
+    ]);
 
     const chooseWord = async (word) => {
         await props.firebase.updateById(
@@ -109,11 +153,11 @@ function Game(props) {
             {
                 questions: firebase.firestore.FieldValue.arrayUnion({
                     question: question,
-                    player: sessionContext.state.playerName
-                })
+                    player: sessionContext.state.playerName,
+                }),
             }
         );
-        setQuestionInput('');
+        setQuestionInput("");
     };
 
     const renderPlayersInfo = () => {
@@ -129,7 +173,9 @@ function Game(props) {
                     <h2>Word Detectives</h2>
                     <div className={classes.avatarContainer}>
                         {wordDetectives.map((detective) => (
-                            <Avatar key={detective}>{detective.substring(0, 2)}</Avatar>
+                            <Avatar key={detective}>
+                                {detective.substring(0, 2)}
+                            </Avatar>
                         ))}
                     </div>
                 </Grid>
@@ -180,7 +226,9 @@ function Game(props) {
                         label="Qual sua pergunta para o Word Master?"
                         fullWidth
                         value={questionInput}
-                        onChange={(event) => setQuestionInput(event.target.value)}
+                        onChange={(event) =>
+                            setQuestionInput(event.target.value)
+                        }
                     />
                     <Button
                         variant="contained"
@@ -190,6 +238,22 @@ function Game(props) {
                     >
                         Enviar
                     </Button>
+                </Grid>
+            );
+        }
+    };
+
+    const renderStateWordMasterChooseQuestion = () => {
+        if (isWordMaster) {
+            return (
+                <Grid item xs={12}>
+                    <h3>Escolha a pergunta e a sua resposta:</h3>
+                </Grid>
+            );
+        } else {
+            return (
+                <Grid item xs={12}>
+                    <h3>Perguntas enviadas ao Word Master:</h3>
                 </Grid>
             );
         }
@@ -208,10 +272,16 @@ function Game(props) {
                     renderStateWordMasterChooseWord()}
 
                 {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
+                    countdown > 0 && <h1>{countdown}</h1>}
+
+                {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
                     renderStateWordDetectivesAskQuestions()}
+
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION &&
+                    renderStateWordMasterChooseQuestion()}
             </Grid>
         </div>
     );
 }
 
-export default withFirebase(Game);
+export default withCountdown(withFirebase(Game));
