@@ -23,6 +23,13 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "row",
     },
+    successButton: {
+        backgroundColor: "green",
+        color: "white",
+    },
+    question: {
+        fontSize: 24,
+    },
 }));
 
 function Game(props) {
@@ -42,6 +49,8 @@ function Game(props) {
     const [wordDetectives, setWordDetectives] = useState([]);
 
     const [questionInput, setQuestionInput] = useState("");
+
+    const [questions, setQuestions] = useState([]);
 
     const { countdown, doCountdown } = props;
 
@@ -123,6 +132,10 @@ function Game(props) {
 
                         isCountdownStarted = true;
                     }
+
+                    if (room.state === GameState.WORD_MASTER_CHOOSE_QUESTION) {
+                        setQuestions(room.questions);
+                    }
                 });
             });
         return () => {
@@ -132,7 +145,7 @@ function Game(props) {
         props.firebase,
         doCountdown,
         sessionContext.state.playerName,
-        sessionContext.state.heartbeatData
+        sessionContext.state.heartbeatData,
     ]);
 
     const chooseWord = async (word) => {
@@ -158,6 +171,30 @@ function Game(props) {
             }
         );
         setQuestionInput("");
+    };
+
+    const sendAnswerOfWordMaster = async (questionIndex, answer) => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                question_answered: {
+                    index: questionIndex,
+                    answer: answer,
+                },
+                state: GameState.SHOW_QUESTION_CHOSE,
+            }
+        );
+    };
+
+    const endGame = async () => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                state: GameState.END_GAME,
+            }
+        );
     };
 
     const renderPlayersInfo = () => {
@@ -248,12 +285,55 @@ function Game(props) {
             return (
                 <Grid item xs={12}>
                     <h3>Escolha a pergunta e a sua resposta:</h3>
+
+                    <ul>
+                        {questions.map((q, index) => (
+                            <div key={index}>
+                                <li className={classes.question}>
+                                    {q.question}
+                                </li>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() =>
+                                        sendAnswerOfWordMaster(index, "SIM")
+                                    }
+                                >
+                                    SIM
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() =>
+                                        sendAnswerOfWordMaster(index, "NÃO")
+                                    }
+                                >
+                                    NÃO
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    className={classes.successButton}
+                                    onClick={() => endGame()}
+                                >
+                                    DESCOBRIU!
+                                </Button>
+                            </div>
+                        ))}
+                    </ul>
                 </Grid>
             );
         } else {
             return (
                 <Grid item xs={12}>
                     <h3>Perguntas enviadas ao Word Master:</h3>
+
+                    <ul>
+                        {questions.map((q, index) => (
+                            <li key={index} className={classes.question}>
+                                {q.question}
+                            </li>
+                        ))}
+                    </ul>
                 </Grid>
             );
         }

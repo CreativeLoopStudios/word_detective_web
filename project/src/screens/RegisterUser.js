@@ -110,6 +110,7 @@ function RegisterUser(props) {
                 word_of_the_round: '',
                 questions: [],
                 heartbeats: {},
+                question_answered: null
             }
         );
     };
