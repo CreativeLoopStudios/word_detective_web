@@ -53,6 +53,10 @@ function Game(props) {
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
 
+    const [round, setRound] = useState(0);
+
+    const [wordOfRound, setWordOfRound] = useState("");
+
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
@@ -118,6 +122,7 @@ function Game(props) {
                     setCurrentGameState(room.state);
                     setWordMaster(room.word_master);
                     setWordDetectives(room.word_detectives);
+                    setRound(room.rounds);
 
                     if (room.word_master === sessionContext.state.playerName) {
                         setIsWordMaster(true);
@@ -151,6 +156,9 @@ function Game(props) {
                             setQuestions(room.questions);
                             setQuestionAnswered(room.question_answered);
                             beginCountdown(10, isHost, () => resetTurn());
+                            break;
+                        case GameState.END_ROUND:
+                            setWordOfRound(room.word_of_the_round);
                             break;
                         default:
                             break;
@@ -202,6 +210,17 @@ function Game(props) {
                     answer: answer,
                 },
                 state: GameState.SHOW_QUESTION_CHOSE,
+            }
+        );
+    };
+
+    const endRound = async () => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                state: GameState.END_ROUND,
+                rounds: round + 1
             }
         );
     };
@@ -332,7 +351,7 @@ function Game(props) {
                                 <Button
                                     variant="contained"
                                     className={classes.successButton}
-                                    onClick={() => endGame()}
+                                    onClick={() => endRound()}
                                 >
                                     DESCOBRIU!
                                 </Button>
@@ -375,6 +394,18 @@ function Game(props) {
         );
     };
 
+    const renderStateEndRound = () => {
+        return (
+            <Grid item xs={12}>
+                <h3>Palavra foi descoberta! Parabéns!</h3>
+
+                <p>A palavra é <b>{wordOfRound}</b>!</p>
+
+                <p>Começando novo round...</p>
+            </Grid>
+        );
+    };
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -397,6 +428,9 @@ function Game(props) {
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
                     renderStateShowQuestionChose()}
+
+                {currentGameState === GameState.END_ROUND &&
+                    renderStateEndRound()}
             </Grid>
         </div>
     );
