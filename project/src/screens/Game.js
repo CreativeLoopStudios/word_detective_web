@@ -51,6 +51,7 @@ function Game(props) {
     const [questionInput, setQuestionInput] = useState("");
 
     const [questions, setQuestions] = useState([]);
+    const [questionAnswered, setQuestionAnswered] = useState({});
 
     const { countdown, doCountdown } = props;
 
@@ -80,6 +81,32 @@ function Game(props) {
             setWordsToChoose(wordsToChooseProto);
         };
 
+        const beginCountdown = (countdownTo, isHost, callback) => {
+            const { readTime, writeTime } = sessionContext.state.heartbeatData;
+
+            // discount the readTime (time that the server takes to get an information to this client)
+            // add the writeTime if this is the host (time to write to firestore server) because the host
+            // will publish here instantly.
+            const countFrom = countdownTo - readTime + (isHost ? writeTime : 0);
+            console.log(`counting from ${countFrom}`);
+            doCountdown(countFrom, callback);
+
+            isCountdownStarted = true;
+        };
+
+        const resetTurn = async () => {
+            isCountdownStarted = false;
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
+                    question_answered: null,
+                    questions: []
+                }
+            );
+        };
+
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION)
             .onSnapshot((snapshot) => {
@@ -101,40 +128,32 @@ function Game(props) {
                         setIsWordMaster(false);
                     }
 
-                    if (
-                        room.state ===
-                            GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
-                        !isCountdownStarted
-                    ) {
-                        const {
-                            readTime,
-                            writeTime,
-                        } = sessionContext.state.heartbeatData;
-
-                        // discount the readTime (time that the server takes to get an information to this client)
-                        // add the writeTime if this is the host (time to write to firestore server) because the host
-                        // will publish here instantly.
-                        const countFrom =
-                            20 - readTime + (isHost ? writeTime : 0);
-                        console.log(`counting from ${countFrom}`);
-                        doCountdown(countFrom, async () => {
-                            await props.firebase.updateById(
-                                ROOMS_COLLECTION,
-                                "Dy9vm3vNjlIWKc84Ug78",
-                                {
-                                    state:
-                                        GameState.WORD_MASTER_CHOOSE_QUESTION,
-                                }
-                            );
-
-                            isCountdownStarted = false;
-                        });
-
-                        isCountdownStarted = true;
-                    }
-
-                    if (room.state === GameState.WORD_MASTER_CHOOSE_QUESTION) {
-                        setQuestions(room.questions);
+                    switch (room.state) {
+                        case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                            if (!isCountdownStarted) {
+                                beginCountdown(20, isHost, async () => {
+                                    await props.firebase.updateById(
+                                        ROOMS_COLLECTION,
+                                        "Dy9vm3vNjlIWKc84Ug78",
+                                        {
+                                            state: GameState.WORD_MASTER_CHOOSE_QUESTION,
+                                        }
+                                    );
+                    
+                                    isCountdownStarted = false;
+                                });
+                            }
+                            break;
+                        case GameState.WORD_MASTER_CHOOSE_QUESTION:
+                            setQuestions(room.questions);
+                            break;
+                        case GameState.SHOW_QUESTION_CHOSE:
+                            setQuestions(room.questions);
+                            setQuestionAnswered(room.question_answered);
+                            beginCountdown(10, isHost, () => resetTurn());
+                            break;
+                        default:
+                            break;
                     }
                 });
             });
@@ -339,6 +358,23 @@ function Game(props) {
         }
     };
 
+    const renderStateShowQuestionChose = () => {
+        return (
+            <Grid item xs={12}>
+                <h3>Pergunta escolhida do Word Master:</h3>
+
+                <ul>
+                    <li className={classes.question}>
+                        {questions[questionAnswered.index] ? questions[questionAnswered.index].question : 'error'}
+                    </li>
+                    <li className={classes.question}>
+                        Resposta: <b>{questionAnswered.answer}</b>
+                    </li>
+                </ul>
+            </Grid>
+        );
+    };
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -351,14 +387,16 @@ function Game(props) {
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD &&
                     renderStateWordMasterChooseWord()}
 
-                {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
-                    countdown > 0 && <h1>{countdown}</h1>}
+                {countdown > 0 && <h1>{countdown}</h1>}
 
                 {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
                     renderStateWordDetectivesAskQuestions()}
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION &&
                     renderStateWordMasterChooseQuestion()}
+
+                {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
+                    renderStateShowQuestionChose()}
             </Grid>
         </div>
     );
