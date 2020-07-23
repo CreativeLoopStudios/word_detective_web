@@ -60,14 +60,12 @@ function Game(props) {
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
-        let isCountdownStarted = false;
-
         const dealWordsForWordMaster = async () => {
             const categories = await props.firebase
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
 
-            let wordsToChooseProto = [];
+            let wordsToChooseFrom = [];
             for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
                 const randomCategory = Math.randomInt(0, categories.size);
                 const categoryToChooseWord = categories.docs[
@@ -79,10 +77,10 @@ function Game(props) {
                     categoryToChooseWord.words.length
                 );
                 const word = categoryToChooseWord.words[randomWord];
-                wordsToChooseProto.push(word);
+                wordsToChooseFrom.push(word);
             }
 
-            setWordsToChoose(wordsToChooseProto);
+            setWordsToChoose(wordsToChooseFrom);
         };
 
         const beginCountdown = (countdownTo, isHost, callback) => {
@@ -94,12 +92,9 @@ function Game(props) {
             const countFrom = countdownTo - readTime + (isHost ? writeTime : 0);
             console.log(`counting from ${countFrom}`);
             doCountdown(countFrom, callback);
-
-            isCountdownStarted = true;
         };
 
         const resetTurn = async () => {
-            isCountdownStarted = false;
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
                 "Dy9vm3vNjlIWKc84Ug78",
@@ -120,22 +115,18 @@ function Game(props) {
                         room.host === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
-                    setWordMaster(room.word_master);
-                    setWordDetectives(room.word_detectives);
                     setRound(room.rounds);
 
-                    if (room.word_master === sessionContext.state.playerName) {
-                        setIsWordMaster(true);
-                        if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                            dealWordsForWordMaster();
-                        }
-                    } else {
-                        setIsWordMaster(false);
-                    }
+                    setIsWordMaster(room.word_master === sessionContext.state.playerName);
 
                     switch (room.state) {
+                        case GameState.WORD_MASTER_CHOOSE_WORD:
+                            setWordMaster(room.word_master);
+                            setWordDetectives(room.word_detectives);
+                            dealWordsForWordMaster();
+                            break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                            if (!isCountdownStarted) {
+                            if (room.questions.length === 0) {
                                 beginCountdown(20, isHost, async () => {
                                     await props.firebase.updateById(
                                         ROOMS_COLLECTION,
@@ -144,8 +135,6 @@ function Game(props) {
                                             state: GameState.WORD_MASTER_CHOOSE_QUESTION,
                                         }
                                     );
-                    
-                                    isCountdownStarted = false;
                                 });
                             }
                             break;
@@ -153,7 +142,6 @@ function Game(props) {
                             setQuestions(room.questions);
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
-                            setQuestions(room.questions);
                             setQuestionAnswered(room.question_answered);
                             beginCountdown(10, isHost, () => resetTurn());
                             break;
@@ -171,6 +159,7 @@ function Game(props) {
     }, [
         props.firebase,
         doCountdown,
+        wordMaster,
         sessionContext.state.playerName,
         sessionContext.state.heartbeatData,
     ]);
@@ -225,15 +214,15 @@ function Game(props) {
         );
     };
 
-    const endGame = async () => {
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
-            {
-                state: GameState.END_GAME,
-            }
-        );
-    };
+    // const endGame = async () => {
+    //     await props.firebase.updateById(
+    //         ROOMS_COLLECTION,
+    //         "Dy9vm3vNjlIWKc84Ug78",
+    //         {
+    //             state: GameState.END_GAME,
+    //         }
+    //     );
+    // };
 
     const renderPlayersInfo = () => {
         return (
