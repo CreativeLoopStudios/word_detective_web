@@ -127,7 +127,7 @@ function Game(props) {
                             break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                             if (room.questions.length === 0) {
-                                beginCountdown(20, isHost, async () => {
+                                beginCountdown(30, isHost, async () => {
                                     await props.firebase.updateById(
                                         ROOMS_COLLECTION,
                                         "Dy9vm3vNjlIWKc84Ug78",
