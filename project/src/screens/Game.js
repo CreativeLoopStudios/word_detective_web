@@ -53,17 +53,17 @@ function Game(props) {
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
 
+    const [wordOfRound, setWordOfRound] = useState("");
+
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
-        let isCountdownStarted = false;
-
         const dealWordsForWordMaster = async () => {
             const categories = await props.firebase
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
 
-            let wordsToChooseProto = [];
+            let wordsToChooseFrom = [];
             for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
                 const randomCategory = Math.randomInt(0, categories.size);
                 const categoryToChooseWord = categories.docs[
@@ -75,10 +75,10 @@ function Game(props) {
                     categoryToChooseWord.words.length
                 );
                 const word = categoryToChooseWord.words[randomWord];
-                wordsToChooseProto.push(word);
+                wordsToChooseFrom.push(word);
             }
 
-            setWordsToChoose(wordsToChooseProto);
+            setWordsToChoose(wordsToChooseFrom);
         };
 
         const beginCountdown = (countdownTo, isHost, callback) => {
@@ -90,12 +90,10 @@ function Game(props) {
             const countFrom = countdownTo - readTime + (isHost ? writeTime : 0);
             console.log(`counting from ${countFrom}`);
             doCountdown(countFrom, callback);
-
-            isCountdownStarted = true;
         };
 
-        const resetTurn = async () => {
-            isCountdownStarted = false;
+        const resetTurn = async (isHost) => {
+            if (!isHost) return;
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
                 "Dy9vm3vNjlIWKc84Ug78",
@@ -116,22 +114,18 @@ function Game(props) {
                         room.host === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
-                    setWordMaster(room.word_master);
-                    setWordDetectives(room.word_detectives);
 
-                    if (room.word_master === sessionContext.state.playerName) {
-                        setIsWordMaster(true);
-                        if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                            dealWordsForWordMaster();
-                        }
-                    } else {
-                        setIsWordMaster(false);
-                    }
+                    setIsWordMaster(room.word_master === sessionContext.state.playerName);
 
                     switch (room.state) {
+                        case GameState.WORD_MASTER_CHOOSE_WORD:
+                            setWordMaster(room.word_master);
+                            setWordDetectives(room.word_detectives);
+                            dealWordsForWordMaster();
+                            break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                            if (!isCountdownStarted) {
-                                beginCountdown(20, isHost, async () => {
+                            if (room.questions.length === 0) {
+                                beginCountdown(30, isHost, async () => {
                                     await props.firebase.updateById(
                                         ROOMS_COLLECTION,
                                         "Dy9vm3vNjlIWKc84Ug78",
@@ -139,8 +133,6 @@ function Game(props) {
                                             state: GameState.WORD_MASTER_CHOOSE_QUESTION,
                                         }
                                     );
-                    
-                                    isCountdownStarted = false;
                                 });
                             }
                             break;
@@ -148,9 +140,12 @@ function Game(props) {
                             setQuestions(room.questions);
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
-                            setQuestions(room.questions);
                             setQuestionAnswered(room.question_answered);
-                            beginCountdown(10, isHost, () => resetTurn());
+                            beginCountdown(10, isHost, () => resetTurn(isHost));
+                            break;
+                        case GameState.END_ROUND:
+                            setWordOfRound(room.word_of_the_round);
+                            beginCountdown(10, isHost, () => newRound(isHost, room));
                             break;
                         default:
                             break;
@@ -163,6 +158,7 @@ function Game(props) {
     }, [
         props.firebase,
         doCountdown,
+        wordMaster,
         sessionContext.state.playerName,
         sessionContext.state.heartbeatData,
     ]);
@@ -202,6 +198,59 @@ function Game(props) {
                     answer: answer,
                 },
                 state: GameState.SHOW_QUESTION_CHOSE,
+            }
+        );
+    };
+
+    const newRound = async (isHost, room) => {
+        if (!isHost) return;
+
+        const newRound = room.rounds + 1;
+
+        // end game
+        if (newRound === room.players.length) {
+            endGame();
+            return;
+        }
+
+        const newWordMaster = room.players[newRound];
+        const newDetective = room.word_master;
+
+        let detectiveToRemove = null;
+        for (let index in room.word_detectives) {
+            if (room.word_detectives[index] === newWordMaster) {
+                detectiveToRemove = index;
+            }
+        }
+
+        if (detectiveToRemove != null) {
+            room.word_detectives.splice(detectiveToRemove, 1);
+        }
+
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                state: GameState.WORD_MASTER_CHOOSE_WORD,
+                question_answered: null,
+                questions: [],
+                word_of_the_round: '',
+                rounds: newRound,
+                word_master: newWordMaster,
+                word_detectives: [
+                    ...room.word_detectives,
+                    newDetective
+                ]
+            }
+        );
+    };
+
+    const endRound = async () => {
+        await props.firebase.updateById(
+            ROOMS_COLLECTION,
+            "Dy9vm3vNjlIWKc84Ug78",
+            {
+                state: GameState.END_ROUND
             }
         );
     };
@@ -267,6 +316,12 @@ function Game(props) {
         }
     };
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            sendQuestionToWordMaster(questionInput);
+        }
+    };
+
     const renderStateWordDetectivesAskQuestions = () => {
         if (isWordMaster) {
             return (
@@ -285,6 +340,7 @@ function Game(props) {
                         onChange={(event) =>
                             setQuestionInput(event.target.value)
                         }
+                        onKeyDown={handleKeyDown}
                     />
                     <Button
                         variant="contained"
@@ -332,7 +388,7 @@ function Game(props) {
                                 <Button
                                     variant="contained"
                                     className={classes.successButton}
-                                    onClick={() => endGame()}
+                                    onClick={() => endRound()}
                                 >
                                     DESCOBRIU!
                                 </Button>
@@ -375,6 +431,18 @@ function Game(props) {
         );
     };
 
+    const renderStateEndRound = () => {
+        return (
+            <Grid item xs={12}>
+                <h3>Palavra foi descoberta! Parabéns!</h3>
+
+                <p>A palavra é <b>{wordOfRound}</b>!</p>
+
+                <p>Começando novo round...</p>
+            </Grid>
+        );
+    };
+
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -397,6 +465,9 @@ function Game(props) {
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
                     renderStateShowQuestionChose()}
+
+                {currentGameState === GameState.END_ROUND &&
+                    renderStateEndRound()}
             </Grid>
         </div>
     );
