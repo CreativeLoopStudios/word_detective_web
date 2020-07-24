@@ -15,6 +15,7 @@ import {
     WordDetectivesAskQuestions,
     WordMasterChooseQuestions,
     ShowQuestionsChosed,
+    EndRound,
 } from "../state_screens";
 
 const useStyles = makeStyles((theme) => ({
@@ -286,20 +287,6 @@ function Game(props) {
         );
     };
 
-    const renderStateEndRound = () => {
-        return (
-            <Grid item xs={12}>
-                <h3>Palavra foi descoberta! Parabéns!</h3>
-
-                <p>
-                    A palavra é <b>{wordOfRound}</b>!
-                </p>
-
-                <p>Começando novo round...</p>
-            </Grid>
-        );
-    };
-
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -309,6 +296,8 @@ function Game(props) {
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
+                {countdown > 0 && <h1>{countdown}</h1>}
+
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
                     <WordMasterChooseWord
                         isWordMaster={isWordMaster}
@@ -316,8 +305,6 @@ function Game(props) {
                         onClickWord={chooseWord}
                     />
                 )}
-
-                {countdown > 0 && <h1>{countdown}</h1>}
 
                 {currentGameState ===
                     GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
@@ -347,8 +334,9 @@ function Game(props) {
                     />
                 )}
 
-                {currentGameState === GameState.END_ROUND &&
-                    renderStateEndRound()}
+                {currentGameState === GameState.END_ROUND && (
+                    <EndRound word={wordOfRound} />
+                )}
             </Grid>
         </div>
     );
