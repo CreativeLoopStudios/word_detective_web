@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid, Avatar, TextField } from "@material-ui/core";
+import { makeStyles, Grid, Avatar } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 import * as firebase from "firebase/app";
 import SessionContext from "../context/Session";
@@ -13,6 +13,7 @@ import { withCountdown } from "../hocs";
 import {
     WordMasterChooseWord,
     WordDetectivesAskQuestions,
+    WordMasterChooseQuestions,
 } from "../state_screens";
 
 const useStyles = makeStyles((theme) => ({
@@ -26,10 +27,6 @@ const useStyles = makeStyles((theme) => ({
     avatarContainer: {
         display: "flex",
         flexDirection: "row",
-    },
-    successButton: {
-        backgroundColor: "green",
-        color: "white",
     },
     question: {
         fontSize: 24,
@@ -103,6 +100,56 @@ function Game(props) {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
                     questions: [],
+                }
+            );
+        };
+
+        const newRound = async (isHost, room) => {
+            if (!isHost) return;
+    
+            const newRound = room.rounds + 1;
+    
+            // end game
+            if (newRound === room.players.length) {
+                endGame();
+                return;
+            }
+    
+            const newWordMaster = room.players[newRound];
+            const newDetective = room.word_master;
+    
+            let detectiveToRemove = null;
+            for (let index in room.word_detectives) {
+                if (room.word_detectives[index] === newWordMaster) {
+                    detectiveToRemove = index;
+                }
+            }
+    
+            if (detectiveToRemove != null) {
+                room.word_detectives.splice(detectiveToRemove, 1);
+            }
+    
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.WORD_MASTER_CHOOSE_WORD,
+                    question_answered: null,
+                    questions: [],
+                    word_of_the_round: "",
+                    rounds: newRound,
+                    word_master: newWordMaster,
+                    word_detectives: [...room.word_detectives, newDetective],
+                }
+            );
+        };
+
+        const endGame = async () => {
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.END_GAME,
                 }
             );
         };
@@ -208,62 +255,12 @@ function Game(props) {
         );
     };
 
-    const newRound = async (isHost, room) => {
-        if (!isHost) return;
-
-        const newRound = room.rounds + 1;
-
-        // end game
-        if (newRound === room.players.length) {
-            endGame();
-            return;
-        }
-
-        const newWordMaster = room.players[newRound];
-        const newDetective = room.word_master;
-
-        let detectiveToRemove = null;
-        for (let index in room.word_detectives) {
-            if (room.word_detectives[index] === newWordMaster) {
-                detectiveToRemove = index;
-            }
-        }
-
-        if (detectiveToRemove != null) {
-            room.word_detectives.splice(detectiveToRemove, 1);
-        }
-
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
-            {
-                state: GameState.WORD_MASTER_CHOOSE_WORD,
-                question_answered: null,
-                questions: [],
-                word_of_the_round: "",
-                rounds: newRound,
-                word_master: newWordMaster,
-                word_detectives: [...room.word_detectives, newDetective],
-            }
-        );
-    };
-
     const endRound = async () => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
-            }
-        );
-    };
-
-    const endGame = async () => {
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
-            {
-                state: GameState.END_GAME,
             }
         );
     };
@@ -289,65 +286,6 @@ function Game(props) {
                 </Grid>
             </>
         );
-    };
-
-    const renderStateWordMasterChooseQuestion = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h3>Escolha a pergunta e a sua resposta:</h3>
-
-                    <ul>
-                        {questions.map((q, index) => (
-                            <div key={index}>
-                                <li className={classes.question}>
-                                    {q.question}
-                                </li>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() =>
-                                        sendAnswerOfWordMaster(index, "SIM")
-                                    }
-                                >
-                                    SIM
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={() =>
-                                        sendAnswerOfWordMaster(index, "NÃO")
-                                    }
-                                >
-                                    NÃO
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    className={classes.successButton}
-                                    onClick={() => endRound()}
-                                >
-                                    DESCOBRIU!
-                                </Button>
-                            </div>
-                        ))}
-                    </ul>
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <h3>Perguntas enviadas ao Word Master:</h3>
-
-                    <ul>
-                        {questions.map((q, index) => (
-                            <li key={index} className={classes.question}>
-                                {q.question}
-                            </li>
-                        ))}
-                    </ul>
-                </Grid>
-            );
-        }
     };
 
     const renderStateShowQuestionChose = () => {
@@ -410,8 +348,14 @@ function Game(props) {
                     />
                 )}
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION &&
-                    renderStateWordMasterChooseQuestion()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
+                    <WordMasterChooseQuestions
+                        isWordMaster={isWordMaster}
+                        questions={questions}
+                        sendAnswer={sendAnswerOfWordMaster}
+                        endRound={endRound}
+                    />
+                )}
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
                     renderStateShowQuestionChose()}
