@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Grid, Avatar } from "@material-ui/core";
+import { makeStyles, Grid } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 import * as firebase from "firebase/app";
 import SessionContext from "../context/Session";
@@ -17,19 +17,13 @@ import {
     ShowQuestionsChosed,
     EndRound,
 } from "../state_screens";
+import { PlayerInfo } from "../components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
         flex: 1,
-    },
-    word: {
-        margin: 16,
-    },
-    avatarContainer: {
-        display: "flex",
-        flexDirection: "row",
-    },
+    }
 }));
 
 function Game(props) {
@@ -264,33 +258,13 @@ function Game(props) {
         );
     };
 
-    const renderPlayersInfo = () => {
-        return (
-            <>
-                <Grid item xs={2}>
-                    <h2>Word Master</h2>
-                    <Avatar style={{ backgroundColor: "green" }}>
-                        {wordMaster.substring(0, 2)}
-                    </Avatar>
-                </Grid>
-                <Grid item xs={10}>
-                    <h2>Word Detectives</h2>
-                    <div className={classes.avatarContainer}>
-                        {wordDetectives.map((detective) => (
-                            <Avatar key={detective}>
-                                {detective.substring(0, 2)}
-                            </Avatar>
-                        ))}
-                    </div>
-                </Grid>
-            </>
-        );
-    };
-
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
-                {renderPlayersInfo()}
+                <PlayerInfo
+                    wordMaster={wordMaster}
+                    wordDetectives={wordDetectives}
+                />
 
                 <Grid item xs={12}>
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
