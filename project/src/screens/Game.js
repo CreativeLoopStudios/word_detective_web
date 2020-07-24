@@ -10,6 +10,7 @@ import {
 import { Math } from "../utils";
 import GameState from "../state_of_play";
 import { withCountdown } from "../hocs";
+import { WordMasterChooseWord } from "../state_screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -100,7 +101,7 @@ function Game(props) {
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
-                    questions: []
+                    questions: [],
                 }
             );
         };
@@ -115,7 +116,9 @@ function Game(props) {
 
                     setCurrentGameState(room.state);
 
-                    setIsWordMaster(room.word_master === sessionContext.state.playerName);
+                    setIsWordMaster(
+                        room.word_master === sessionContext.state.playerName
+                    );
 
                     switch (room.state) {
                         case GameState.WORD_MASTER_CHOOSE_WORD:
@@ -130,7 +133,8 @@ function Game(props) {
                                         ROOMS_COLLECTION,
                                         "Dy9vm3vNjlIWKc84Ug78",
                                         {
-                                            state: GameState.WORD_MASTER_CHOOSE_QUESTION,
+                                            state:
+                                                GameState.WORD_MASTER_CHOOSE_QUESTION,
                                         }
                                     );
                                 });
@@ -145,7 +149,9 @@ function Game(props) {
                             break;
                         case GameState.END_ROUND:
                             setWordOfRound(room.word_of_the_round);
-                            beginCountdown(10, isHost, () => newRound(isHost, room));
+                            beginCountdown(10, isHost, () =>
+                                newRound(isHost, room)
+                            );
                             break;
                         default:
                             break;
@@ -234,13 +240,10 @@ function Game(props) {
                 state: GameState.WORD_MASTER_CHOOSE_WORD,
                 question_answered: null,
                 questions: [],
-                word_of_the_round: '',
+                word_of_the_round: "",
                 rounds: newRound,
                 word_master: newWordMaster,
-                word_detectives: [
-                    ...room.word_detectives,
-                    newDetective
-                ]
+                word_detectives: [...room.word_detectives, newDetective],
             }
         );
     };
@@ -250,7 +253,7 @@ function Game(props) {
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
-                state: GameState.END_ROUND
+                state: GameState.END_ROUND,
             }
         );
     };
@@ -287,37 +290,9 @@ function Game(props) {
             </>
         );
     };
-
-    const renderStateWordMasterChooseWord = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h2>Escolha uma palavra para os detetives:</h2>
-
-                    {wordsToChoose.map((word) => (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            key={word}
-                            className={classes.word}
-                            onClick={() => chooseWord(word)}
-                        >
-                            {word}
-                        </Button>
-                    ))}
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <h3>Aguarde o Word Master escolher a palavra da rodada</h3>
-                </Grid>
-            );
-        }
-    };
-
+    
     const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
+        if (event.key === "Enter") {
             sendQuestionToWordMaster(questionInput);
         }
     };
@@ -421,7 +396,9 @@ function Game(props) {
 
                 <ul>
                     <li className={classes.question}>
-                        {questions[questionAnswered.index] ? questions[questionAnswered.index].question : 'error'}
+                        {questions[questionAnswered.index]
+                            ? questions[questionAnswered.index].question
+                            : "error"}
                     </li>
                     <li className={classes.question}>
                         Resposta: <b>{questionAnswered.answer}</b>
@@ -436,7 +413,9 @@ function Game(props) {
             <Grid item xs={12}>
                 <h3>Palavra foi descoberta! Parabéns!</h3>
 
-                <p>A palavra é <b>{wordOfRound}</b>!</p>
+                <p>
+                    A palavra é <b>{wordOfRound}</b>!
+                </p>
 
                 <p>Começando novo round...</p>
             </Grid>
@@ -452,8 +431,13 @@ function Game(props) {
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD &&
-                    renderStateWordMasterChooseWord()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
+                    <WordMasterChooseWord
+                        isWordMaster={isWordMaster}
+                        words={wordsToChoose}
+                        onClickWord={chooseWord}
+                    />
+                )}
 
                 {countdown > 0 && <h1>{countdown}</h1>}
 
