@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid, Avatar, TextField } from "@material-ui/core";
+import { makeStyles, Grid } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 import * as firebase from "firebase/app";
 import SessionContext from "../context/Session";
@@ -10,26 +10,20 @@ import {
 import { Math } from "../utils";
 import GameState from "../state_of_play";
 import { withCountdown } from "../hocs";
+import {
+    WordMasterChooseWord,
+    WordDetectivesAskQuestions,
+    WordMasterChooseQuestions,
+    ShowQuestionsChosed,
+    EndRound,
+} from "../state_screens";
+import { PlayerInfo } from "../components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
         flex: 1,
-    },
-    word: {
-        margin: 16,
-    },
-    avatarContainer: {
-        display: "flex",
-        flexDirection: "row",
-    },
-    successButton: {
-        backgroundColor: "green",
-        color: "white",
-    },
-    question: {
-        fontSize: 24,
-    },
+    }
 }));
 
 function Game(props) {
@@ -47,8 +41,6 @@ function Game(props) {
 
     const [wordMaster, setWordMaster] = useState("");
     const [wordDetectives, setWordDetectives] = useState([]);
-
-    const [questionInput, setQuestionInput] = useState("");
 
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
@@ -100,7 +92,57 @@ function Game(props) {
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
-                    questions: []
+                    questions: [],
+                }
+            );
+        };
+
+        const newRound = async (isHost, room) => {
+            if (!isHost) return;
+
+            const newRound = room.rounds + 1;
+
+            // end game
+            if (newRound === room.players.length) {
+                endGame();
+                return;
+            }
+
+            const newWordMaster = room.players[newRound];
+            const newDetective = room.word_master;
+
+            let detectiveToRemove = null;
+            for (let index in room.word_detectives) {
+                if (room.word_detectives[index] === newWordMaster) {
+                    detectiveToRemove = index;
+                }
+            }
+
+            if (detectiveToRemove != null) {
+                room.word_detectives.splice(detectiveToRemove, 1);
+            }
+
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.WORD_MASTER_CHOOSE_WORD,
+                    question_answered: null,
+                    questions: [],
+                    word_of_the_round: "",
+                    rounds: newRound,
+                    word_master: newWordMaster,
+                    word_detectives: [...room.word_detectives, newDetective],
+                }
+            );
+        };
+
+        const endGame = async () => {
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.END_GAME,
                 }
             );
         };
@@ -115,7 +157,9 @@ function Game(props) {
 
                     setCurrentGameState(room.state);
 
-                    setIsWordMaster(room.word_master === sessionContext.state.playerName);
+                    setIsWordMaster(
+                        room.word_master === sessionContext.state.playerName
+                    );
 
                     switch (room.state) {
                         case GameState.WORD_MASTER_CHOOSE_WORD:
@@ -130,7 +174,8 @@ function Game(props) {
                                         ROOMS_COLLECTION,
                                         "Dy9vm3vNjlIWKc84Ug78",
                                         {
-                                            state: GameState.WORD_MASTER_CHOOSE_QUESTION,
+                                            state:
+                                                GameState.WORD_MASTER_CHOOSE_QUESTION,
                                         }
                                     );
                                 });
@@ -145,7 +190,9 @@ function Game(props) {
                             break;
                         case GameState.END_ROUND:
                             setWordOfRound(room.word_of_the_round);
-                            beginCountdown(10, isHost, () => newRound(isHost, room));
+                            beginCountdown(10, isHost, () =>
+                                newRound(isHost, room)
+                            );
                             break;
                         default:
                             break;
@@ -185,7 +232,6 @@ function Game(props) {
                 }),
             }
         );
-        setQuestionInput("");
     };
 
     const sendAnswerOfWordMaster = async (questionIndex, answer) => {
@@ -202,272 +248,69 @@ function Game(props) {
         );
     };
 
-    const newRound = async (isHost, room) => {
-        if (!isHost) return;
-
-        const newRound = room.rounds + 1;
-
-        // end game
-        if (newRound === room.players.length) {
-            endGame();
-            return;
-        }
-
-        const newWordMaster = room.players[newRound];
-        const newDetective = room.word_master;
-
-        let detectiveToRemove = null;
-        for (let index in room.word_detectives) {
-            if (room.word_detectives[index] === newWordMaster) {
-                detectiveToRemove = index;
-            }
-        }
-
-        if (detectiveToRemove != null) {
-            room.word_detectives.splice(detectiveToRemove, 1);
-        }
-
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
-            {
-                state: GameState.WORD_MASTER_CHOOSE_WORD,
-                question_answered: null,
-                questions: [],
-                word_of_the_round: '',
-                rounds: newRound,
-                word_master: newWordMaster,
-                word_detectives: [
-                    ...room.word_detectives,
-                    newDetective
-                ]
-            }
-        );
-    };
-
     const endRound = async () => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
-                state: GameState.END_ROUND
+                state: GameState.END_ROUND,
             }
-        );
-    };
-
-    const endGame = async () => {
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
-            {
-                state: GameState.END_GAME,
-            }
-        );
-    };
-
-    const renderPlayersInfo = () => {
-        return (
-            <>
-                <Grid item xs={2}>
-                    <h2>Word Master</h2>
-                    <Avatar style={{ backgroundColor: "green" }}>
-                        {wordMaster.substring(0, 2)}
-                    </Avatar>
-                </Grid>
-                <Grid item xs={10}>
-                    <h2>Word Detectives</h2>
-                    <div className={classes.avatarContainer}>
-                        {wordDetectives.map((detective) => (
-                            <Avatar key={detective}>
-                                {detective.substring(0, 2)}
-                            </Avatar>
-                        ))}
-                    </div>
-                </Grid>
-            </>
-        );
-    };
-
-    const renderStateWordMasterChooseWord = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h2>Escolha uma palavra para os detetives:</h2>
-
-                    {wordsToChoose.map((word) => (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            key={word}
-                            className={classes.word}
-                            onClick={() => chooseWord(word)}
-                        >
-                            {word}
-                        </Button>
-                    ))}
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <h3>Aguarde o Word Master escolher a palavra da rodada</h3>
-                </Grid>
-            );
-        }
-    };
-
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            sendQuestionToWordMaster(questionInput);
-        }
-    };
-
-    const renderStateWordDetectivesAskQuestions = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h3>Aguarde os Word Detectives fazerem suas perguntas!</h3>
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <TextField
-                        id="standard-basic"
-                        label="Qual sua pergunta para o Word Master?"
-                        fullWidth
-                        value={questionInput}
-                        onChange={(event) =>
-                            setQuestionInput(event.target.value)
-                        }
-                        onKeyDown={handleKeyDown}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        className={classes.word}
-                        onClick={() => sendQuestionToWordMaster(questionInput)}
-                    >
-                        Enviar
-                    </Button>
-                </Grid>
-            );
-        }
-    };
-
-    const renderStateWordMasterChooseQuestion = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h3>Escolha a pergunta e a sua resposta:</h3>
-
-                    <ul>
-                        {questions.map((q, index) => (
-                            <div key={index}>
-                                <li className={classes.question}>
-                                    {q.question}
-                                </li>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() =>
-                                        sendAnswerOfWordMaster(index, "SIM")
-                                    }
-                                >
-                                    SIM
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={() =>
-                                        sendAnswerOfWordMaster(index, "NÃO")
-                                    }
-                                >
-                                    NÃO
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    className={classes.successButton}
-                                    onClick={() => endRound()}
-                                >
-                                    DESCOBRIU!
-                                </Button>
-                            </div>
-                        ))}
-                    </ul>
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <h3>Perguntas enviadas ao Word Master:</h3>
-
-                    <ul>
-                        {questions.map((q, index) => (
-                            <li key={index} className={classes.question}>
-                                {q.question}
-                            </li>
-                        ))}
-                    </ul>
-                </Grid>
-            );
-        }
-    };
-
-    const renderStateShowQuestionChose = () => {
-        return (
-            <Grid item xs={12}>
-                <h3>Pergunta escolhida do Word Master:</h3>
-
-                <ul>
-                    <li className={classes.question}>
-                        {questions[questionAnswered.index] ? questions[questionAnswered.index].question : 'error'}
-                    </li>
-                    <li className={classes.question}>
-                        Resposta: <b>{questionAnswered.answer}</b>
-                    </li>
-                </ul>
-            </Grid>
-        );
-    };
-
-    const renderStateEndRound = () => {
-        return (
-            <Grid item xs={12}>
-                <h3>Palavra foi descoberta! Parabéns!</h3>
-
-                <p>A palavra é <b>{wordOfRound}</b>!</p>
-
-                <p>Começando novo round...</p>
-            </Grid>
         );
     };
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
-                {renderPlayersInfo()}
+                <PlayerInfo
+                    wordMaster={wordMaster}
+                    wordDetectives={wordDetectives}
+                />
 
                 <Grid item xs={12}>
                     <h1>Bom Jogo, {sessionContext.state.playerName}</h1>
                 </Grid>
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD &&
-                    renderStateWordMasterChooseWord()}
-
                 {countdown > 0 && <h1>{countdown}</h1>}
 
-                {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
-                    renderStateWordDetectivesAskQuestions()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
+                    <WordMasterChooseWord
+                        isWordMaster={isWordMaster}
+                        words={wordsToChoose}
+                        onClickWord={chooseWord}
+                    />
+                )}
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION &&
-                    renderStateWordMasterChooseQuestion()}
+                {currentGameState ===
+                    GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
+                    <WordDetectivesAskQuestions
+                        isWordMaster={isWordMaster}
+                        sendQuestion={sendQuestionToWordMaster}
+                    />
+                )}
 
-                {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
-                    renderStateShowQuestionChose()}
+                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
+                    <WordMasterChooseQuestions
+                        isWordMaster={isWordMaster}
+                        questions={questions}
+                        sendAnswer={sendAnswerOfWordMaster}
+                        endRound={endRound}
+                    />
+                )}
 
-                {currentGameState === GameState.END_ROUND &&
-                    renderStateEndRound()}
+                {currentGameState === GameState.SHOW_QUESTION_CHOSE && (
+                    <ShowQuestionsChosed
+                        question={
+                            questions[questionAnswered.index]
+                                ? questions[questionAnswered.index].question
+                                : "error"
+                        }
+                        answer={questionAnswered.answer}
+                    />
+                )}
+
+                {currentGameState === GameState.END_ROUND && (
+                    <EndRound word={wordOfRound} />
+                )}
             </Grid>
         </div>
     );
