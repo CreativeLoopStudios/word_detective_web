@@ -14,6 +14,7 @@ import {
     WordMasterChooseWord,
     WordDetectivesAskQuestions,
     WordMasterChooseQuestions,
+    ShowQuestionsChosed,
 } from "../state_screens";
 
 const useStyles = makeStyles((theme) => ({
@@ -27,9 +28,6 @@ const useStyles = makeStyles((theme) => ({
     avatarContainer: {
         display: "flex",
         flexDirection: "row",
-    },
-    question: {
-        fontSize: 24,
     },
 }));
 
@@ -106,29 +104,29 @@ function Game(props) {
 
         const newRound = async (isHost, room) => {
             if (!isHost) return;
-    
+
             const newRound = room.rounds + 1;
-    
+
             // end game
             if (newRound === room.players.length) {
                 endGame();
                 return;
             }
-    
+
             const newWordMaster = room.players[newRound];
             const newDetective = room.word_master;
-    
+
             let detectiveToRemove = null;
             for (let index in room.word_detectives) {
                 if (room.word_detectives[index] === newWordMaster) {
                     detectiveToRemove = index;
                 }
             }
-    
+
             if (detectiveToRemove != null) {
                 room.word_detectives.splice(detectiveToRemove, 1);
             }
-    
+
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
                 "Dy9vm3vNjlIWKc84Ug78",
@@ -288,25 +286,6 @@ function Game(props) {
         );
     };
 
-    const renderStateShowQuestionChose = () => {
-        return (
-            <Grid item xs={12}>
-                <h3>Pergunta escolhida do Word Master:</h3>
-
-                <ul>
-                    <li className={classes.question}>
-                        {questions[questionAnswered.index]
-                            ? questions[questionAnswered.index].question
-                            : "error"}
-                    </li>
-                    <li className={classes.question}>
-                        Resposta: <b>{questionAnswered.answer}</b>
-                    </li>
-                </ul>
-            </Grid>
-        );
-    };
-
     const renderStateEndRound = () => {
         return (
             <Grid item xs={12}>
@@ -357,8 +336,16 @@ function Game(props) {
                     />
                 )}
 
-                {currentGameState === GameState.SHOW_QUESTION_CHOSE &&
-                    renderStateShowQuestionChose()}
+                {currentGameState === GameState.SHOW_QUESTION_CHOSE && (
+                    <ShowQuestionsChosed
+                        question={
+                            questions[questionAnswered.index]
+                                ? questions[questionAnswered.index].question
+                                : "error"
+                        }
+                        answer={questionAnswered.answer}
+                    />
+                )}
 
                 {currentGameState === GameState.END_ROUND &&
                     renderStateEndRound()}
