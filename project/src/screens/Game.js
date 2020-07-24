@@ -10,7 +10,10 @@ import {
 import { Math } from "../utils";
 import GameState from "../state_of_play";
 import { withCountdown } from "../hocs";
-import { WordMasterChooseWord } from "../state_screens";
+import {
+    WordMasterChooseWord,
+    WordDetectivesAskQuestions,
+} from "../state_screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,8 +51,6 @@ function Game(props) {
 
     const [wordMaster, setWordMaster] = useState("");
     const [wordDetectives, setWordDetectives] = useState([]);
-
-    const [questionInput, setQuestionInput] = useState("");
 
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
@@ -191,7 +192,6 @@ function Game(props) {
                 }),
             }
         );
-        setQuestionInput("");
     };
 
     const sendAnswerOfWordMaster = async (questionIndex, answer) => {
@@ -289,45 +289,6 @@ function Game(props) {
                 </Grid>
             </>
         );
-    };
-    
-    const handleKeyDown = (event) => {
-        if (event.key === "Enter") {
-            sendQuestionToWordMaster(questionInput);
-        }
-    };
-
-    const renderStateWordDetectivesAskQuestions = () => {
-        if (isWordMaster) {
-            return (
-                <Grid item xs={12}>
-                    <h3>Aguarde os Word Detectives fazerem suas perguntas!</h3>
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item xs={12}>
-                    <TextField
-                        id="standard-basic"
-                        label="Qual sua pergunta para o Word Master?"
-                        fullWidth
-                        value={questionInput}
-                        onChange={(event) =>
-                            setQuestionInput(event.target.value)
-                        }
-                        onKeyDown={handleKeyDown}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        className={classes.word}
-                        onClick={() => sendQuestionToWordMaster(questionInput)}
-                    >
-                        Enviar
-                    </Button>
-                </Grid>
-            );
-        }
     };
 
     const renderStateWordMasterChooseQuestion = () => {
@@ -441,8 +402,13 @@ function Game(props) {
 
                 {countdown > 0 && <h1>{countdown}</h1>}
 
-                {currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS &&
-                    renderStateWordDetectivesAskQuestions()}
+                {currentGameState ===
+                    GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
+                    <WordDetectivesAskQuestions
+                        isWordMaster={isWordMaster}
+                        sendQuestion={sendQuestionToWordMaster}
+                    />
+                )}
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION &&
                     renderStateWordMasterChooseQuestion()}
