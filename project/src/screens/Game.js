@@ -275,6 +275,12 @@ function Game(props) {
         }
     };
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            sendQuestionToWordMaster(questionInput);
+        }
+    };
+
     const renderStateWordDetectivesAskQuestions = () => {
         if (isWordMaster) {
             return (
@@ -293,6 +299,7 @@ function Game(props) {
                         onChange={(event) =>
                             setQuestionInput(event.target.value)
                         }
+                        onKeyDown={handleKeyDown}
                     />
                     <Button
                         variant="contained"
