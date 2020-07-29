@@ -104,6 +104,7 @@ function RegisterUser(props) {
                 host: '',
                 state: '',
                 players: [],
+                turns: 0,
                 word_detectives: [],
                 word_master: '',
                 rounds: 0,

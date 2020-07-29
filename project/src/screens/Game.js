@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Game(props) {
     const WORDS_TO_CHOOSE = 5;
+    const TURNS_BEFORE_ROUND_ENDS = 2;
 
     const classes = useStyles();
 
@@ -84,7 +85,7 @@ function Game(props) {
             doCountdown(countFrom, callback);
         };
 
-        const resetTurn = async (isHost) => {
+        const resetTurn = async (isHost, room) => {
             if (!isHost) return;
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
@@ -93,6 +94,7 @@ function Game(props) {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
                     questions: [],
+                    turns: room.turns + 1
                 }
             );
         };
@@ -187,7 +189,7 @@ function Game(props) {
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
                             setQuestionAnswered(room.question_answered);
-                            beginCountdown(10, isHost, () => resetTurn(isHost));
+                            beginCountdown(10, isHost, () => resetTurn(isHost, room));
                             break;
                         case GameState.END_ROUND:
                             setWordOfRound(room.word_of_the_round);
