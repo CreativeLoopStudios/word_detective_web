@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Game(props) {
     const WORDS_TO_CHOOSE = 5;
-    const TURNS_BEFORE_ROUND_ENDS = 2;
+    const TURNS_BEFORE_ROUND_ENDS = 5;
 
     const classes = useStyles();
 
@@ -87,6 +87,12 @@ function Game(props) {
 
         const resetTurn = async (isHost, room) => {
             if (!isHost) return;
+
+            if (TURNS_BEFORE_ROUND_ENDS <= room.turns + 1) {
+                endRound();
+                return;
+            }
+
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
                 "Dy9vm3vNjlIWKc84Ug78",
