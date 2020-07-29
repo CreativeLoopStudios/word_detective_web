@@ -168,6 +168,7 @@ function Game(props) {
                             dealWordsForWordMaster();
                             break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                            setWordOfRound(room.word_of_the_round);
                             if (room.questions.length === 0) {
                                 beginCountdown(30, isHost, async () => {
                                     await props.firebase.updateById(
@@ -222,6 +223,11 @@ function Game(props) {
     };
 
     const sendQuestionToWordMaster = async (question) => {
+        if (question.toLowerCase() === wordOfRound.toLowerCase()) {
+            endRound();
+            return;
+        }
+
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
@@ -293,7 +299,6 @@ function Game(props) {
                         isWordMaster={isWordMaster}
                         questions={questions}
                         sendAnswer={sendAnswerOfWordMaster}
-                        endRound={endRound}
                     />
                 )}
 

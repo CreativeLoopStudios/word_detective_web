@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 function withCountdown(BaseComponent) {
     return function WithCountdown({ ...props }) {
         const [countdown, setCountdown] = useState(0);
+        const currentCountdownRef = useRef(null);
 
         const doCountdown = useCallback((counter, callback) => {
+            stopCountdown();
             if (counter <= 0) {
                 return;
             }
@@ -27,8 +29,13 @@ function withCountdown(BaseComponent) {
                         counter -= 1;
                     }
                 }, 1000);
+                currentCountdownRef.current = h;
             }, splitSecond);
         }, []);
+
+        const stopCountdown = () => {
+            clearInterval(currentCountdownRef.current);
+        };
 
         return <BaseComponent doCountdown={doCountdown} countdown={countdown} {...props} />;
     }

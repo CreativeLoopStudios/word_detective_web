@@ -44,13 +44,6 @@ function WordMasterChooseQuestions(props) {
                                 >
                                     NÃO
                                 </Button>
-                                <Button
-                                    variant="contained"
-                                    className={classes.successButton}
-                                    onClick={() => props.endRound()}
-                                >
-                                    DESCOBRIU!
-                                </Button>
                             </div>
                         ))}
                     </ul>
