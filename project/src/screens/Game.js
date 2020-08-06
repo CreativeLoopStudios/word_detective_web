@@ -48,6 +48,8 @@ function Game(props) {
 
     const [wordOfRound, setWordOfRound] = useState("");
 
+    const [players, setPlayers] = useState([]);
+
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
@@ -116,7 +118,7 @@ function Game(props) {
                 return;
             }
 
-            const newWordMaster = room.players[newRound];
+            const newWordMaster = room.players[newRound].name;
             const newDetective = room.word_master;
 
             let detectiveToRemove = null;
@@ -164,6 +166,7 @@ function Game(props) {
                         room.host === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
+                    setPlayers(room.players);
 
                     setIsWordMaster(
                         room.word_master === sessionContext.state.playerName
@@ -278,6 +281,7 @@ function Game(props) {
                 <PlayerInfo
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
+                    players={players}
                 />
 
                 <Grid item xs={12}>

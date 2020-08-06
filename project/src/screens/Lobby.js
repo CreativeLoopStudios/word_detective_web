@@ -64,7 +64,7 @@ function Lobby(props) {
 
                     <ul>
                         {players.map((player, index) => (
-                            <li key={index}>{player}</li>
+                            <li key={index}>{player.name}</li>
                         ))}
                     </ul>
                 </Grid>
