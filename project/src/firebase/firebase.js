@@ -29,7 +29,7 @@ class Firebase {
 
     updateById = async (collection_name, id, value) => {
         await this.db.collection(collection_name).doc(id).update(value);
-    }
+    };
 }
 
 export default Firebase;

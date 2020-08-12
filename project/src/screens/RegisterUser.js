@@ -54,7 +54,10 @@ function RegisterUser(props) {
         }
 
         objToUpdate[`heartbeats.${name}`] = firebase.firestore.FieldValue.serverTimestamp();
-        objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion(name);
+        objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion({
+            score: 0,
+            name
+        });
 
         const localClockStart = firebase.firestore.Timestamp.now();
         const updatePromise = props.firebase.updateById(

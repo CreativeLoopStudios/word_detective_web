@@ -48,6 +48,10 @@ function Game(props) {
 
     const [wordOfRound, setWordOfRound] = useState("");
 
+    const [players, setPlayers] = useState([]);
+
+    const [turns, setTurns] = useState(0);
+
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
@@ -116,7 +120,7 @@ function Game(props) {
                 return;
             }
 
-            const newWordMaster = room.players[newRound];
+            const newWordMaster = room.players[newRound].name;
             const newDetective = room.word_master;
 
             let detectiveToRemove = null;
@@ -164,6 +168,8 @@ function Game(props) {
                         room.host === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
+                    setPlayers(room.players);
+                    setTurns(room.turns);
 
                     setIsWordMaster(
                         room.word_master === sessionContext.state.playerName
@@ -263,11 +269,19 @@ function Game(props) {
     };
 
     const endRound = async () => {
+        const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
+        players.forEach(p => {
+            if (p.name === wordMaster) {
+                p.score += pointsForWordMaster
+            }
+        });
+
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
+                players: players
             }
         );
     };
@@ -278,6 +292,7 @@ function Game(props) {
                 <PlayerInfo
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
+                    players={players}
                 />
 
                 <Grid item xs={12}>
