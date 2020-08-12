@@ -35,8 +35,8 @@ function PlayerInfo(props) {
                 <h2>Word Detectives</h2>
                 <div className={classes.avatarContainer}>
                     {props.wordDetectives.map((detective) => (
-                        <div className={classes.avatarItem}>
-                            <Avatar key={detective}>
+                        <div className={classes.avatarItem} key={detective}>
+                            <Avatar>
                                 {detective.substring(0, 2)}
                             </Avatar>
                             <span>
