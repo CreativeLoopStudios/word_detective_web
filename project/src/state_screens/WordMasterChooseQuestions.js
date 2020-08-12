@@ -30,7 +30,7 @@ function WordMasterChooseQuestions(props) {
                                     variant="contained"
                                     color="primary"
                                     onClick={() =>
-                                        props.sendAnswer(index, "SIM")
+                                        props.sendAnswer(index, "SIM", q.player)
                                     }
                                 >
                                     SIM
@@ -39,7 +39,7 @@ function WordMasterChooseQuestions(props) {
                                     variant="contained"
                                     color="secondary"
                                     onClick={() =>
-                                        props.sendAnswer(index, "NÃO")
+                                        props.sendAnswer(index, "NÃO", q.player)
                                     }
                                 >
                                     NÃO

@@ -254,7 +254,8 @@ function Game(props) {
         );
     };
 
-    const sendAnswerOfWordMaster = async (questionIndex, answer) => {
+    const sendAnswerOfWordMaster = async (questionIndex, answer, player) => {
+        const newPlayers = giveScoreToPlayer(player, 1);
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
@@ -263,6 +264,7 @@ function Game(props) {
                     index: questionIndex,
                     answer: answer,
                 },
+                players: newPlayers,
                 state: GameState.SHOW_QUESTION_CHOSE,
             }
         );
@@ -270,20 +272,25 @@ function Game(props) {
 
     const endRound = async () => {
         const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
-        players.forEach(p => {
-            if (p.name === wordMaster) {
-                p.score += pointsForWordMaster
-            }
-        });
+        const newPlayers = giveScoreToPlayer(wordMaster, pointsForWordMaster);
 
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
-                players: players
+                players: newPlayers
             }
         );
+    };
+
+    const giveScoreToPlayer = (player, score) => {
+        players.forEach(p => {
+            if (p.name === player) {
+                p.score += score;
+            }
+        });
+        return players;
     };
 
     return (
