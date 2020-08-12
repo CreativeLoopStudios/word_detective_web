@@ -50,6 +50,8 @@ function Game(props) {
 
     const [players, setPlayers] = useState([]);
 
+    const [turns, setTurns] = useState(0);
+
     const { countdown, doCountdown } = props;
 
     useEffect(() => {
@@ -167,6 +169,7 @@ function Game(props) {
 
                     setCurrentGameState(room.state);
                     setPlayers(room.players);
+                    setTurns(room.turns);
 
                     setIsWordMaster(
                         room.word_master === sessionContext.state.playerName
@@ -266,11 +269,19 @@ function Game(props) {
     };
 
     const endRound = async () => {
+        const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
+        players.forEach(p => {
+            if (p.name === wordMaster) {
+                p.score += pointsForWordMaster
+            }
+        });
+
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
+                players: players
             }
         );
     };
