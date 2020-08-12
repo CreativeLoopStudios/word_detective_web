@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
 function Game(props) {
     const WORDS_TO_CHOOSE = 5;
     const TURNS_BEFORE_ROUND_ENDS = 5;
+    const SCORE_TO_PLAYER_WHO_GUESSED = 2;
+    const SCORE_TO_QUESTION_SELECTED = 1;
 
     const classes = useStyles();
 
@@ -238,7 +240,7 @@ function Game(props) {
 
     const sendQuestionToWordMaster = async (question) => {
         if (question.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound();
+            endRound(sessionContext.state.playerName);
             return;
         }
 
@@ -255,7 +257,7 @@ function Game(props) {
     };
 
     const sendAnswerOfWordMaster = async (questionIndex, answer, player) => {
-        const newPlayers = giveScoreToPlayer(player, 1);
+        const newPlayers = giveScoreToPlayer(player, SCORE_TO_QUESTION_SELECTED);
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
@@ -270,9 +272,12 @@ function Game(props) {
         );
     };
 
-    const endRound = async () => {
+    const endRound = async (playerWhoGuessed) => {
         const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
-        const newPlayers = giveScoreToPlayer(wordMaster, pointsForWordMaster);
+        let newPlayers = giveScoreToPlayer(wordMaster, pointsForWordMaster);
+        if (playerWhoGuessed) {
+            newPlayers = giveScoreToPlayer(playerWhoGuessed, SCORE_TO_PLAYER_WHO_GUESSED);
+        }
 
         await props.firebase.updateById(
             ROOMS_COLLECTION,
