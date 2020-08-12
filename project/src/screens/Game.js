@@ -16,6 +16,7 @@ import {
     WordMasterChooseQuestions,
     ShowQuestionsChosed,
     EndRound,
+    EndGame
 } from "../state_screens";
 import { PlayerInfo } from "../components";
 
@@ -51,6 +52,7 @@ function Game(props) {
     const [wordOfRound, setWordOfRound] = useState("");
 
     const [players, setPlayers] = useState([]);
+    const [orderedPlayers, setOrderedPlayers] = useState([]);
 
     const [turns, setTurns] = useState(0);
 
@@ -211,6 +213,9 @@ function Game(props) {
                                 newRound(isHost, room)
                             );
                             break;
+                        case GameState.END_GAME:
+                            const orderedPlayersByScore = room.players.sort((a, b) => b.score - a.score);
+                            setOrderedPlayers(orderedPlayersByScore);
                         default:
                             break;
                     }
@@ -350,6 +355,10 @@ function Game(props) {
 
                 {currentGameState === GameState.END_ROUND && (
                     <EndRound word={wordOfRound} />
+                )}
+
+                {currentGameState === GameState.END_GAME && (
+                    <EndGame players={orderedPlayers} />
                 )}
             </Grid>
         </div>
