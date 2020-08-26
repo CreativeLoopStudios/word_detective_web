@@ -36,6 +36,8 @@ function EndGame(props) {
                         case 2:
                             className = classes.third;
                             break;
+                        default:
+                            break;
                     }
 
                     return (
@@ -46,7 +48,7 @@ function EndGame(props) {
                 })}
             </ul>
 
-            <p>FIM DO JOGO! OBRIGADO POR TER JGOADO!</p>
+            <p>FIM DO JOGO! OBRIGADO POR TER JOGADO E PARTICIPADO DESSE PLAYTEST!</p>
         </Grid>
     );
 }

@@ -186,7 +186,6 @@ function Game(props) {
                             dealWordsForWordMaster();
                             break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                            setWordOfRound(room.word_of_the_round);
                             if (room.questions.length === 0) {
                                 beginCountdown(30, isHost, async () => {
                                     await props.firebase.updateById(
@@ -204,6 +203,7 @@ function Game(props) {
                             setQuestions(room.questions);
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
+                            setWordOfRound(room.word_of_the_round);
                             setQuestionAnswered(room.question_answered);
                             beginCountdown(10, isHost, () => resetTurn(isHost, room));
                             break;
@@ -216,6 +216,7 @@ function Game(props) {
                         case GameState.END_GAME:
                             const orderedPlayersByScore = room.players.sort((a, b) => b.score - a.score);
                             setOrderedPlayers(orderedPlayersByScore);
+                            break;
                         default:
                             break;
                     }
@@ -244,11 +245,6 @@ function Game(props) {
     };
 
     const sendQuestionToWordMaster = async (question) => {
-        if (question.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound(sessionContext.state.playerName);
-            return;
-        }
-
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
@@ -259,6 +255,12 @@ function Game(props) {
                 }),
             }
         );
+    };
+
+    const sendHunchToDiscoverWord = async (hunch) => {
+        if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
+            endRound(sessionContext.state.playerName);
+        }
     };
 
     const sendAnswerOfWordMaster = async (questionIndex, answer, player) => {
@@ -289,7 +291,8 @@ function Game(props) {
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
-                players: newPlayers
+                players: newPlayers,
+                turns: 0
             }
         );
     };
@@ -344,12 +347,14 @@ function Game(props) {
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE && (
                     <ShowQuestionsChosed
+                        isWordMaster={isWordMaster}
                         question={
                             questions[questionAnswered.index]
                                 ? questions[questionAnswered.index].question
                                 : "error"
                         }
                         answer={questionAnswered.answer}
+                        sendHunchToDiscoverWord={sendHunchToDiscoverWord}
                     />
                 )}
 
