@@ -290,7 +290,8 @@ function Game(props) {
             "Dy9vm3vNjlIWKc84Ug78",
             {
                 state: GameState.END_ROUND,
-                players: newPlayers
+                players: newPlayers,
+                turns: 0
             }
         );
     };
