@@ -36,6 +36,8 @@ function EndGame(props) {
                         case 2:
                             className = classes.third;
                             break;
+                        default:
+                            break;
                     }
 
                     return (

@@ -216,6 +216,7 @@ function Game(props) {
                         case GameState.END_GAME:
                             const orderedPlayersByScore = room.players.sort((a, b) => b.score - a.score);
                             setOrderedPlayers(orderedPlayersByScore);
+                            break;
                         default:
                             break;
                     }
