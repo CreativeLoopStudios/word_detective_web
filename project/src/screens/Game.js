@@ -48,6 +48,7 @@ function Game(props) {
 
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
+    const [clues, setClues] = useState([]);
 
     const [wordOfRound, setWordOfRound] = useState("");
 
@@ -145,6 +146,7 @@ function Game(props) {
                     state: GameState.WORD_MASTER_CHOOSE_WORD,
                     question_answered: null,
                     questions: [],
+                    clues: [],
                     word_of_the_round: "",
                     rounds: newRound,
                     word_master: newWordMaster,
@@ -205,6 +207,7 @@ function Game(props) {
                         case GameState.SHOW_QUESTION_CHOSE:
                             setWordOfRound(room.word_of_the_round);
                             setQuestionAnswered(room.question_answered);
+                            setClues(room.clues);
                             beginCountdown(10, isHost, () => resetTurn(isHost, room));
                             break;
                         case GameState.END_ROUND:
@@ -273,6 +276,10 @@ function Game(props) {
                     index: questionIndex,
                     answer: answer,
                 },
+                clues: firebase.firestore.FieldValue.arrayUnion({
+                    question: questions[questionIndex],
+                    answer,
+                }),
                 players: newPlayers,
                 state: GameState.SHOW_QUESTION_CHOSE,
             }
@@ -334,6 +341,7 @@ function Game(props) {
                     <WordDetectivesAskQuestions
                         isWordMaster={isWordMaster}
                         sendQuestion={sendQuestionToWordMaster}
+                        clues={clues}
                     />
                 )}
 
@@ -355,6 +363,7 @@ function Game(props) {
                         }
                         answer={questionAnswered.answer}
                         sendHunchToDiscoverWord={sendHunchToDiscoverWord}
+                        clues={clues}
                     />
                 )}
 
