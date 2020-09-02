@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles, Grid, TextField, Button } from "@material-ui/core";
+import Clues from '../components/Clues';
 
 const useStyles = makeStyles((theme) => ({
     question: {
@@ -34,6 +35,10 @@ function ShowQuestionsChosed(props) {
                     Resposta: <b>{props.answer}</b>
                 </li>
             </ul>
+
+            {props.clues && (
+                <Clues clues={props.clues} />
+            )}
 
             {props.isWordMaster && (
                 <h3>Aguardando palpites dos Word Detectives</h3>

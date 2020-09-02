@@ -363,6 +363,7 @@ function Game(props) {
                         }
                         answer={questionAnswered.answer}
                         sendHunchToDiscoverWord={sendHunchToDiscoverWord}
+                        clues={clues}
                     />
                 )}
 
