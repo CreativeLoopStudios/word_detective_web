@@ -30,6 +30,12 @@ function PlayerInfo(props) {
                     {props.wordMaster.substring(0, 2)}
                 </Avatar>
                 Score: <b>{renderScore(props.wordMaster)}</b>
+                {props.word && (
+                    <>
+                    <br />
+                    Word: <b>{props.word}</b>
+                    </>
+                )}
             </Grid>
             <Grid item xs={10}>
                 <h2>Word Detectives</h2>

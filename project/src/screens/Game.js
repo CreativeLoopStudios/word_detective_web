@@ -188,6 +188,7 @@ function Game(props) {
                             dealWordsForWordMaster();
                             break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                            setWordOfRound(room.word_of_the_round);
                             if (room.questions.length === 0) {
                                 beginCountdown(30, isHost, async () => {
                                     await props.firebase.updateById(
@@ -205,13 +206,11 @@ function Game(props) {
                             setQuestions(room.questions);
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
-                            setWordOfRound(room.word_of_the_round);
                             setQuestionAnswered(room.question_answered);
                             setClues(room.clues);
                             beginCountdown(10, isHost, () => resetTurn(isHost, room));
                             break;
                         case GameState.END_ROUND:
-                            setWordOfRound(room.word_of_the_round);
                             beginCountdown(10, isHost, () =>
                                 newRound(isHost, room)
                             );
@@ -320,6 +319,7 @@ function Game(props) {
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
                     players={players}
+                    word={isWordMaster ? wordOfRound : null}
                 />
 
                 <Grid item xs={12}>
