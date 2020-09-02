@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Clues from '../components/Clues';
 import { makeStyles, Button, Grid, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -33,6 +34,12 @@ function WordDetectivesAskQuestions(props) {
             )}
 
             {!props.isWordMaster && (
+                <>
+                {props.clues && (
+                    <Grid item xs={12}>
+                        <Clues clues={props.clues} />
+                    </Grid>
+                )}
                 <Grid item xs={12}>
                     <TextField
                         id="standard-basic"
@@ -53,6 +60,7 @@ function WordDetectivesAskQuestions(props) {
                         Enviar
                     </Button>
                 </Grid>
+                </>
             )}
         </>
     );
