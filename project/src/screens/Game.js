@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { makeStyles, Grid } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 import * as firebase from "firebase/app";
@@ -16,7 +16,7 @@ import {
     WordMasterChooseQuestions,
     ShowQuestionsChosed,
     EndRound,
-    EndGame
+    EndGame,
 } from "../state_screens";
 import { PlayerInfo } from "../components";
 
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
         flex: 1,
-    }
+    },
 }));
 
 function Game(props) {
@@ -59,6 +59,9 @@ function Game(props) {
 
     const { countdown, doCountdown } = props;
 
+    const wordsToChooseRef = useRef();
+    wordsToChooseRef.current = wordsToChoose;
+
     useEffect(() => {
         const dealWordsForWordMaster = async () => {
             const categories = await props.firebase
@@ -79,7 +82,6 @@ function Game(props) {
                 const word = categoryToChooseWord.words[randomWord];
                 wordsToChooseFrom.push(word);
             }
-
             setWordsToChoose(wordsToChooseFrom);
         };
 
@@ -94,9 +96,7 @@ function Game(props) {
             doCountdown(countFrom, callback);
         };
 
-        const resetTurn = async (isHost, room) => {
-            if (!isHost) return;
-
+        const resetTurn = async (room) => {
             if (TURNS_BEFORE_ROUND_ENDS <= room.turns + 1) {
                 endRound();
                 return;
@@ -109,14 +109,12 @@ function Game(props) {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
                     questions: [],
-                    turns: room.turns + 1
+                    turns: room.turns + 1,
                 }
             );
         };
 
-        const newRound = async (isHost, room) => {
-            if (!isHost) return;
-
+        const newRound = async (room) => {
             const newRound = room.rounds + 1;
 
             // end game
@@ -165,6 +163,29 @@ function Game(props) {
             );
         };
 
+        const determineRandomWord = async () => {
+            const randomWordIndex = Math.randomInt(
+                0,
+                wordsToChooseRef.current.length
+            );
+            await props.firebase.updateById(
+                ROOMS_COLLECTION,
+                "Dy9vm3vNjlIWKc84Ug78",
+                {
+                    state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
+                    word_of_the_round:
+                        wordsToChooseRef.current[randomWordIndex],
+                }
+            );
+        };
+
+        const returnCallbackIfHost = (isHost, callback) => {
+            if (isHost) {
+                return callback;
+            }
+            return () => null;
+        }
+
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION)
             .onSnapshot((snapshot) => {
@@ -172,25 +193,28 @@ function Game(props) {
                     const room = doc.data();
                     const isHost =
                         room.host === sessionContext.state.playerName;
+                    const isCurrentPlayerIsWordMaster =
+                        room.word_master === sessionContext.state.playerName;
 
                     setCurrentGameState(room.state);
                     setPlayers(room.players);
                     setTurns(room.turns);
 
-                    setIsWordMaster(
-                        room.word_master === sessionContext.state.playerName
-                    );
+                    setIsWordMaster(isCurrentPlayerIsWordMaster);
 
                     switch (room.state) {
                         case GameState.WORD_MASTER_CHOOSE_WORD:
                             setWordMaster(room.word_master);
                             setWordDetectives(room.word_detectives);
-                            dealWordsForWordMaster();
+                            if (isCurrentPlayerIsWordMaster) {
+                                dealWordsForWordMaster();
+                            }
+                            beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerIsWordMaster, determineRandomWord));
                             break;
                         case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                             setWordOfRound(room.word_of_the_round);
                             if (room.questions.length === 0) {
-                                beginCountdown(30, isHost, async () => {
+                                beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
                                     await props.firebase.updateById(
                                         ROOMS_COLLECTION,
                                         "Dy9vm3vNjlIWKc84Ug78",
@@ -199,7 +223,7 @@ function Game(props) {
                                                 GameState.WORD_MASTER_CHOOSE_QUESTION,
                                         }
                                     );
-                                });
+                                }));
                             }
                             break;
                         case GameState.WORD_MASTER_CHOOSE_QUESTION:
@@ -208,15 +232,18 @@ function Game(props) {
                         case GameState.SHOW_QUESTION_CHOSE:
                             setQuestionAnswered(room.question_answered);
                             setClues(room.clues);
-                            beginCountdown(10, isHost, () => resetTurn(isHost, room));
+                            beginCountdown(20, isHost, returnCallbackIfHost(isHost, () => resetTurn(room)));
                             break;
                         case GameState.END_ROUND:
+                            setWordOfRound(room.word_of_the_round);
                             beginCountdown(10, isHost, () =>
                                 newRound(isHost, room)
                             );
                             break;
                         case GameState.END_GAME:
-                            const orderedPlayersByScore = room.players.sort((a, b) => b.score - a.score);
+                            const orderedPlayersByScore = room.players.sort(
+                                (a, b) => b.score - a.score
+                            );
                             setOrderedPlayers(orderedPlayersByScore);
                             break;
                         default:
@@ -230,7 +257,6 @@ function Game(props) {
     }, [
         props.firebase,
         doCountdown,
-        wordMaster,
         sessionContext.state.playerName,
         sessionContext.state.heartbeatData,
     ]);
@@ -266,7 +292,10 @@ function Game(props) {
     };
 
     const sendAnswerOfWordMaster = async (questionIndex, answer, player) => {
-        const newPlayers = giveScoreToPlayer(player, SCORE_TO_QUESTION_SELECTED);
+        const newPlayers = giveScoreToPlayer(
+            player,
+            SCORE_TO_QUESTION_SELECTED
+        );
         await props.firebase.updateById(
             ROOMS_COLLECTION,
             "Dy9vm3vNjlIWKc84Ug78",
@@ -289,7 +318,10 @@ function Game(props) {
         const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
         let newPlayers = giveScoreToPlayer(wordMaster, pointsForWordMaster);
         if (playerWhoGuessed) {
-            newPlayers = giveScoreToPlayer(playerWhoGuessed, SCORE_TO_PLAYER_WHO_GUESSED);
+            newPlayers = giveScoreToPlayer(
+                playerWhoGuessed,
+                SCORE_TO_PLAYER_WHO_GUESSED
+            );
         }
 
         await props.firebase.updateById(
@@ -298,13 +330,13 @@ function Game(props) {
             {
                 state: GameState.END_ROUND,
                 players: newPlayers,
-                turns: 0
+                turns: 0,
             }
         );
     };
 
     const giveScoreToPlayer = (player, score) => {
-        players.forEach(p => {
+        players.forEach((p) => {
             if (p.name === player) {
                 p.score += score;
             }
