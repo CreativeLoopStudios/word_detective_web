@@ -29,12 +29,20 @@ function ShowQuestionsChosed(props) {
         <Grid item xs={12}>
             <h3>Pergunta escolhida do Word Master:</h3>
 
-            <ul>
-                <li className={classes.question}>{props.question}</li>
-                <li className={classes.question}>
-                    Resposta: <b>{props.answer}</b>
-                </li>
-            </ul>
+            {
+                (props.question && props.answer) ? (
+                <ul>
+                    <li className={classes.question}>{props.question}</li>
+                    <li className={classes.question}>
+                        Resposta: <b>{props.answer}</b>
+                    </li>
+                </ul>
+                ) : (
+                    <ul>
+                        <li className={classes.question}>Nenhum das perguntas foi selecionada.</li>
+                    </ul>
+                )
+            }
 
             {props.clues && (
                 <Clues clues={props.clues} />

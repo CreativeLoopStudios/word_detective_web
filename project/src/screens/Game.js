@@ -228,6 +228,16 @@ function Game(props) {
                             break;
                         case GameState.WORD_MASTER_CHOOSE_QUESTION:
                             setQuestions(room.questions);
+                            beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
+                                await props.firebase.updateById(
+                                    ROOMS_COLLECTION,
+                                    "Dy9vm3vNjlIWKc84Ug78",
+                                    {
+                                        question_answered: {},
+                                        state: GameState.SHOW_QUESTION_CHOSE
+                                    }
+                                );
+                            }));
                             break;
                         case GameState.SHOW_QUESTION_CHOSE:
                             setQuestionAnswered(room.question_answered);
@@ -236,9 +246,7 @@ function Game(props) {
                             break;
                         case GameState.END_ROUND:
                             setWordOfRound(room.word_of_the_round);
-                            beginCountdown(10, isHost, () =>
-                                newRound(isHost, room)
-                            );
+                            beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room)));
                             break;
                         case GameState.END_GAME:
                             const orderedPlayersByScore = room.players.sort(
