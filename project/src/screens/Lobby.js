@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid } from "@material-ui/core";
+import { makeStyles, Button, Grid, TextField, Snackbar } from "@material-ui/core";
+import { Alert } from '@material-ui/lab';
 import { useHistory, useParams } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,7 +23,10 @@ function Lobby(props) {
     const sessionContext = useContext(SessionContext);
 
     const [players, setPlayers] = useState([]);
+    const [copied, setCopied] = useState(false);
     const [isHost, setIsHost] = useState(false);
+
+    const lobbyUrl = `http://localhost:3000/${roomId}/lobby`;
 
     useEffect(() => {
         const unsubscribe = props.firebase
@@ -68,6 +73,30 @@ function Lobby(props) {
                             <li key={index}>{player.name}</li>
                         ))}
                     </ul>
+                </Grid>
+
+                <Grid item xs={12}>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <h3>Compartilhe o link com seus amigos!</h3>
+                        </Grid>
+
+                        <Grid item xs={6}>
+                            <TextField fullWidth label="Link" readOnly value={lobbyUrl} />
+                        </Grid>
+
+                        <Grid item>
+                            <CopyToClipboard text={lobbyUrl}
+                                onCopy={() => setCopied(true)}>
+                                <Button variant="outlined" color="secondary">Copiar</Button>
+                            </CopyToClipboard>
+                        </Grid>
+                    </Grid>
+
+                    <Snackbar open={copied} autoHideDuration={3000} onClose={() => setCopied(false)}
+                        anchorOrigin={{vertical: "top", horizontal: "center"}}>
+                        <Alert severity="success">Copiado!</Alert>
+                    </Snackbar>
                 </Grid>
 
                 <Grid item xs={12}>
