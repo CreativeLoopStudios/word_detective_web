@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, Button, Grid } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
@@ -14,6 +14,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Lobby(props) {
+    const { roomId } = useParams();
     const classes = useStyles();
     const history = useHistory();
 
@@ -34,20 +35,20 @@ function Lobby(props) {
                     setIsHost(isHost);
 
                     if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        history.push("/game");
+                        history.push(`/${roomId}/game`);
                     }
                 });
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName]);
+    }, [props.firebase, history, sessionContext.state.playerName, roomId]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.WORD_MASTER_CHOOSE_WORD,
             }

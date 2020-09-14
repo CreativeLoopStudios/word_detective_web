@@ -46,10 +46,10 @@ function App() {
                 </AppBar>
 
                 <Switch>
-                    <Route path="/game">
+                    <Route path="/:roomId/game">
                         <Game />
                     </Route>
-                    <Route path="/lobby">
+                    <Route path="/:roomId/lobby">
                         <Lobby />
                     </Route>
                     <Route path="/">
