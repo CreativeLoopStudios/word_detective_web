@@ -8,7 +8,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { RegisterUser, Lobby, Game } from "./screens";
+import { RegisterUser, Lobby, Game, CreateRoom } from "./screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -51,6 +51,9 @@ function App() {
                     </Route>
                     <Route path="/lobby">
                         <Lobby />
+                    </Route>
+                    <Route path="/create-room">
+                        <CreateRoom />
                     </Route>
                     <Route path="/">
                         <RegisterUser />
