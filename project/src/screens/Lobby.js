@@ -26,7 +26,7 @@ function Lobby(props) {
     const [copied, setCopied] = useState(false);
     const [isHost, setIsHost] = useState(false);
 
-    const lobbyUrl = `http://localhost:3000/${roomId}/lobby`;
+    const lobbyUrl = window.location.href;
 
     useEffect(() => {
         const unsubscribe = props.firebase
