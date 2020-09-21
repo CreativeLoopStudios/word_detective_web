@@ -30,19 +30,17 @@ function Lobby(props) {
 
     useEffect(() => {
         const unsubscribe = props.firebase
-            .getCollection(ROOMS_COLLECTION)
-            .onSnapshot((snapshot) => {
-                snapshot.forEach((doc) => {
-                    const room = doc.data();
-                    setPlayers(room.players);
+            .getCollection(ROOMS_COLLECTION, roomId)
+            .onSnapshot((doc) => {
+                const room = doc.data();
+                setPlayers(room.players);
 
-                    const isHost = room.host === sessionContext.state.playerName;
-                    setIsHost(isHost);
+                const isHost = room.host === sessionContext.state.playerName;
+                setIsHost(isHost);
 
-                    if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        history.push(`/${roomId}/game`);
-                    }
-                });
+                if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
+                    history.push(`/${roomId}/game`);
+                }
             });
         return () => {
             unsubscribe();
