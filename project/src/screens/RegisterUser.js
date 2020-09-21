@@ -99,6 +99,10 @@ function RegisterUser(props) {
         history.push("/lobby");
     };
 
+    const createRoom = () => {
+        history.push("/create-room");
+    };
+
     const resetRoom = async () => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
@@ -150,10 +154,10 @@ function RegisterUser(props) {
                 <Grid item xs={12}>
                     <Button
                         variant="contained"
-                        color="secondary"
-                        onClick={resetRoom}
+                        color="primary"
+                        onClick={createRoom}
                     >
-                        Resetar Sala
+                        Criar Sala
                     </Button>
                 </Grid>
             </Grid>
