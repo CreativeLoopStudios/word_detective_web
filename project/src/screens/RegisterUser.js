@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function RegisterUser(props) {
+    const magicRoomId = "Dy9vm3vNjlIWKc84Ug78";
     const classes = useStyles();
     const history = useHistory();
 
@@ -36,7 +37,6 @@ function RegisterUser(props) {
             payload: name
         });
 
-        const magicRoomId = "Dy9vm3vNjlIWKc84Ug78";
         const room = (
             await props.firebase.getItemById(ROOMS_COLLECTION, magicRoomId)
         ).data();
@@ -96,7 +96,7 @@ function RegisterUser(props) {
 
         await updatePromise;
 
-        history.push("/lobby");
+        history.push(`/${magicRoomId}/lobby`);
     };
 
     const createRoom = () => {
@@ -106,7 +106,7 @@ function RegisterUser(props) {
     const resetRoom = async () => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            magicRoomId,
             {
                 host: '',
                 state: '',

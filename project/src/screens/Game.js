@@ -19,6 +19,7 @@ import {
     EndGame,
 } from "../state_screens";
 import { PlayerInfo } from "../components";
+import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -58,6 +59,7 @@ function Game(props) {
     const [turns, setTurns] = useState(0);
 
     const { countdown, doCountdown } = props;
+    const { roomId } = useParams();
 
     const wordsToChooseRef = useRef();
     wordsToChooseRef.current = wordsToChoose;
@@ -104,7 +106,7 @@ function Game(props) {
 
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
@@ -139,7 +141,7 @@ function Game(props) {
 
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_MASTER_CHOOSE_WORD,
                     question_answered: null,
@@ -156,7 +158,7 @@ function Game(props) {
         const endGame = async () => {
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.END_GAME,
                 }
@@ -170,7 +172,7 @@ function Game(props) {
             );
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     word_of_the_round:
@@ -217,7 +219,7 @@ function Game(props) {
                                 beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
                                     await props.firebase.updateById(
                                         ROOMS_COLLECTION,
-                                        "Dy9vm3vNjlIWKc84Ug78",
+                                        roomId,
                                         {
                                             state:
                                                 GameState.WORD_MASTER_CHOOSE_QUESTION,
@@ -231,7 +233,7 @@ function Game(props) {
                             beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
                                 await props.firebase.updateById(
                                     ROOMS_COLLECTION,
-                                    "Dy9vm3vNjlIWKc84Ug78",
+                                    roomId,
                                     {
                                         question_answered: {},
                                         state: GameState.SHOW_QUESTION_CHOSE
@@ -272,7 +274,7 @@ function Game(props) {
     const chooseWord = async (word) => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                 word_of_the_round: word,
@@ -283,7 +285,7 @@ function Game(props) {
     const sendQuestionToWordMaster = async (question) => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 questions: firebase.firestore.FieldValue.arrayUnion({
                     question: question,
@@ -306,7 +308,7 @@ function Game(props) {
         );
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 question_answered: {
                     index: questionIndex,
@@ -334,7 +336,7 @@ function Game(props) {
 
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.END_ROUND,
                 players: newPlayers,
