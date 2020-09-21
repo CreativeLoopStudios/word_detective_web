@@ -103,27 +103,6 @@ function RegisterUser(props) {
         history.push("/create-room");
     };
 
-    const resetRoom = async () => {
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            magicRoomId,
-            {
-                host: '',
-                state: '',
-                players: [],
-                turns: 0,
-                word_detectives: [],
-                word_master: '',
-                rounds: 0,
-                word_of_the_round: '',
-                questions: [],
-                heartbeats: {},
-                question_answered: null,
-                clues: []
-            }
-        );
-    };
-
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
