@@ -30,6 +30,24 @@ class Firebase {
     updateById = async (collection_name, id, value) => {
         await this.db.collection(collection_name).doc(id).update(value);
     };
+
+    createNewRoom = async () => {
+        const res = await this.db.collection('rooms').add({
+            host: '',
+            state: '',
+            players: [],
+            turns: 0,
+            word_detectives: [],
+            word_master: '',
+            rounds: 0,
+            word_of_the_round: '',
+            questions: [],
+            heartbeats: {},
+            question_answered: null,
+            clues: []
+        });
+        return res.id;
+    };
 }
 
 export default Firebase;
