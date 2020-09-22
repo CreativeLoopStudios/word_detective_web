@@ -7,7 +7,7 @@ import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { SET_PLAYER_NAME } from '../actions';
+import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 import * as firebase from "firebase/app";
 
@@ -36,7 +36,6 @@ function Lobby(props) {
     const lobbyUrl = window.location.href;
 
     useEffect(() => {
-        const objToUpdate = {};
         let name = sessionContext.state.playerName;
 
         if (!name) {
@@ -45,32 +44,75 @@ function Lobby(props) {
                 type: SET_PLAYER_NAME,
                 payload: name 
             });
-
-            // add player to word detectives
-            objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(name);
         }
-        objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion({
-            score: 0,
-            name
-        });
 
+        // add player to room
         props.firebase.updateById(
             ROOMS_COLLECTION,
             roomId,
             { 
-                ...objToUpdate,
+                players: firebase.firestore.FieldValue.arrayUnion({
+                    score: 0,
+                    name
+                })
             }
         );
+
+        let roleIsSet = false;
+        let heartbeatSet = false;
+        let localClockStart = null;
 
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION, roomId)
             .onSnapshot((doc) => {
                 const room = doc.data();
-                console.log(room)
                 setPlayers(room.players);
+                const playerName = sessionContext.state.playerName;
 
-                const isHost = room.host === sessionContext.state.playerName;
-                setIsHost(isHost);
+                if (room.players.length > 0 && !roleIsSet) {
+                    // as a convention, the host is always the first player to enter the room
+                    const isHost = room.players[0].name === playerName;
+                    setIsHost(isHost);
+
+                    const objToUpdate = {};
+                    if (isHost) {
+                        objToUpdate['host'] = playerName;
+                        objToUpdate['word_master'] = playerName;
+                    }
+                    else {
+                        // add player to word detectives
+                        objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerName);
+                    }
+                    objToUpdate[`heartbeats.${playerName}`] = firebase.firestore.FieldValue.serverTimestamp();
+
+                    localClockStart = firebase.firestore.Timestamp.now();
+                    props.firebase.updateById(
+                        ROOMS_COLLECTION,
+                        roomId,
+                        objToUpdate,
+                    );
+
+                    roleIsSet = true;
+                }
+                
+                if (!heartbeatSet && playerName in room.heartbeats && room.heartbeats[playerName]) {
+                    const localClockEnd = firebase.firestore.Timestamp.now();
+                    const lastValue = room.heartbeats[name];
+
+                    // round trip time (total latency)
+                    const rtt = localClockEnd - localClockStart;
+                    // time to write something to firestore 
+                    const writeTime = lastValue - localClockStart;
+                    // time to read something from firestore (dissemination)
+                    const readTime = localClockEnd - lastValue;
+
+                    sessionContext.dispatch({
+                        type: SET_HEARTBEAT_DATA,
+                        payload: { rtt, writeTime, readTime },
+                    });
+
+                    heartbeatSet = true;
+                }
 
                 if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
                     history.push(`/${roomId}/game`);
