@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
     makeStyles,
     Button,
@@ -8,16 +8,11 @@ import {
     FormControlLabel,
     Switch,
 } from "@material-ui/core";
-import * as firebase from "firebase/app";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
-import SessionContext from "../context/Session";
-import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from "../actions";
 import {
-    ROOMS_COLLECTION,
     CATEGORIES_COLLECTION,
 } from "../firebase/collections";
-import GameState from "../state_of_play";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,7 +47,7 @@ function CreateRoom(props) {
         };
 
         fetchCategories();
-    }, []);
+    }, [props.firebase]);
 
     const handleChange = (evt) => {
         const numberOfAlreadyChecked = categories.reduce((total, c) => {

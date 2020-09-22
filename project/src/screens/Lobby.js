@@ -22,6 +22,7 @@ const generateUserName = () => {
     return uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: ' ', style: 'capital' });
 }
 
+
 function Lobby(props) {
     const { roomId } = useParams();
     const classes = useStyles();
@@ -65,6 +66,7 @@ function Lobby(props) {
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION, roomId)
             .onSnapshot((doc) => {
+                console.log('new room snapshot')
                 const room = doc.data();
                 setPlayers(room.players);
                 const playerName = sessionContext.state.playerName;
@@ -75,14 +77,17 @@ function Lobby(props) {
                     setIsHost(isHost);
 
                     const objToUpdate = {};
-                    if (isHost) {
+                    if (isHost && !room.host) {
                         objToUpdate['host'] = playerName;
                         objToUpdate['word_master'] = playerName;
                     }
-                    else {
+
+                    if (!isHost && !(playerName in room.word_detectives)) {
                         // add player to word detectives
                         objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerName);
                     }
+
+                    // piggyback on this update to follow up with the heartbeat protocol
                     objToUpdate[`heartbeats.${playerName}`] = firebase.firestore.FieldValue.serverTimestamp();
 
                     localClockStart = firebase.firestore.Timestamp.now();
@@ -121,7 +126,7 @@ function Lobby(props) {
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName, roomId]);
+    }, [props.firebase, history, sessionContext, roomId]);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -148,6 +153,7 @@ function Lobby(props) {
                         ))}
                     </ul>
                 </Grid>
+
 
                 <Grid item xs={12}>
                     <Grid container>

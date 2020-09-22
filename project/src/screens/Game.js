@@ -267,6 +267,7 @@ function Game(props) {
         doCountdown,
         sessionContext.state.playerName,
         sessionContext.state.heartbeatData,
+        roomId
     ]);
 
     const chooseWord = async (word) => {
