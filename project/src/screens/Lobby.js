@@ -7,6 +7,9 @@ import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { SET_PLAYER_NAME } from '../actions';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
+import * as firebase from "firebase/app";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -14,6 +17,10 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
 }));
+
+const generateUserName = () => {
+    return uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: ' ', style: 'capital' });
+}
 
 function Lobby(props) {
     const { roomId } = useParams();
@@ -29,10 +36,37 @@ function Lobby(props) {
     const lobbyUrl = window.location.href;
 
     useEffect(() => {
+        const objToUpdate = {};
+        let name = sessionContext.state.playerName;
+
+        if (!name) {
+            name = generateUserName();
+            sessionContext.dispatch({
+                type: SET_PLAYER_NAME,
+                payload: name 
+            });
+
+            // add player to word detectives
+            objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(name);
+        }
+        objToUpdate["players"] = firebase.firestore.FieldValue.arrayUnion({
+            score: 0,
+            name
+        });
+
+        props.firebase.updateById(
+            ROOMS_COLLECTION,
+            roomId,
+            { 
+                ...objToUpdate,
+            }
+        );
+
         const unsubscribe = props.firebase
             .getCollection(ROOMS_COLLECTION, roomId)
             .onSnapshot((doc) => {
                 const room = doc.data();
+                console.log(room)
                 setPlayers(room.players);
 
                 const isHost = room.host === sessionContext.state.playerName;
