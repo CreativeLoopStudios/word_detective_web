@@ -19,6 +19,7 @@ import {
     EndGame,
 } from "../state_screens";
 import { PlayerInfo } from "../components";
+import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -58,6 +59,7 @@ function Game(props) {
     const [turns, setTurns] = useState(0);
 
     const { countdown, doCountdown } = props;
+    const { roomId } = useParams();
 
     const wordsToChooseRef = useRef();
     wordsToChooseRef.current = wordsToChoose;
@@ -104,7 +106,7 @@ function Game(props) {
 
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
@@ -139,7 +141,7 @@ function Game(props) {
 
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_MASTER_CHOOSE_WORD,
                     question_answered: null,
@@ -156,7 +158,7 @@ function Game(props) {
         const endGame = async () => {
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.END_GAME,
                 }
@@ -170,7 +172,7 @@ function Game(props) {
             );
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
-                "Dy9vm3vNjlIWKc84Ug78",
+                roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     word_of_the_round:
@@ -187,78 +189,76 @@ function Game(props) {
         }
 
         const unsubscribe = props.firebase
-            .getCollection(ROOMS_COLLECTION)
-            .onSnapshot((snapshot) => {
-                snapshot.forEach((doc) => {
-                    const room = doc.data();
-                    const isHost =
-                        room.host === sessionContext.state.playerName;
-                    const isCurrentPlayerIsWordMaster =
-                        room.word_master === sessionContext.state.playerName;
+            .getCollection(ROOMS_COLLECTION, roomId)
+            .onSnapshot((doc) => {
+                const room = doc.data();
+                const isHost =
+                    room.host === sessionContext.state.playerName;
+                const isCurrentPlayerIsWordMaster =
+                    room.word_master === sessionContext.state.playerName;
 
-                    setCurrentGameState(room.state);
-                    setPlayers(room.players);
-                    setTurns(room.turns);
+                setCurrentGameState(room.state);
+                setPlayers(room.players);
+                setTurns(room.turns);
 
-                    setIsWordMaster(isCurrentPlayerIsWordMaster);
+                setIsWordMaster(isCurrentPlayerIsWordMaster);
 
-                    switch (room.state) {
-                        case GameState.WORD_MASTER_CHOOSE_WORD:
-                            setWordMaster(room.word_master);
-                            setWordDetectives(room.word_detectives);
-                            if (isCurrentPlayerIsWordMaster) {
-                                dealWordsForWordMaster();
-                            }
-                            beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerIsWordMaster, determineRandomWord));
-                            break;
-                        case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                            setWordOfRound(room.word_of_the_round);
-                            if (room.questions.length === 0) {
-                                beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
-                                    await props.firebase.updateById(
-                                        ROOMS_COLLECTION,
-                                        "Dy9vm3vNjlIWKc84Ug78",
-                                        {
-                                            state:
-                                                GameState.WORD_MASTER_CHOOSE_QUESTION,
-                                        }
-                                    );
-                                }));
-                            }
-                            break;
-                        case GameState.WORD_MASTER_CHOOSE_QUESTION:
-                            setQuestions(room.questions);
-                            beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
+                switch (room.state) {
+                    case GameState.WORD_MASTER_CHOOSE_WORD:
+                        setWordMaster(room.word_master);
+                        setWordDetectives(room.word_detectives);
+                        if (isCurrentPlayerIsWordMaster) {
+                            dealWordsForWordMaster();
+                        }
+                        beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerIsWordMaster, determineRandomWord));
+                        break;
+                    case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                        setWordOfRound(room.word_of_the_round);
+                        if (room.questions.length === 0) {
+                            beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
                                 await props.firebase.updateById(
                                     ROOMS_COLLECTION,
-                                    "Dy9vm3vNjlIWKc84Ug78",
+                                    roomId,
                                     {
-                                        question_answered: {},
-                                        state: GameState.SHOW_QUESTION_CHOSE
+                                        state:
+                                            GameState.WORD_MASTER_CHOOSE_QUESTION,
                                     }
                                 );
                             }));
-                            break;
-                        case GameState.SHOW_QUESTION_CHOSE:
-                            setQuestionAnswered(room.question_answered);
-                            setClues(room.clues);
-                            beginCountdown(20, isHost, returnCallbackIfHost(isHost, () => resetTurn(room)));
-                            break;
-                        case GameState.END_ROUND:
-                            setWordOfRound(room.word_of_the_round);
-                            beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room)));
-                            break;
-                        case GameState.END_GAME:
-                            const orderedPlayersByScore = room.players.sort(
-                                (a, b) => b.score - a.score
+                        }
+                        break;
+                    case GameState.WORD_MASTER_CHOOSE_QUESTION:
+                        setQuestions(room.questions);
+                        beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
+                            await props.firebase.updateById(
+                                ROOMS_COLLECTION,
+                                roomId,
+                                {
+                                    question_answered: {},
+                                    state: GameState.SHOW_QUESTION_CHOSE
+                                }
                             );
-                            setOrderedPlayers(orderedPlayersByScore);
-                            break;
-                        default:
-                            break;
-                    }
+                        }));
+                        break;
+                    case GameState.SHOW_QUESTION_CHOSE:
+                        setQuestionAnswered(room.question_answered);
+                        setClues(room.clues);
+                        beginCountdown(20, isHost, returnCallbackIfHost(isHost, () => resetTurn(room)));
+                        break;
+                    case GameState.END_ROUND:
+                        setWordOfRound(room.word_of_the_round);
+                        beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room)));
+                        break;
+                    case GameState.END_GAME:
+                        const orderedPlayersByScore = room.players.sort(
+                            (a, b) => b.score - a.score
+                        );
+                        setOrderedPlayers(orderedPlayersByScore);
+                        break;
+                    default:
+                        break;
+                }
                 });
-            });
         return () => {
             unsubscribe();
         };
@@ -267,12 +267,13 @@ function Game(props) {
         doCountdown,
         sessionContext.state.playerName,
         sessionContext.state.heartbeatData,
+        roomId
     ]);
 
     const chooseWord = async (word) => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                 word_of_the_round: word,
@@ -283,7 +284,7 @@ function Game(props) {
     const sendQuestionToWordMaster = async (question) => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 questions: firebase.firestore.FieldValue.arrayUnion({
                     question: question,
@@ -306,7 +307,7 @@ function Game(props) {
         );
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 question_answered: {
                     index: questionIndex,
@@ -334,7 +335,7 @@ function Game(props) {
 
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.END_ROUND,
                 players: newPlayers,

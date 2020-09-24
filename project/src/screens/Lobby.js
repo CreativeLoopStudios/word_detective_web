@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, Button, Grid } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
+import { makeStyles, Button, Grid, TextField, Snackbar } from "@material-ui/core";
+import { Alert } from '@material-ui/lab';
+import { useHistory, useParams } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
+import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
+import * as firebase from "firebase/app";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -13,41 +18,123 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const generateUserName = () => {
+    return uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: ' ', style: 'capital' });
+}
+
+
 function Lobby(props) {
+    const { roomId } = useParams();
     const classes = useStyles();
     const history = useHistory();
 
     const sessionContext = useContext(SessionContext);
 
     const [players, setPlayers] = useState([]);
+    const [copied, setCopied] = useState(false);
     const [isHost, setIsHost] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = props.firebase
-            .getCollection(ROOMS_COLLECTION)
-            .onSnapshot((snapshot) => {
-                snapshot.forEach((doc) => {
-                    const room = doc.data();
-                    setPlayers(room.players);
+    const lobbyUrl = window.location.href;
 
-                    const isHost = room.host === sessionContext.state.playerName;
+    useEffect(() => {
+        let name = sessionContext.state.playerName;
+
+        if (!name) {
+            name = generateUserName();
+            sessionContext.dispatch({
+                type: SET_PLAYER_NAME,
+                payload: name 
+            });
+        }
+
+        // add player to room
+        props.firebase.updateById(
+            ROOMS_COLLECTION,
+            roomId,
+            { 
+                players: firebase.firestore.FieldValue.arrayUnion({
+                    score: 0,
+                    name
+                })
+            }
+        );
+
+        let roleIsSet = false;
+        let heartbeatSet = false;
+        let localClockStart = null;
+
+        const unsubscribe = props.firebase
+            .getCollection(ROOMS_COLLECTION, roomId)
+            .onSnapshot((doc) => {
+                console.log('new room snapshot')
+                const room = doc.data();
+                setPlayers(room.players);
+                const playerName = sessionContext.state.playerName;
+
+                if (room.players.length > 0 && !roleIsSet) {
+                    // as a convention, the host is always the first player to enter the room
+                    const isHost = room.players[0].name === playerName;
                     setIsHost(isHost);
 
-                    if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                        history.push("/game");
+                    const objToUpdate = {};
+                    if (isHost && !room.host) {
+                        objToUpdate['host'] = playerName;
+                        objToUpdate['word_master'] = playerName;
                     }
-                });
+
+                    if (!isHost && !(playerName in room.word_detectives)) {
+                        // add player to word detectives
+                        objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerName);
+                    }
+
+                    // piggyback on this update to follow up with the heartbeat protocol
+                    objToUpdate[`heartbeats.${playerName}`] = firebase.firestore.FieldValue.serverTimestamp();
+
+                    localClockStart = firebase.firestore.Timestamp.now();
+                    props.firebase.updateById(
+                        ROOMS_COLLECTION,
+                        roomId,
+                        objToUpdate,
+                    );
+
+                    roleIsSet = true;
+                }
+                
+                if (!heartbeatSet && playerName in room.heartbeats && room.heartbeats[playerName]) {
+                    const localClockEnd = firebase.firestore.Timestamp.now();
+                    const lastValue = room.heartbeats[name];
+
+                    // round trip time (total latency)
+                    const rtt = localClockEnd - localClockStart;
+                    // time to write something to firestore 
+                    const writeTime = lastValue - localClockStart;
+                    // time to read something from firestore (dissemination)
+                    const readTime = localClockEnd - lastValue;
+
+                    sessionContext.dispatch({
+                        type: SET_HEARTBEAT_DATA,
+                        payload: { rtt, writeTime, readTime },
+                    });
+
+                    heartbeatSet = true;
+                }
+
+                if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
+                    history.push(`/${roomId}/game`);
+                }
             });
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext.state.playerName]);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
         await props.firebase.updateById(
             ROOMS_COLLECTION,
-            "Dy9vm3vNjlIWKc84Ug78",
+            roomId,
             {
                 state: GameState.WORD_MASTER_CHOOSE_WORD,
             }
@@ -67,6 +154,31 @@ function Lobby(props) {
                             <li key={index}>{player.name}</li>
                         ))}
                     </ul>
+                </Grid>
+
+
+                <Grid item xs={12}>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <h3>Compartilhe o link com seus amigos!</h3>
+                        </Grid>
+
+                        <Grid item xs={6}>
+                            <TextField fullWidth label="Link" readOnly value={lobbyUrl} />
+                        </Grid>
+
+                        <Grid item>
+                            <CopyToClipboard text={lobbyUrl}
+                                onCopy={() => setCopied(true)}>
+                                <Button variant="outlined" color="secondary">Copiar</Button>
+                            </CopyToClipboard>
+                        </Grid>
+                    </Grid>
+
+                    <Snackbar open={copied} autoHideDuration={3000} onClose={() => setCopied(false)}
+                        anchorOrigin={{vertical: "top", horizontal: "center"}}>
+                        <Alert severity="success">Copiado!</Alert>
+                    </Snackbar>
                 </Grid>
 
                 <Grid item xs={12}>

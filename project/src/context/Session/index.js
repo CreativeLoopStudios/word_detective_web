@@ -30,7 +30,7 @@ const SessionContextProvider = (props) => {
 
     useEffect(() => {
         localStorage.setItem("SessionContext", JSON.stringify(state));
-    });
+    }, [state]);
 
     return (
         <SessionContext.Provider value={{ state, dispatch }}>

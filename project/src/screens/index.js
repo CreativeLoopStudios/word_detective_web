@@ -1,9 +1,11 @@
-import RegisterUser from './RegisterUser';
+import Home from './Home';
 import Lobby from './Lobby';
 import Game from './Game';
+import CreateRoom from './CreateRoom';
 
 export {
-    RegisterUser,
+    Home,
     Lobby,
-    Game
+    Game,
+    CreateRoom
 };
