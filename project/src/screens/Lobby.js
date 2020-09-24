@@ -126,7 +126,9 @@ function Lobby(props) {
         return () => {
             unsubscribe();
         };
-    }, [props.firebase, history, sessionContext, roomId]);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
