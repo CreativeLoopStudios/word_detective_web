@@ -31,11 +31,12 @@ class Firebase {
         await this.db.collection(collection_name).doc(id).update(value);
     };
 
-    createNewRoom = async () => {
+    createNewRoom = async (categories) => {
         const res = await this.db.collection('rooms').add({
             host: '',
             state: '',
             players: [],
+            categories: categories,
             turns: 0,
             word_detectives: [],
             word_master: '',

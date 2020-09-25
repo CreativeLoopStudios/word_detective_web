@@ -73,7 +73,8 @@ function CreateRoom(props) {
     };
 
     const handleSubmit = async () => {
-        const roomId = await props.firebase.createNewRoom();
+        const categoriesChecked = categories.filter(c => c.isChecked).map(c => c.id);
+        const roomId = await props.firebase.createNewRoom(categoriesChecked);
         history.push(`/${roomId}/lobby`);
     };
 
