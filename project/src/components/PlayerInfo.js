@@ -23,7 +23,7 @@ function PlayerInfo(props) {
                 <Avatar style={{ backgroundColor: "green" }}>
                     {wordMasterInfo && wordMasterInfo.name.substring(0, 2)}
                 </Avatar>
-                Score: <b>{wordMasterInfo && wordMasterInfo.score || 0}</b>
+                Score: <b>{(wordMasterInfo && wordMasterInfo.score) || 0}</b>
                 {word && (
                     <>
                     <br />
