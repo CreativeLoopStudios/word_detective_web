@@ -13,40 +13,36 @@ const useStyles = makeStyles((theme) => ({
 
 function PlayerInfo(props) {
     const classes = useStyles();
-
-    const renderScore = (name) => {
-        const playerFound = props.players.find((p) => p.name === name);
-        if (playerFound) {
-            return playerFound.score;
-        }
-        return 0;
-    };
+    const { wordMaster, word, wordDetectives, players } = props;
+    const wordMasterInfo = players.find(p => p.id === wordMaster);
 
     return (
         <>
             <Grid item xs={2}>
                 <h2>Word Master</h2>
                 <Avatar style={{ backgroundColor: "green" }}>
-                    {props.wordMaster.substring(0, 2)}
+                    {wordMasterInfo && wordMasterInfo.name.substring(0, 2)}
                 </Avatar>
-                Score: <b>{renderScore(props.wordMaster)}</b>
-                {props.word && (
+                Score: <b>{wordMasterInfo && wordMasterInfo.score || 0}</b>
+                {word && (
                     <>
                     <br />
-                    Word: <b>{props.word}</b>
+                    Word: <b>{word}</b>
                     </>
                 )}
             </Grid>
             <Grid item xs={10}>
                 <h2>Word Detectives</h2>
                 <div className={classes.avatarContainer}>
-                    {props.wordDetectives.map((detective) => (
-                        <div className={classes.avatarItem} key={detective}>
+                    {wordDetectives
+                        .map(detectiveId => players.find(p => p.id === detectiveId))
+                        .map(detective => (
+                        <div className={classes.avatarItem} key={detective.id}>
                             <Avatar>
-                                {detective.substring(0, 2)}
+                                {detective.name.substring(0, 2)}
                             </Avatar>
                             <span>
-                                Score: <b>{renderScore(detective)}</b>
+                                Score: <b>{detective.score}</b>
                             </span>
                         </div>
                     ))}

@@ -125,7 +125,7 @@ function Game(props) {
                 return;
             }
 
-            const newWordMaster = room.players[newRound].name;
+            const newWordMaster = room.players[newRound].id;
             const newDetective = room.word_master;
 
             let detectiveToRemove = null;
@@ -192,10 +192,9 @@ function Game(props) {
             .getCollection(ROOMS_COLLECTION, roomId)
             .onSnapshot((doc) => {
                 const room = doc.data();
-                const isHost =
-                    room.host === sessionContext.state.playerName;
-                const isCurrentPlayerIsWordMaster =
-                    room.word_master === sessionContext.state.playerName;
+                const { playerId } = sessionContext.state;
+                const isHost = room.host === playerId;
+                const isCurrentPlayerIsWordMaster = room.word_master === playerId;
 
                 setCurrentGameState(room.state);
                 setPlayers(room.players);
@@ -266,8 +265,7 @@ function Game(props) {
     }, [
         props.firebase,
         doCountdown,
-        sessionContext.state.playerName,
-        sessionContext.state.heartbeatData,
+        sessionContext.state,
         roomId
     ]);
 
@@ -289,7 +287,7 @@ function Game(props) {
             {
                 questions: firebase.firestore.FieldValue.arrayUnion({
                     question: question,
-                    player: sessionContext.state.playerName,
+                    player: sessionContext.state.playerId,
                 }),
             }
         );
@@ -297,7 +295,7 @@ function Game(props) {
 
     const sendHunchToDiscoverWord = async (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound(sessionContext.state.playerName);
+            endRound(sessionContext.state.playerId);
         }
     };
 

@@ -37,13 +37,13 @@ function Lobby(props) {
     const lobbyUrl = window.location.href;
 
     useEffect(() => {
-        let name = sessionContext.state.playerName;
+        let { playerName, playerId } = sessionContext.state;
 
-        if (!name) {
-            name = generateUserName();
+        if (!playerName) {
+            playerName = generateUserName();
             sessionContext.dispatch({
                 type: SET_PLAYER_NAME,
-                payload: name 
+                payload: playerName 
             });
         }
 
@@ -54,7 +54,8 @@ function Lobby(props) {
             { 
                 players: firebase.firestore.FieldValue.arrayUnion({
                     score: 0,
-                    name
+                    name: playerName,
+                    id: playerId
                 })
             }
         );
@@ -69,26 +70,26 @@ function Lobby(props) {
                 console.log('new room snapshot')
                 const room = doc.data();
                 setPlayers(room.players);
-                const playerName = sessionContext.state.playerName;
+                const { playerId } = sessionContext.state;
 
                 if (room.players.length > 0 && !roleIsSet) {
                     // as a convention, the host is always the first player to enter the room
-                    const isHost = room.players[0].name === playerName;
+                    const isHost = room.players[0].id === playerId;
                     setIsHost(isHost);
 
                     const objToUpdate = {};
                     if (isHost && !room.host) {
-                        objToUpdate['host'] = playerName;
-                        objToUpdate['word_master'] = playerName;
+                        objToUpdate['host'] = playerId;
+                        objToUpdate['word_master'] = playerId;
                     }
 
-                    if (!isHost && !(playerName in room.word_detectives)) {
+                    if (!isHost && !(playerId in room.word_detectives)) {
                         // add player to word detectives
-                        objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerName);
+                        objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerId);
                     }
 
                     // piggyback on this update to follow up with the heartbeat protocol
-                    objToUpdate[`heartbeats.${playerName}`] = firebase.firestore.FieldValue.serverTimestamp();
+                    objToUpdate[`heartbeats.${playerId}`] = firebase.firestore.FieldValue.serverTimestamp();
 
                     localClockStart = firebase.firestore.Timestamp.now();
                     props.firebase.updateById(
@@ -100,9 +101,9 @@ function Lobby(props) {
                     roleIsSet = true;
                 }
                 
-                if (!heartbeatSet && playerName in room.heartbeats && room.heartbeats[playerName]) {
+                if (!heartbeatSet && playerId in room.heartbeats && room.heartbeats[playerId]) {
                     const localClockEnd = firebase.firestore.Timestamp.now();
-                    const lastValue = room.heartbeats[name];
+                    const lastValue = room.heartbeats[playerId];
 
                     // round trip time (total latency)
                     const rtt = localClockEnd - localClockStart;

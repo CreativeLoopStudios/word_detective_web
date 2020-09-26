@@ -1,10 +1,12 @@
 import React, { useReducer, useEffect } from 'react';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../../actions';
+import { v4 as uuidv4 } from 'uuid';
 
 const SessionContext = React.createContext();
 
 const initialState = {
-    playerName: ''
+    playerName: null,
+    playerId: uuidv4(),
 };
 
 const reducer = (state, action) => {
@@ -24,13 +26,19 @@ const reducer = (state, action) => {
     }
 };
 
+const saveState = (state) => {
+    localStorage.setItem("SessionContext", JSON.stringify(state));
+}
+
 const SessionContextProvider = (props) => {
     const localState = JSON.parse(localStorage.getItem("SessionContext")) || initialState;
-    const [state, dispatch] = useReducer(reducer, localState);
+    if (localState.playerId === undefined) {
+        localState.playerId = uuidv4();
+        saveState(localState);
+    }
 
-    useEffect(() => {
-        localStorage.setItem("SessionContext", JSON.stringify(state));
-    }, [state]);
+    const [state, dispatch] = useReducer(reducer, localState);
+    useEffect(() => saveState(state), [state]);
 
     return (
         <SessionContext.Provider value={{ state, dispatch }}>
