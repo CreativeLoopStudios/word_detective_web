@@ -247,6 +247,7 @@ function Game(props) {
                         break;
                     case GameState.END_ROUND:
                         setWordOfRound(room.word_of_the_round);
+                        setClues([]);
                         beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room)));
                         break;
                     case GameState.END_GAME:
