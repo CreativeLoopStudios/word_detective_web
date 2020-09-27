@@ -41,7 +41,7 @@ function EndGame(props) {
                     }
 
                     return (
-                        <li className={className}>
+                        <li className={className} key={index}>
                             <b>{p.name} - Score: {p.score}</b>
                         </li>
                     );
