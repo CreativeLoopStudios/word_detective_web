@@ -1,12 +1,14 @@
 import React, { useReducer, useEffect } from 'react';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../../actions';
 import { v4 as uuidv4 } from 'uuid';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 const SessionContext = React.createContext();
 
 const initialState = {
     playerName: null,
-    playerId: uuidv4(),
+    playerId: null,
+    heartbeatData: null,
 };
 
 const reducer = (state, action) => {
@@ -30,11 +32,17 @@ const saveState = (state) => {
     localStorage.setItem("SessionContext", JSON.stringify(state));
 }
 
+const generateUserName = () => {
+    return uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: ' ', style: 'capital' });
+}
+
 const SessionContextProvider = (props) => {
     const localState = JSON.parse(localStorage.getItem("SessionContext")) || initialState;
-    if (localState.playerId === undefined) {
+    if (localState.playerId === undefined || localState.playerId === null) {
         localState.playerId = uuidv4();
-        saveState(localState);
+    }
+    if (!localState.playerName) {
+        localState.playerName = generateUserName();
     }
 
     const [state, dispatch] = useReducer(reducer, localState);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { makeStyles, Button, Grid, TextField, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 import { useHistory, useParams } from "react-router-dom";
@@ -8,7 +8,6 @@ import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
-import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 import * as firebase from "firebase/app";
 
 const useStyles = makeStyles((theme) => ({
@@ -17,11 +16,6 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
 }));
-
-const generateUserName = () => {
-    return uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: ' ', style: 'capital' });
-}
-
 
 function Lobby(props) {
     const { roomId } = useParams();
@@ -33,121 +27,129 @@ function Lobby(props) {
     const [players, setPlayers] = useState([]);
     const [copied, setCopied] = useState(false);
     const [isHost, setIsHost] = useState(false);
+    const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
+    const [heartbeatData, setHeartbeatData] = useState(null);
+    const [wordDetectives, setWordDetectives] = useState([]);
+    const [localClockStart, setLocalClockStart] = useState(null);
 
     const lobbyUrl = window.location.href;
+    const { playerId } = sessionContext.state;
+    const { firebase: fb } = props;
 
-    useEffect(() => {
-        let { playerName, playerId } = sessionContext.state;
+    const updateRoom = useCallback((data) => {
+        return fb.updateById(ROOMS_COLLECTION, roomId, data);
+    }, [fb, roomId]);
 
-        if (!playerName) {
-            playerName = generateUserName();
-            sessionContext.dispatch({
-                type: SET_PLAYER_NAME,
-                payload: playerName 
-            });
-        }
-
-        // add player to room
-        props.firebase.updateById(
-            ROOMS_COLLECTION,
-            roomId,
-            { 
-                players: firebase.firestore.FieldValue.arrayUnion({
-                    score: 0,
-                    name: playerName,
-                    id: playerId
-                })
-            }
-        );
-
-        let roleIsSet = false;
-        let heartbeatSet = false;
-        let localClockStart = null;
-
-        const unsubscribe = props.firebase
-            .getCollection(ROOMS_COLLECTION, roomId)
-            .onSnapshot((doc) => {
-                console.log('new room snapshot')
-                const room = doc.data();
-                setPlayers(room.players);
-                const { playerId } = sessionContext.state;
-
-                if (room.players.length > 0 && !roleIsSet) {
-                    // as a convention, the host is always the first player to enter the room
-                    const isHost = room.players[0].id === playerId;
-                    setIsHost(isHost);
-
-                    const objToUpdate = {};
-                    if (isHost && !room.host) {
-                        objToUpdate['host'] = playerId;
-                        objToUpdate['word_master'] = playerId;
-                    }
-
-                    if (!isHost && !(playerId in room.word_detectives)) {
-                        // add player to word detectives
-                        objToUpdate['word_detectives'] = firebase.firestore.FieldValue.arrayUnion(playerId);
-                    }
-
-                    // piggyback on this update to follow up with the heartbeat protocol
-                    objToUpdate[`heartbeats.${playerId}`] = firebase.firestore.FieldValue.serverTimestamp();
-
-                    localClockStart = firebase.firestore.Timestamp.now();
-                    props.firebase.updateById(
-                        ROOMS_COLLECTION,
-                        roomId,
-                        objToUpdate,
-                    );
-
-                    roleIsSet = true;
-                }
-                
-                if (!heartbeatSet && playerId in room.heartbeats && room.heartbeats[playerId]) {
-                    const localClockEnd = firebase.firestore.Timestamp.now();
-                    const lastValue = room.heartbeats[playerId];
-
-                    // round trip time (total latency)
-                    const rtt = localClockEnd - localClockStart;
-                    // time to write something to firestore 
-                    const writeTime = lastValue - localClockStart;
-                    // time to read something from firestore (dissemination)
-                    const readTime = localClockEnd - lastValue;
-
-                    sessionContext.dispatch({
-                        type: SET_HEARTBEAT_DATA,
-                        payload: { rtt, writeTime, readTime },
-                    });
-
-                    heartbeatSet = true;
-                }
-
-                if (room.state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                    history.push(`/${roomId}/game`);
-                }
-            });
-        return () => {
-            unsubscribe();
-        };
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleSubmit = async (evt) => {
+    const handleSubmit = (evt) => {
         evt.preventDefault();
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            roomId,
-            {
-                state: GameState.WORD_MASTER_CHOOSE_WORD,
+        updateRoom({ state: GameState.WORD_MASTER_CHOOSE_WORD });
+    }
+
+    const commitPlayerName = (newName) => {
+        sessionContext.dispatch({
+            type: SET_PLAYER_NAME,
+            payload: newName 
+        });
+        setPlayerName(newName);
+
+        const newPlayers = [...players];
+        const idx = newPlayers.findIndex(p => p.id === playerId);
+        newPlayers[idx].name = newName;
+
+        updateRoom({ players: newPlayers });
+        setPlayers(newPlayers);
+    }
+
+    // add player to room
+    const playerInRoom = players.map(p => p.id).includes(playerId);
+    useEffect(() => {
+        if (!playerInRoom) {
+            updateRoom({ players: firebase.firestore.FieldValue.arrayUnion({
+                score: 0,
+                name: playerName,
+                id: playerId
+            })});
+        }
+    }, [playerInRoom, playerName, playerId, updateRoom])
+
+    // update host status
+    useEffect(() => {
+        if (players.length > 0 && !isHost) {
+            // as a convention, the host is always the first player to enter the room
+            const shouldBeHost = players[0].id === playerId;
+            setIsHost(shouldBeHost);
+
+            if (shouldBeHost) {
+                updateRoom({ host: playerId, word_master: playerId });
+            } else if (!(playerId in wordDetectives)) {
+                updateRoom({ word_detectives: firebase.firestore.FieldValue.arrayUnion(playerId) });
             }
-        );
-    };
+        }
+    }, [players, playerId, setIsHost, isHost, wordDetectives, updateRoom]);
+
+    // add heartbeat info if needed
+    useEffect(() => {
+        if (!heartbeatData) {
+            const data = {};
+            data[`heartbeats.${playerId}`] = firebase.firestore.FieldValue.serverTimestamp();
+            updateRoom(data);
+            const now = firebase.firestore.Timestamp.now();
+            setLocalClockStart(now);
+
+            console.log('setting heartbeat to', now)
+        }
+    }, [heartbeatData, playerId, setLocalClockStart, updateRoom]);
+
+    // firebase snapshot
+    useEffect(() => {
+        const unsub = fb.getCollection(ROOMS_COLLECTION, roomId).onSnapshot((doc) => {
+            console.log("new room snapshot");
+            const room = doc.data();
+            if (!room) {
+                return;
+            }
+
+            const { players: roomPlayers, heartbeats, state, word_detectives } = room;
+            setPlayers(roomPlayers);
+            setWordDetectives(word_detectives);
+
+            // finish setting the heartbeat
+            if (!heartbeatData && playerId in heartbeats && heartbeats[playerId]) {
+                const localClockEnd = firebase.firestore.Timestamp.now();
+                const lastValue = heartbeats[playerId];
+                console.log('heartbeat snapshot')
+
+                // round trip time (total latency)
+                const rtt = localClockEnd - localClockStart;
+                // time to write something to firestore
+                const writeTime = lastValue - localClockStart;
+                // time to read something from firestore (dissemination)
+                const readTime = localClockEnd - lastValue;
+
+                const payload = { rtt, writeTime, readTime };
+                console.log(payload)
+
+                sessionContext.dispatch({
+                    type: SET_HEARTBEAT_DATA,
+                    payload,
+                });
+                setHeartbeatData(payload);
+            }
+
+            if (state === GameState.WORD_MASTER_CHOOSE_WORD) {
+                history.push(`/${roomId}/game`);
+            }
+        });
+
+        return unsub;
+    }, [playerId, heartbeatData, fb, roomId, sessionContext, localClockStart, history]);
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12}>
                     <h1>
-                        Lobby - Bem vindo, {sessionContext.state.playerName}
+                        Lobby - Bem vindo, {playerName}
                     </h1>
 
                     <ul>
@@ -157,6 +159,18 @@ function Lobby(props) {
                     </ul>
                 </Grid>
 
+                <Grid item xs={12}>
+                    <Grid container>
+                        <Grid item>
+                            <TextField fullWidth label="Nome" value={playerName || ''} onChange={(ev) => setPlayerName(ev.target.value)} />
+                        </Grid>
+                        <Grid item>
+                            <Button variant="outlined" color="secondary" onClick={() => commitPlayerName(playerName)}>
+                                Mudar
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
 
                 <Grid item xs={12}>
                     <Grid container>
