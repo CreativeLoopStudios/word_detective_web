@@ -345,7 +345,7 @@ function Game(props) {
 
     const giveScoreToPlayer = (player, score) => {
         players.forEach((p) => {
-            if (p.name === player) {
+            if (p.id === player) {
                 p.score += score;
             }
         });
