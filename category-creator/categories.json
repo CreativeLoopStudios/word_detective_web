@@ -446,5 +446,43 @@
             "Alien",
             "Chupacabra"
         ]
+    },
+    {
+        "name": "Cidades Turísticas Brasileiras",
+        "description": "Descubra os destinos mais deslumbrantes do nosso Brasil!",
+        "lang": "pt_br",
+        "words": [
+            "Rio de Janeiro",
+            "Campos do Jordão",
+            "Ouro Preto",
+            "Petrópolis",
+            "Balneário Camboriú",
+            "Curitiba",
+            "Blumenau",
+            "Diamantina",
+            "Florianópolis",
+            "Bento Gonçalves",
+            "Gramado",
+            "Paraty",
+            "Holambra",
+            "Ubatuba",
+            "Tiradentes",
+            "Teresópolis",
+            "Pomerode",
+            "Morretes",
+            "Triunfo",
+            "Ilhabela",
+            "Búzios",
+            "Carambeí",
+            "Alcântara",
+            "Cidade de Goiás",
+            "Vinhedo",
+            "Serra Negra",
+            "Penedo",
+            "Treze Tílias",
+            "Guaramiranga",
+            "Guararema",
+            "Rio de Contas"
+        ]
     }
 ]
