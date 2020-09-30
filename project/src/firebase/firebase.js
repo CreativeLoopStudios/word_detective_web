@@ -42,6 +42,7 @@ class Firebase {
             word_master: '',
             rounds: 0,
             word_of_the_round: '',
+            category_of_the_round: {},
             questions: [],
             heartbeats: {},
             question_answered: null,

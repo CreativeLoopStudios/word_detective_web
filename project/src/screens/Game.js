@@ -40,6 +40,8 @@ function Game(props) {
 
     const [isWordMaster, setIsWordMaster] = useState(false);
 
+    const [categoriesToChoose, setCategoriesToChoose] = useState([]);
+    const [categorySelected, setCategorySelected] = useState({});
     const [wordsToChoose, setWordsToChoose] = useState([]);
 
     const [currentGameState, setCurrentGameState] = useState("");
@@ -51,6 +53,7 @@ function Game(props) {
     const [questionAnswered, setQuestionAnswered] = useState({});
     const [clues, setClues] = useState([]);
 
+    const [categoryOfRound, setCategoryOfRound] = useState({});
     const [wordOfRound, setWordOfRound] = useState("");
 
     const [players, setPlayers] = useState([]);
@@ -61,32 +64,10 @@ function Game(props) {
     const { countdown, doCountdown } = props;
     const { roomId } = useParams();
 
-    const wordsToChooseRef = useRef();
-    wordsToChooseRef.current = wordsToChoose;
+    const categoriesToChooseRef = useRef();
+    categoriesToChooseRef.current = categoriesToChoose;
 
     useEffect(() => {
-        const dealWordsForWordMaster = async () => {
-            const categories = await props.firebase
-                .getCollection(CATEGORIES_COLLECTION)
-                .get();
-
-            let wordsToChooseFrom = [];
-            for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
-                const randomCategory = Math.randomInt(0, categories.size);
-                const categoryToChooseWord = categories.docs[
-                    randomCategory
-                ].data();
-
-                const randomWord = Math.randomInt(
-                    0,
-                    categoryToChooseWord.words.length
-                );
-                const word = categoryToChooseWord.words[randomWord];
-                wordsToChooseFrom.push(word);
-            }
-            setWordsToChoose(wordsToChooseFrom);
-        };
-
         const beginCountdown = (countdownTo, isHost, callback) => {
             const { readTime, writeTime } = sessionContext.state.heartbeatData;
 
@@ -166,17 +147,24 @@ function Game(props) {
         };
 
         const determineRandomWord = async () => {
+            const randomCategoryIndex = Math.randomInt(0, categoriesToChooseRef.current.length);
+            const randomCategory = categoriesToChooseRef.current[randomCategoryIndex];
+
+            const categoryToChooseFrom = await props.firebase.getCollection(CATEGORIES_COLLECTION).doc(randomCategory.id).get();
+            
             const randomWordIndex = Math.randomInt(
                 0,
-                wordsToChooseRef.current.length
+                categoryToChooseFrom.data().words.length
             );
+            const wordOfTheRound = categoryToChooseFrom.data().words[randomWordIndex];
+
             await props.firebase.updateById(
                 ROOMS_COLLECTION,
                 roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
-                    word_of_the_round:
-                        wordsToChooseRef.current[randomWordIndex],
+                    category_of_the_round: randomCategory,
+                    word_of_the_round: wordOfTheRound
                 }
             );
         };
@@ -206,12 +194,11 @@ function Game(props) {
                     case GameState.WORD_MASTER_CHOOSE_WORD:
                         setWordMaster(room.word_master);
                         setWordDetectives(room.word_detectives);
-                        if (isCurrentPlayerIsWordMaster) {
-                            dealWordsForWordMaster();
-                        }
+                        setCategoriesToChoose(room.categories);
                         beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerIsWordMaster, determineRandomWord));
                         break;
                     case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                        setCategoryOfRound(room.category_of_the_round);
                         setWordOfRound(room.word_of_the_round);
                         if (room.questions.length === 0) {
                             beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
@@ -269,6 +256,26 @@ function Game(props) {
         roomId
     ]);
 
+    const dealWordsForWordMaster = async (category) => {
+        const categoryToChooseFrom = await props.firebase.getCollection(CATEGORIES_COLLECTION).doc(category.id).get();
+
+        let wordsToChooseFrom = [];
+        for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
+            const randomWord = Math.randomInt(
+                0,
+                categoryToChooseFrom.data().words.length
+            );
+            const word = categoryToChooseFrom.data().words[randomWord];
+            wordsToChooseFrom.push(word);
+        }
+        setWordsToChoose(wordsToChooseFrom);
+    };
+
+    const chooseCategory = async (category) => {
+        dealWordsForWordMaster(category);
+        setCategorySelected(category);
+    };
+
     const chooseWord = async (word) => {
         await props.firebase.updateById(
             ROOMS_COLLECTION,
@@ -276,6 +283,7 @@ function Game(props) {
             {
                 state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                 word_of_the_round: word,
+                category_of_the_round: categorySelected
             }
         );
     };
@@ -371,6 +379,8 @@ function Game(props) {
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
                     <WordMasterChooseWord
                         isWordMaster={isWordMaster}
+                        categories={categoriesToChoose}
+                        onClickCategory={chooseCategory}
                         words={wordsToChoose}
                         onClickWord={chooseWord}
                     />
