@@ -13,11 +13,18 @@ const useStyles = makeStyles((theme) => ({
 
 function PlayerInfo(props) {
     const classes = useStyles();
-    const { wordMaster, word, wordDetectives, players } = props;
+    const { wordMaster, word, wordDetectives, players, category } = props;
     const wordMasterInfo = players.find(p => p.id === wordMaster);
 
     return (
         <>
+            {
+                category.name &&
+                <Grid item xs={12}>
+                    <h2>Categoria Selecionada</h2>
+                    <p>{category.name}</p>
+                </Grid>
+            }
             <Grid item xs={2}>
                 <h2>Word Master</h2>
                 <Avatar style={{ backgroundColor: "green" }}>

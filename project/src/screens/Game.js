@@ -367,6 +367,7 @@ function Game(props) {
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
                     players={players}
+                    category={categoryOfRound}
                     word={isWordMaster ? wordOfRound : null}
                 />
 
