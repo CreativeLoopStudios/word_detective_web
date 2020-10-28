@@ -24,12 +24,11 @@ function Lobby(props) {
 
     const sessionContext = useContext(SessionContext);
 
-    const [players, setPlayers] = useState({});
+    const [players, setPlayers] = useState([]);
     const [copied, setCopied] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
     const [heartbeatData, setHeartbeatData] = useState(null);
-    const [wordDetectives, setWordDetectives] = useState({});
     const [localClockStart, setLocalClockStart] = useState(null);
 
     const lobbyUrl = window.location.href;
@@ -52,39 +51,37 @@ function Lobby(props) {
         });
         setPlayerName(newName);
 
-        for(let [key, player] of Object.entries(players)) {
-            if (player.id === playerId) {
-                const data = {};
-                data[`/players/${key}/name`] = newName;
-                updateRoom(data);
-                break;
-            }
-        }
+        updateRoom({
+            [`/players/${playerId}/name`]: newName
+        });
     }
 
     // update host status
     useEffect(() => {
-        if (Object.keys(players).length > 0 && !isHost) {
+        if (players.length > 0 && !isHost) {
             // as a convention, the host is always the first player to enter the room
-            const shouldBeHost = players[Object.keys(players)[0]].id === playerId;
+            const shouldBeHost = players[0].id === playerId;
             setIsHost(shouldBeHost);
 
+            let data = {};
             if (shouldBeHost) {
-                updateRoom({ host: playerId, word_master: playerId });
-            } else if (!(playerId in wordDetectives)) {
-                const data = {};
-                data[`word_detectives/${playerId}`] = {}; 
-                updateRoom(data);
+                data = {
+                    host: playerId,
+                    [`/players/${playerId}/role`]: 'word_master'
+                };
+            } else {
+                data[`/players/${playerId}/role`] = 'word_detective';
             }
+            updateRoom(data);
         }
-    }, [players, playerId, setIsHost, isHost, wordDetectives, updateRoom]);
+    }, [players, playerId, setIsHost, isHost, updateRoom]);
 
     // add heartbeat info if needed
     useEffect(() => {
         if (!heartbeatData) {
-            const data = {};
-            data[`heartbeats/${playerId}`] = database.ServerValue.TIMESTAMP;
-            updateRoom(data);
+            updateRoom({
+                [`heartbeats/${playerId}`]: database.ServerValue.TIMESTAMP
+            });
 
             const now = firestore.Timestamp.now();
             setLocalClockStart(now);
@@ -103,17 +100,19 @@ function Lobby(props) {
                 return;
             }
 
-            const { players: roomPlayers, heartbeats, state, word_detectives } = room;
-            setPlayers(roomPlayers || {});
-            setWordDetectives(word_detectives || {});
+            const { players: roomPlayers, heartbeats, state } = room;
+            setPlayers(Object.values(roomPlayers || {}).sort((a, b) => a.creationDate - b.creationDate));
 
             const playerInRoom = roomPlayers && Object.values(roomPlayers).map(p => p.id).includes(playerId);
             // add player in room
             if (!playerInRoom) {
-                firebase.pushToList(ROOMS_COLLECTION, roomId, 'players', {
-                    id: playerId,
-                    name: playerName,
-                    score: 0
+                updateRoom({
+                    [`/players/${playerId}`]: {
+                        id: playerId,
+                        name: playerName,
+                        score: 0,
+                        creationDate: database.ServerValue.TIMESTAMP
+                    }
                 });
             }
 
@@ -159,8 +158,8 @@ function Lobby(props) {
                     </h1>
 
                     <ul>
-                        {Object.keys(players).map((key) => (
-                            <li key={key}>{players[key].name}</li>
+                        {players.map((player) => (
+                            <li key={player.id}>{player.name}</li>
                         ))}
                     </ul>
                 </Grid>
