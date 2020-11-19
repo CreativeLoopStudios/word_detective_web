@@ -63,8 +63,6 @@ class Firebase {
             heartbeats: {},
             categories: categories,
             turns: 0,
-            word_detectives: {},
-            word_master: '',
             rounds: 0,
             word_of_the_round: '',
             category_of_the_round: {},

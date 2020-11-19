@@ -6,7 +6,7 @@ function withCountdown(BaseComponent) {
         const currentCountdownRef = useRef(null);
 
         const doCountdown = useCallback((counter, callback) => {
-            stopCountdown();
+            clearInterval(currentCountdownRef.current);
             if (counter <= 0) {
                 return;
             }
@@ -32,10 +32,6 @@ function withCountdown(BaseComponent) {
                 currentCountdownRef.current = h;
             }, splitSecond);
         }, []);
-
-        const stopCountdown = () => {
-            clearInterval(currentCountdownRef.current);
-        };
 
         return <BaseComponent doCountdown={doCountdown} countdown={countdown} {...props} />;
     }

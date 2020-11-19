@@ -13,8 +13,7 @@ const useStyles = makeStyles((theme) => ({
 
 function PlayerInfo(props) {
     const classes = useStyles();
-    const { wordMaster, word, wordDetectives, players, category } = props;
-    const wordMasterInfo = players.find(p => p.id === wordMaster);
+    const { wordMaster, word, wordDetectives, category } = props;
 
     return (
         <>
@@ -28,9 +27,9 @@ function PlayerInfo(props) {
             <Grid item xs={2}>
                 <h2>Word Master</h2>
                 <Avatar style={{ backgroundColor: "green" }}>
-                    {wordMasterInfo && wordMasterInfo.name.substring(0, 2)}
+                    {wordMaster && wordMaster.name.substring(0, 2)}
                 </Avatar>
-                Score: <b>{(wordMasterInfo && wordMasterInfo.score) || 0}</b>
+                Score: <b>{(wordMaster && wordMaster.score) || 0}</b>
                 {word && (
                     <>
                     <br />
@@ -42,7 +41,6 @@ function PlayerInfo(props) {
                 <h2>Word Detectives</h2>
                 <div className={classes.avatarContainer}>
                     {wordDetectives
-                        .map(detectiveId => players.find(p => p.id === detectiveId))
                         .map(detective => (
                         <div className={classes.avatarItem} key={detective.id}>
                             <Avatar>

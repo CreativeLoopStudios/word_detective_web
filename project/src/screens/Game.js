@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { makeStyles, Grid } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
-import * as firebase from "firebase/app";
+//import * as firebase from "firebase/app";
+import { database, firestore } from "firebase/app";
 import SessionContext from "../context/Session";
 import {
     ROOMS_COLLECTION,
@@ -37,6 +38,7 @@ function Game(props) {
     const classes = useStyles();
 
     const sessionContext = useContext(SessionContext);
+    const { firebase } = props;
 
     const [isWordMaster, setIsWordMaster] = useState(false);
 
@@ -46,7 +48,7 @@ function Game(props) {
 
     const [currentGameState, setCurrentGameState] = useState("");
 
-    const [wordMaster, setWordMaster] = useState("");
+    const [wordMaster, setWordMaster] = useState({});
     const [wordDetectives, setWordDetectives] = useState([]);
 
     const [questions, setQuestions] = useState([]);
@@ -61,6 +63,8 @@ function Game(props) {
 
     const [turns, setTurns] = useState(0);
 
+    const [loading, setLoading] = useState(true);
+
     const { countdown, doCountdown } = props;
     const { roomId } = useParams();
 
@@ -74,7 +78,8 @@ function Game(props) {
             // discount the readTime (time that the server takes to get an information to this client)
             // add the writeTime if this is the host (time to write to firestore server) because the host
             // will publish here instantly.
-            const countFrom = countdownTo - readTime + (isHost ? writeTime : 0);
+            //const countFrom = countdownTo - readTime + (isHost ? writeTime : 0);
+            const countFrom = countdownTo;
             console.log(`counting from ${countFrom}`);
             doCountdown(countFrom, callback);
         };
@@ -85,59 +90,48 @@ function Game(props) {
                 return;
             }
 
-            await props.firebase.updateById(
+            await firebase.updateRlById(
                 ROOMS_COLLECTION,
                 roomId,
                 {
                     state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
                     question_answered: null,
-                    questions: [],
+                    questions: null,
                     turns: room.turns + 1,
                 }
             );
         };
 
-        const newRound = async (room) => {
-            const newRound = room.rounds + 1;
+        const newRound = async (rounds, players) => {
+            const newRound = rounds + 1;
 
             // end game
-            if (newRound === room.players.length) {
+            if (newRound === players.length) {
                 endGame();
                 return;
             }
 
-            const newWordMaster = room.players[newRound].id;
-            const newDetective = room.word_master;
+            const newWordMasterId = players[newRound].id;
+            const newDetectiveId = players.filter(player => player.role === 'word_master')[0].id;
 
-            let detectiveToRemove = null;
-            for (let index in room.word_detectives) {
-                if (room.word_detectives[index] === newWordMaster) {
-                    detectiveToRemove = index;
-                }
-            }
-
-            if (detectiveToRemove != null) {
-                room.word_detectives.splice(detectiveToRemove, 1);
-            }
-
-            await props.firebase.updateById(
+            await firebase.updateRlById(
                 ROOMS_COLLECTION,
                 roomId,
                 {
                     state: GameState.WORD_MASTER_CHOOSE_WORD,
                     question_answered: null,
-                    questions: [],
-                    clues: [],
+                    questions: null,
+                    clues: null,
                     word_of_the_round: "",
                     rounds: newRound,
-                    word_master: newWordMaster,
-                    word_detectives: [...room.word_detectives, newDetective],
+                    [`/players/${newWordMasterId}/role`]: 'word_master',
+                    [`/players/${newDetectiveId}/role`]: 'word_detective'
                 }
             );
         };
 
         const endGame = async () => {
-            await props.firebase.updateById(
+            await firebase.updateRlById(
                 ROOMS_COLLECTION,
                 roomId,
                 {
@@ -150,7 +144,7 @@ function Game(props) {
             const randomCategoryIndex = Math.randomInt(0, categoriesToChooseRef.current.length);
             const randomCategory = categoriesToChooseRef.current[randomCategoryIndex];
 
-            const categoryToChooseFrom = await props.firebase.getCollection(CATEGORIES_COLLECTION).doc(randomCategory.id).get();
+            const categoryToChooseFrom = await firebase.getCollection(CATEGORIES_COLLECTION).doc(randomCategory.id).get();
             
             const randomWordIndex = Math.randomInt(
                 0,
@@ -158,7 +152,7 @@ function Game(props) {
             );
             const wordOfTheRound = categoryToChooseFrom.data().words[randomWordIndex];
 
-            await props.firebase.updateById(
+            await firebase.updateRlById(
                 ROOMS_COLLECTION,
                 roomId,
                 {
@@ -176,88 +170,95 @@ function Game(props) {
             return () => null;
         }
 
-        const unsubscribe = props.firebase
-            .getCollection(ROOMS_COLLECTION, roomId)
-            .onSnapshot((doc) => {
-                const room = doc.data();
-                const { playerId } = sessionContext.state;
-                const isHost = room.host === playerId;
-                const isCurrentPlayerIsWordMaster = room.word_master === playerId;
+        const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
+        collectionRef.on('value', (doc) => {
+            const room = doc.val();
+            const { playerId } = sessionContext.state;
+            const isHost = room.host === playerId;
 
-                setCurrentGameState(room.state);
-                setPlayers(room.players);
-                setTurns(room.turns);
+            const playersSorted = Object.values(room.players).sort((a, b) => a.creationDate - b.creationDate);
+            setPlayers(playersSorted);
+            setCurrentGameState(room.state);
+            setTurns(room.turns);
 
-                setIsWordMaster(isCurrentPlayerIsWordMaster);
+            const playerWordMaster = playersSorted.find(player => player.role === 'word_master');
+            setWordMaster(playerWordMaster);
+            const isCurrentPlayerWordMaster = playerWordMaster.id === playerId;
+            setIsWordMaster(isCurrentPlayerWordMaster);
 
-                switch (room.state) {
-                    case GameState.WORD_MASTER_CHOOSE_WORD:
-                        setWordMaster(room.word_master);
-                        setWordDetectives(room.word_detectives);
-                        setCategoriesToChoose(room.categories);
-                        beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerIsWordMaster, determineRandomWord));
-                        break;
-                    case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                        setCategoryOfRound(room.category_of_the_round);
-                        setWordOfRound(room.word_of_the_round);
-                        if (room.questions.length === 0) {
-                            beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
-                                await props.firebase.updateById(
-                                    ROOMS_COLLECTION,
-                                    roomId,
-                                    {
-                                        state:
-                                            GameState.WORD_MASTER_CHOOSE_QUESTION,
-                                    }
-                                );
-                            }));
-                        }
-                        break;
-                    case GameState.WORD_MASTER_CHOOSE_QUESTION:
-                        setQuestions(room.questions);
-                        beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
-                            await props.firebase.updateById(
+            setWordDetectives(playersSorted.filter(player => player.role === 'word_detective'));
+
+            const questionsAsked = Object.values(room.questions || {});
+            const cluesDiscovered = Object.values(room.clues || {});
+
+            switch (room.state) {
+                case GameState.WORD_MASTER_CHOOSE_WORD:
+                    setCategoriesToChoose(room.categories);
+                    beginCountdown(15, isHost, returnCallbackIfHost(isCurrentPlayerWordMaster, determineRandomWord));
+                    break;
+                case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                    setCategoryOfRound(room.category_of_the_round);
+                    setWordOfRound(room.word_of_the_round);
+                    if (questionsAsked.length === 0) {
+                        beginCountdown(30, isHost, returnCallbackIfHost(isHost, async () => {
+                            await firebase.updateRlById(
                                 ROOMS_COLLECTION,
                                 roomId,
                                 {
-                                    question_answered: {},
-                                    state: GameState.SHOW_QUESTION_CHOSE
+                                    state:
+                                        GameState.WORD_MASTER_CHOOSE_QUESTION,
                                 }
                             );
                         }));
-                        break;
-                    case GameState.SHOW_QUESTION_CHOSE:
-                        setQuestionAnswered(room.question_answered);
-                        setClues(room.clues);
-                        beginCountdown(20, isHost, returnCallbackIfHost(isHost, () => resetTurn(room)));
-                        break;
-                    case GameState.END_ROUND:
-                        setWordOfRound(room.word_of_the_round);
-                        setClues([]);
-                        beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room)));
-                        break;
-                    case GameState.END_GAME:
-                        const orderedPlayersByScore = room.players.sort(
-                            (a, b) => b.score - a.score
+                    }
+                    break;
+                case GameState.WORD_MASTER_CHOOSE_QUESTION:
+                    setQuestions(questionsAsked);
+                    beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
+                        await firebase.updateRlById(
+                            ROOMS_COLLECTION,
+                            roomId,
+                            {
+                                question_answered: null,
+                                state: GameState.SHOW_QUESTION_CHOSE
+                            }
                         );
-                        setOrderedPlayers(orderedPlayersByScore);
-                        break;
-                    default:
-                        break;
-                }
-                });
+                    }));
+                    break;
+                case GameState.SHOW_QUESTION_CHOSE:
+                    setQuestionAnswered(room.question_answered);
+                    setClues(cluesDiscovered);
+                    beginCountdown(20, isHost, returnCallbackIfHost(isHost, () => resetTurn(room)));
+                    break;
+                case GameState.END_ROUND:
+                    setWordOfRound(room.word_of_the_round);
+                    setClues([]);
+                    beginCountdown(10, isHost, returnCallbackIfHost(isHost, () => newRound(room.rounds, playersSorted)));
+                    break;
+                case GameState.END_GAME:
+                    const orderedPlayersByScore = playersSorted.sort(
+                        (a, b) => b.score - a.score
+                    );
+                    setOrderedPlayers(orderedPlayersByScore);
+                    break;
+                default:
+                    break;
+            }
+
+            setLoading(false);
+        });
         return () => {
-            unsubscribe();
+            collectionRef.off();
         };
     }, [
-        props.firebase,
+        firebase,
         doCountdown,
         sessionContext.state,
         roomId
     ]);
 
     const dealWordsForWordMaster = async (category) => {
-        const categoryToChooseFrom = await props.firebase.getCollection(CATEGORIES_COLLECTION).doc(category.id).get();
+        const categoryToChooseFrom = await firebase.getCollection(CATEGORIES_COLLECTION).doc(category.id).get();
 
         let wordsToChooseFrom = [];
         for (let i = 0; i < WORDS_TO_CHOOSE; i++) {
@@ -277,7 +278,7 @@ function Game(props) {
     };
 
     const chooseWord = async (word) => {
-        await props.firebase.updateById(
+        await firebase.updateRlById(
             ROOMS_COLLECTION,
             roomId,
             {
@@ -289,30 +290,31 @@ function Game(props) {
     };
 
     const sendQuestionToWordMaster = async (question) => {
-        await props.firebase.updateById(
-            ROOMS_COLLECTION,
-            roomId,
-            {
-                questions: firebase.firestore.FieldValue.arrayUnion({
-                    question: question,
-                    player: sessionContext.state.playerId,
-                }),
-            }
-        );
+        await firebase.pushToList(ROOMS_COLLECTION, roomId, 'questions', {
+            question: question,
+            player: sessionContext.state.playerId
+        });
     };
 
     const sendHunchToDiscoverWord = async (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound(sessionContext.state.playerId);
+            const playerWhoGuessed = players.find(player => player.id === sessionContext.state.playerId)
+            await endRound(playerWhoGuessed);
         }
     };
 
-    const sendAnswerOfWordMaster = async (questionIndex, answer, player) => {
+    const sendAnswerOfWordMaster = async (questionIndex, answer, playerId) => {
+        const playerToScore = players.find(player => player.id === playerId);
         const newPlayers = giveScoreToPlayer(
-            player,
+            playerToScore,
             SCORE_TO_QUESTION_SELECTED
         );
-        await props.firebase.updateById(
+        const futureClues = firebase.pushToList(ROOMS_COLLECTION, roomId, 'clues', {
+            question: questions[questionIndex],
+            answer,
+        });
+
+        await firebase.updateRlById(
             ROOMS_COLLECTION,
             roomId,
             {
@@ -320,45 +322,49 @@ function Game(props) {
                     index: questionIndex,
                     answer: answer,
                 },
-                clues: firebase.firestore.FieldValue.arrayUnion({
-                    question: questions[questionIndex],
-                    answer,
-                }),
-                players: newPlayers,
+                ...newPlayers,
                 state: GameState.SHOW_QUESTION_CHOSE,
             }
         );
+
+        await futureClues;
     };
 
     const endRound = async (playerWhoGuessed) => {
         const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
-        let newPlayers = giveScoreToPlayer(wordMaster, pointsForWordMaster);
+        const wordMasterWithScore = giveScoreToPlayer(wordMaster, pointsForWordMaster);
+        
+        let playerWhoGuessedWithScore = {};
         if (playerWhoGuessed) {
-            newPlayers = giveScoreToPlayer(
+            playerWhoGuessedWithScore = giveScoreToPlayer(
                 playerWhoGuessed,
                 SCORE_TO_PLAYER_WHO_GUESSED
             );
         }
 
-        await props.firebase.updateById(
+        await firebase.updateRlById(
             ROOMS_COLLECTION,
             roomId,
             {
                 state: GameState.END_ROUND,
-                players: newPlayers,
                 turns: 0,
+                ...wordMasterWithScore,
+                ...playerWhoGuessedWithScore
             }
         );
     };
 
     const giveScoreToPlayer = (player, score) => {
-        players.forEach((p) => {
-            if (p.id === player) {
-                p.score += score;
-            }
-        });
-        return players;
+        return {
+            [`/players/${player.id}/score`]: player.score + score
+        };
     };
+
+    if (loading) {
+        return (
+            <p>Loading...</p>
+        );
+    }
 
     return (
         <div className={classes.root}>
@@ -366,7 +372,6 @@ function Game(props) {
                 <PlayerInfo
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
-                    players={players}
                     category={categoryOfRound}
                     word={isWordMaster ? wordOfRound : null}
                 />
@@ -404,7 +409,7 @@ function Game(props) {
                     />
                 )}
 
-                {currentGameState === GameState.SHOW_QUESTION_CHOSE && (
+                {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
                     <ShowQuestionsChosed
                         isWordMaster={isWordMaster}
                         question={
