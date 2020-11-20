@@ -6,31 +6,29 @@ function withCountdown(BaseComponent) {
         const currentCountdownRef = useRef(null);
 
         const doCountdown = useCallback((counter, callback) => {
+            console.log(`clearing countdown ${currentCountdownRef.current}`)
             clearInterval(currentCountdownRef.current);
             if (counter <= 0) {
                 return;
             }
     
-            // first, wait for fractional second
-            const splitSecond = counter % 1;
-    
             // transform to int
+            const splitSecond = counter % 1;
             counter = (counter - splitSecond) | 0;
     
-            setTimeout(() => {
-                const h = setInterval(() => {
-                    setCountdown(counter);
-                    if (counter === 0) {
-                        clearInterval(h);
-                        if (callback) {
-                            callback();
-                        }
-                    } else {
-                        counter -= 1;
+            const h = setInterval(() => {
+                setCountdown(counter);
+                if (counter === 0) {
+                    clearInterval(h);
+                    if (callback) {
+                        callback();
                     }
-                }, 1000);
-                currentCountdownRef.current = h;
-            }, splitSecond);
+                } else {
+                    counter -= 1;
+                }
+            }, 1000);
+            currentCountdownRef.current = h;
+            console.log(`setting countdown ref to ${h}`)
         }, []);
 
         return <BaseComponent doCountdown={doCountdown} countdown={countdown} {...props} />;

@@ -191,6 +191,8 @@ function Game(props) {
             const questionsAsked = Object.values(room.questions || {});
             const cluesDiscovered = Object.values(room.clues || {});
 
+            console.log(`incoming state is: ${room.state}`)
+
             switch (room.state) {
                 case GameState.WORD_MASTER_CHOOSE_WORD:
                     setCategoriesToChoose(room.categories);
@@ -215,6 +217,7 @@ function Game(props) {
                 case GameState.WORD_MASTER_CHOOSE_QUESTION:
                     setQuestions(questionsAsked);
                     beginCountdown(20, isHost, returnCallbackIfHost(isHost, async () => {
+                        console.log('triggering callback for choose question timeout');
                         await firebase.updateRlById(
                             ROOMS_COLLECTION,
                             roomId,
@@ -331,6 +334,7 @@ function Game(props) {
     };
 
     const endRound = async (playerWhoGuessed) => {
+        console.log(`ending round with ${playerWhoGuessed}`)
         const pointsForWordMaster = TURNS_BEFORE_ROUND_ENDS - turns;
         const wordMasterWithScore = giveScoreToPlayer(wordMaster, pointsForWordMaster);
         
@@ -341,6 +345,8 @@ function Game(props) {
                 SCORE_TO_PLAYER_WHO_GUESSED
             );
         }
+        console.log(playerWhoGuessedWithScore);
+        console.log(wordMasterWithScore);
 
         await firebase.updateRlById(
             ROOMS_COLLECTION,
