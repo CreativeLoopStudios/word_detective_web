@@ -16,8 +16,8 @@ const Clue = (props) => {
           <h3>Pistas:</h3>
           <ul>
           {
-              (props.clues || []).map(clue => (
-                  <li>
+              (props.clues || []).map((clue, idx) => (
+                  <li key={idx}>
                       <span className={classes.question}>{clue.question.question}</span>
                       <span>{clue.answer}</span>
                   </li>

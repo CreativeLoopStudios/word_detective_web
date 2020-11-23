@@ -8,7 +8,7 @@ import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
-import * as firebase from "firebase/app";
+import { database, firestore } from "firebase/app";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,16 +29,15 @@ function Lobby(props) {
     const [isHost, setIsHost] = useState(false);
     const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
     const [heartbeatData, setHeartbeatData] = useState(null);
-    const [wordDetectives, setWordDetectives] = useState([]);
     const [localClockStart, setLocalClockStart] = useState(null);
 
     const lobbyUrl = window.location.href;
     const { playerId } = sessionContext.state;
-    const { firebase: fb } = props;
+    const { firebase } = props;
 
     const updateRoom = useCallback((data) => {
-        return fb.updateById(ROOMS_COLLECTION, roomId, data);
-    }, [fb, roomId]);
+        return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
+    }, [firebase, roomId]);
 
     const handleSubmit = (evt) => {
         evt.preventDefault();
@@ -52,25 +51,10 @@ function Lobby(props) {
         });
         setPlayerName(newName);
 
-        const newPlayers = [...players];
-        const idx = newPlayers.findIndex(p => p.id === playerId);
-        newPlayers[idx].name = newName;
-
-        updateRoom({ players: newPlayers });
-        setPlayers(newPlayers);
+        updateRoom({
+            [`/players/${playerId}/name`]: newName
+        });
     }
-
-    // add player to room
-    const playerInRoom = players.map(p => p.id).includes(playerId);
-    useEffect(() => {
-        if (!playerInRoom) {
-            updateRoom({ players: firebase.firestore.FieldValue.arrayUnion({
-                score: 0,
-                name: playerName,
-                id: playerId
-            })});
-        }
-    }, [playerInRoom, playerName, playerId, updateRoom])
 
     // update host status
     useEffect(() => {
@@ -79,21 +63,27 @@ function Lobby(props) {
             const shouldBeHost = players[0].id === playerId;
             setIsHost(shouldBeHost);
 
+            let data = {};
             if (shouldBeHost) {
-                updateRoom({ host: playerId, word_master: playerId });
-            } else if (!(playerId in wordDetectives)) {
-                updateRoom({ word_detectives: firebase.firestore.FieldValue.arrayUnion(playerId) });
+                data = {
+                    host: playerId,
+                    [`/players/${playerId}/role`]: 'word_master'
+                };
+            } else {
+                data[`/players/${playerId}/role`] = 'word_detective';
             }
+            updateRoom(data);
         }
-    }, [players, playerId, setIsHost, isHost, wordDetectives, updateRoom]);
+    }, [players, playerId, setIsHost, isHost, updateRoom]);
 
     // add heartbeat info if needed
     useEffect(() => {
         if (!heartbeatData) {
-            const data = {};
-            data[`heartbeats.${playerId}`] = firebase.firestore.FieldValue.serverTimestamp();
-            updateRoom(data);
-            const now = firebase.firestore.Timestamp.now();
+            updateRoom({
+                [`heartbeats/${playerId}`]: database.ServerValue.TIMESTAMP
+            });
+
+            const now = firestore.Timestamp.now();
             setLocalClockStart(now);
 
             console.log('setting heartbeat to', now)
@@ -102,20 +92,33 @@ function Lobby(props) {
 
     // firebase snapshot
     useEffect(() => {
-        const unsub = fb.getCollection(ROOMS_COLLECTION, roomId).onSnapshot((doc) => {
+        const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
+        collectionRef.on('value', (snapshot) => {
             console.log("new room snapshot");
-            const room = doc.data();
+            const room = snapshot.val();
             if (!room) {
                 return;
             }
 
-            const { players: roomPlayers, heartbeats, state, word_detectives } = room;
-            setPlayers(roomPlayers);
-            setWordDetectives(word_detectives);
+            const { players: roomPlayers, heartbeats, state } = room;
+            setPlayers(Object.values(roomPlayers || {}).sort((a, b) => a.creationDate - b.creationDate));
+
+            const playerInRoom = roomPlayers && Object.values(roomPlayers).map(p => p.id).includes(playerId);
+            // add player in room
+            if (!playerInRoom) {
+                updateRoom({
+                    [`/players/${playerId}`]: {
+                        id: playerId,
+                        name: playerName,
+                        score: 0,
+                        creationDate: database.ServerValue.TIMESTAMP
+                    }
+                });
+            }
 
             // finish setting the heartbeat
             if (!heartbeatData && playerId in heartbeats && heartbeats[playerId]) {
-                const localClockEnd = firebase.firestore.Timestamp.now();
+                const localClockEnd = firestore.Timestamp.now();
                 const lastValue = heartbeats[playerId];
                 console.log('heartbeat snapshot')
 
@@ -141,8 +144,10 @@ function Lobby(props) {
             }
         });
 
-        return unsub;
-    }, [playerId, heartbeatData, fb, roomId, sessionContext, localClockStart, history]);
+        return () => {
+            collectionRef.off();
+        };
+    }, [playerId, playerName, heartbeatData, firebase, roomId, sessionContext, localClockStart, history]);
 
     return (
         <div className={classes.root}>
@@ -153,8 +158,8 @@ function Lobby(props) {
                     </h1>
 
                     <ul>
-                        {players.map((player, index) => (
-                            <li key={index}>{player.name}</li>
+                        {players.map((player) => (
+                            <li key={player.id}>{player.name}</li>
                         ))}
                     </ul>
                 </Grid>
