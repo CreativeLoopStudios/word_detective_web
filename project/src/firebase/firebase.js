@@ -47,6 +47,10 @@ class Firebase {
         await this.realtimeDb.ref(collection_name + '/' + id).update(value);
     };
 
+    onDisconnect = async (roomId, playerId) => {
+        this.realtimeDb.ref(`rooms/${roomId}/players/${playerId}/status`).onDisconnect().set('disconnected');
+    };
+
     createNewRoom = async (roomName, numberOfPlayers, categories, isPrivate) => {
         const res = await this.db.collection(ROOMS_COLLECTION).add({
             createdBy: {},

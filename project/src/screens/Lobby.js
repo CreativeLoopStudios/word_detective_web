@@ -100,10 +100,11 @@ function Lobby(props) {
                 return;
             }
 
-            const { players: roomPlayers, heartbeats, state } = room;
-            setPlayers(Object.values(roomPlayers || {}).sort((a, b) => a.creationDate - b.creationDate));
+            const { players: _roomPlayers, heartbeats, state } = room;
+            const roomPlayers = Object.values(_roomPlayers || {});
+            setPlayers(roomPlayers.sort((a, b) => a.creationDate - b.creationDate));
 
-            const playerInRoom = roomPlayers && Object.values(roomPlayers).map(p => p.id).includes(playerId);
+            const playerInRoom = roomPlayers && roomPlayers.map(p => p.id).includes(playerId);
             // add player in room
             if (!playerInRoom) {
                 updateRoom({
@@ -111,7 +112,16 @@ function Lobby(props) {
                         id: playerId,
                         name: playerName,
                         score: 0,
-                        creationDate: database.ServerValue.TIMESTAMP
+                        creationDate: database.ServerValue.TIMESTAMP,
+                        status: 'connected'
+                    }
+                });
+
+                firebase.onDisconnect(roomId, playerId);
+            } else if (roomPlayers.find(p => p.id === playerId).status !== 'connected') {
+                updateRoom({
+                    [`/players/${playerId}`]: {
+                        status: 'connected'
                     }
                 });
             }
@@ -159,7 +169,7 @@ function Lobby(props) {
 
                     <ul>
                         {players.map((player) => (
-                            <li key={player.id}>{player.name}</li>
+                            <li key={player.id}>{player.name} - Status: {player.status}</li>
                         ))}
                     </ul>
                 </Grid>
