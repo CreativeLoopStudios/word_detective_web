@@ -9,6 +9,7 @@ import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { database, firestore } from "firebase/app";
+import PlayerStatus from "../player_status";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -113,15 +114,15 @@ function Lobby(props) {
                         name: playerName,
                         score: 0,
                         creationDate: database.ServerValue.TIMESTAMP,
-                        status: 'connected'
+                        status: PlayerStatus.CONNECTED
                     }
                 });
 
                 firebase.onDisconnect(roomId, playerId);
-            } else if (roomPlayers.find(p => p.id === playerId).status !== 'connected') {
+            } else if (roomPlayers.find(p => p.id === playerId).status !== PlayerStatus.CONNECTED) {
                 updateRoom({
                     [`/players/${playerId}`]: {
-                        status: 'connected'
+                        status: PlayerStatus.CONNECTED
                     }
                 });
             }
