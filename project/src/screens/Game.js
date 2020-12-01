@@ -183,7 +183,22 @@ function Game(props) {
                 return callback;
             }
             return () => null;
-        }
+        };
+
+        const isWordMasterDisconnected = (isHost, wordMaster) => {
+            return isHost && wordMaster.status === PlayerStatus.DISCONNECTED;
+        };
+
+        const endRoundWithoutPoints = async () => {
+            await firebase.updateRlById(
+                ROOMS_COLLECTION,
+                roomId,
+                {
+                    state: GameState.END_ROUND,
+                    turns: 0
+                }
+            );
+        };
 
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
         collectionRef.on('value', (doc) => {
@@ -206,7 +221,12 @@ function Game(props) {
             const questionsAsked = Object.values(room.questions || {});
             const cluesDiscovered = Object.values(room.clues || {});
 
-            console.log(`incoming state is: ${room.state}`)
+            console.log(`incoming state is: ${room.state}`);
+
+            if(isWordMasterDisconnected(isHost, playerWordMaster) && room.state != GameState.END_ROUND) {
+                endRoundWithoutPoints();
+                return;
+            }
 
             switch (room.state) {
                 case GameState.WORD_MASTER_CHOOSE_WORD:
@@ -360,8 +380,6 @@ function Game(props) {
                 SCORE_TO_PLAYER_WHO_GUESSED
             );
         }
-        console.log(playerWhoGuessedWithScore);
-        console.log(wordMasterWithScore);
 
         await firebase.updateRlById(
             ROOMS_COLLECTION,
