@@ -9,6 +9,7 @@ import GameState from "../state_of_play";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { database, firestore } from "firebase/app";
+import PlayerStatus from "../player_status";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -100,10 +101,11 @@ function Lobby(props) {
                 return;
             }
 
-            const { players: roomPlayers, heartbeats, state } = room;
-            setPlayers(Object.values(roomPlayers || {}).sort((a, b) => a.creationDate - b.creationDate));
+            const { players: _roomPlayers, heartbeats, state } = room;
+            const roomPlayers = Object.values(_roomPlayers || {});
+            setPlayers(roomPlayers.sort((a, b) => a.creationDate - b.creationDate));
 
-            const playerInRoom = roomPlayers && Object.values(roomPlayers).map(p => p.id).includes(playerId);
+            const playerInRoom = roomPlayers && roomPlayers.map(p => p.id).includes(playerId);
             // add player in room
             if (!playerInRoom) {
                 updateRoom({
@@ -111,7 +113,16 @@ function Lobby(props) {
                         id: playerId,
                         name: playerName,
                         score: 0,
-                        creationDate: database.ServerValue.TIMESTAMP
+                        creationDate: database.ServerValue.TIMESTAMP,
+                        status: PlayerStatus.CONNECTED
+                    }
+                });
+
+                firebase.onDisconnect(roomId, playerId);
+            } else if (roomPlayers.find(p => p.id === playerId).status !== PlayerStatus.CONNECTED) {
+                updateRoom({
+                    [`/players/${playerId}`]: {
+                        status: PlayerStatus.CONNECTED
                     }
                 });
             }
@@ -159,7 +170,7 @@ function Lobby(props) {
 
                     <ul>
                         {players.map((player) => (
-                            <li key={player.id}>{player.name}</li>
+                            <li key={player.id}>{player.name} - Status: {player.status}</li>
                         ))}
                     </ul>
                 </Grid>

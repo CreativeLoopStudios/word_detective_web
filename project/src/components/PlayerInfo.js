@@ -1,5 +1,6 @@
 import React from "react";
-import { makeStyles, Grid, Avatar } from "@material-ui/core";
+import { makeStyles, Grid, Avatar, Badge } from "@material-ui/core";
+import PlayerStatus from "../player_status";
 
 const useStyles = makeStyles((theme) => ({
     avatarContainer: {
@@ -26,9 +27,11 @@ function PlayerInfo(props) {
             }
             <Grid item xs={2}>
                 <h2>Word Master</h2>
-                <Avatar style={{ backgroundColor: "green" }}>
-                    {wordMaster && wordMaster.name.substring(0, 2)}
-                </Avatar>
+                <Badge color={wordMaster.status === PlayerStatus.CONNECTED ? 'primary' : 'secondary'} variant="dot">
+                    <Avatar style={{ backgroundColor: "green" }}>
+                        {wordMaster && wordMaster.name.substring(0, 2)}
+                    </Avatar>
+                </Badge>
                 Score: <b>{(wordMaster && wordMaster.score) || 0}</b>
                 {word && (
                     <>
@@ -43,9 +46,11 @@ function PlayerInfo(props) {
                     {wordDetectives
                         .map(detective => (
                         <div className={classes.avatarItem} key={detective.id}>
-                            <Avatar>
-                                {detective.name.substring(0, 2)}
-                            </Avatar>
+                            <Badge color={detective.status === PlayerStatus.CONNECTED ? 'primary' : 'secondary'} variant="dot">
+                                <Avatar>
+                                    {detective.name.substring(0, 2)}
+                                </Avatar>
+                            </Badge>
                             <span>
                                 Score: <b>{detective.score}</b>
                             </span>

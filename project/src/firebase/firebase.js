@@ -2,6 +2,7 @@ import app from "firebase/app";
 import "firebase/firestore";
 import "firebase/database";
 import { ROOMS_COLLECTION } from "./collections";
+import PlayerStatus from "../player_status";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -45,6 +46,10 @@ class Firebase {
 
     updateRlById = async (collection_name, id, value) => {
         await this.realtimeDb.ref(collection_name + '/' + id).update(value);
+    };
+
+    onDisconnect = async (roomId, playerId) => {
+        this.realtimeDb.ref(`rooms/${roomId}/players/${playerId}/status`).onDisconnect().set(PlayerStatus.DISCONNECTED);
     };
 
     createNewRoom = async (roomName, numberOfPlayers, categories, isPrivate) => {

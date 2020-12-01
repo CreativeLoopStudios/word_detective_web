@@ -10,6 +10,7 @@ import {
 } from "../firebase/collections";
 import { Math } from "../utils";
 import GameState from "../state_of_play";
+import PlayerStatus from "../player_status";
 import { withCountdown } from "../hocs";
 import {
     WordMasterChooseWord,
@@ -102,32 +103,46 @@ function Game(props) {
             );
         };
 
+        const findNextConnectedPlayer = (indexToBegin, players) => {
+            for(let i = indexToBegin; i < players.length; i++) {
+                if (players[i].status === PlayerStatus.CONNECTED) {
+                    return players[i];
+                }
+            }
+            return null;
+        };
+
         const newRound = async (rounds, players) => {
             const newRound = rounds + 1;
 
             // end game
-            if (newRound === players.length) {
+            if (newRound >= players.length) {
                 endGame();
                 return;
             }
 
-            const newWordMasterId = players[newRound].id;
-            const newDetectiveId = players.filter(player => player.role === 'word_master')[0].id;
+            const nextConnectedPlayer = findNextConnectedPlayer(newRound, players);
+            if (nextConnectedPlayer) {
+                const newWordMasterId = players[newRound].id;
+                const newDetectiveId = players.filter(player => player.role === 'word_master')[0].id;
 
-            await firebase.updateRlById(
-                ROOMS_COLLECTION,
-                roomId,
-                {
-                    state: GameState.WORD_MASTER_CHOOSE_WORD,
-                    question_answered: null,
-                    questions: null,
-                    clues: null,
-                    word_of_the_round: "",
-                    rounds: newRound,
-                    [`/players/${newWordMasterId}/role`]: 'word_master',
-                    [`/players/${newDetectiveId}/role`]: 'word_detective'
-                }
-            );
+                await firebase.updateRlById(
+                    ROOMS_COLLECTION,
+                    roomId,
+                    {
+                        state: GameState.WORD_MASTER_CHOOSE_WORD,
+                        question_answered: null,
+                        questions: null,
+                        clues: null,
+                        word_of_the_round: "",
+                        rounds: newRound,
+                        [`/players/${newWordMasterId}/role`]: 'word_master',
+                        [`/players/${newDetectiveId}/role`]: 'word_detective'
+                    }
+                );
+            } else {
+                endGame();
+            }
         };
 
         const endGame = async () => {
@@ -168,7 +183,22 @@ function Game(props) {
                 return callback;
             }
             return () => null;
-        }
+        };
+
+        const isWordMasterDisconnected = (isHost, wordMaster) => {
+            return isHost && wordMaster.status === PlayerStatus.DISCONNECTED;
+        };
+
+        const endRoundWithoutPoints = async () => {
+            await firebase.updateRlById(
+                ROOMS_COLLECTION,
+                roomId,
+                {
+                    state: GameState.END_ROUND,
+                    turns: 0
+                }
+            );
+        };
 
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
         collectionRef.on('value', (doc) => {
@@ -191,7 +221,12 @@ function Game(props) {
             const questionsAsked = Object.values(room.questions || {});
             const cluesDiscovered = Object.values(room.clues || {});
 
-            console.log(`incoming state is: ${room.state}`)
+            console.log(`incoming state is: ${room.state}`);
+
+            if(isWordMasterDisconnected(isHost, playerWordMaster) && room.state != GameState.END_ROUND) {
+                endRoundWithoutPoints();
+                return;
+            }
 
             switch (room.state) {
                 case GameState.WORD_MASTER_CHOOSE_WORD:
@@ -345,8 +380,6 @@ function Game(props) {
                 SCORE_TO_PLAYER_WHO_GUESSED
             );
         }
-        console.log(playerWhoGuessedWithScore);
-        console.log(wordMasterWithScore);
 
         await firebase.updateRlById(
             ROOMS_COLLECTION,
