@@ -80,7 +80,7 @@ const Game = (props) => {
     }, [firebase, roomId]);
 
     // lightweight computed variable ;)
-    const loading = !(playersByScore.length > 0 && wordDetectives.length > 0);
+    const loading = !(playersByScore.length > 0 && wordDetectives.length > 0 && wordMaster);
 
     const sendHunchToDiscoverWord = (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
@@ -166,15 +166,6 @@ const Game = (props) => {
         });
     }, [wordMaster, updateRoom, turns]);
 
-    const findNextConnectedPlayer = (indexToBegin, players) => {
-        for (let i = indexToBegin; i < players.length; i++) {
-            if (players[i].status === PlayerStatus.CONNECTED) {
-                return players[i];
-            }
-        }
-        return null;
-    };
-
     // room setup
     useEffect(() => {
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
@@ -183,8 +174,8 @@ const Game = (props) => {
             if (!room || !room.players || room.players.length === 0) {
                 return;
             }
-            console.log("new room snapshot");
 
+            console.log("new room snapshot");
             const playersByCreation = Object.values(room.players).sort((a, b) => a.creationDate - b.creationDate);
             setPlayersByScore(playersByCreation.sort((a, b) => b.score - a.score));
 
@@ -215,7 +206,7 @@ const Game = (props) => {
 
     // set myself as connected
     useEffect(() => {
-        if (loading) return;
+        if (playersByScore.length === 0) return;
 
         const player = playersByScore.find(p => p.id === playerId);
         if (player.status !== PlayerStatus.CONNECTED) {
@@ -224,7 +215,12 @@ const Game = (props) => {
                 [`/players/${playerId}/status`]: PlayerStatus.CONNECTED
             });
         } 
-    }, [playersByScore, playerId, updateRoom, loading]);
+    }, [playersByScore, playerId, updateRoom]);
+
+    // set 
+    useEffect(() => {
+        
+    });
 
     // game state machine
     useEffect(() => {
@@ -285,38 +281,38 @@ const Game = (props) => {
         };
 
         const newRound = async (rounds, players) => {
-            const newRound = rounds + 1;
+            const availableToBeWm = players.filter(p => p.status === PlayerStatus.CONNECTED && !p.playedAsWordMaster);
 
-            // end game
-            if (newRound >= players.length) {
-                await endGame();
-                return;
-            }
+            if (availableToBeWm.length > 0) {
+                const newRound = rounds + 1;
+                const newWordMasterId = availableToBeWm[0].id;
+                const prevWordMasterId = players.filter(player => player.role === 'word_master')[0].id;
 
-            // TODO: this implementation has one limitation: 
-            // if the player that would be the next word master is disconnected, the game ends.
-            const nextConnectedPlayer = findNextConnectedPlayer(newRound, players);
-            if (nextConnectedPlayer) {
-                const newWordMasterId = players[newRound].id;
-                const newDetectiveId = players.filter(player => player.role === 'word_master')[0].id;
-
-                await updateRoom({
+                const data = {
                     state: GameState.WORD_MASTER_CHOOSE_WORD,
                     question_answered: null,
                     questions: null,
                     clues: null,
                     word_of_the_round: "",
-                    rounds: newRound,
-                    [`/players/${newWordMasterId}/role`]: 'word_master',
-                    [`/players/${newDetectiveId}/role`]: 'word_detective'
-                });
+                    rounds: newRound
+                };
+                if (newWordMasterId !== prevWordMasterId) {
+                    // if the ids are equal, it means that the word_master disconnected an connected again
+                    data[`/players/${prevWordMasterId}/role`] = 'word_detective';
+                    data[`/players/${prevWordMasterId}/playedAsWordMaster`] = true;
+                    data[`/players/${newWordMasterId}/role`] = 'word_master';
+                }
+
+                await updateRoom(data);
             } else {
+                // game ends when nobody that is connected exists that haven't already FINISHED a round as Word Master
                 await endGame();
             }
         };
 
-        (async() => {
-            if (wordMaster.status === PlayerStatus.DISCONNECTED && currentGameState !== GameState.END_ROUND) {
+        (async () => {
+            if (isHost && wordMaster.status === PlayerStatus.DISCONNECTED && currentGameState !== GameState.END_ROUND) {
+                // end the round so we can elect a new wordMaster
                 await endRoundWithoutPoints();
                 return;
             }
@@ -395,7 +391,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
                     <WordMasterChooseWord
-                        isWordMaster={playerId === wordMaster.id}
+                        isWordMaster={wordMaster && playerId === wordMaster.id}
                         categories={categoriesToChoose}
                         onClickCategory={chooseCategory}
                         words={wordsToChoose}
@@ -406,7 +402,7 @@ const Game = (props) => {
                 {currentGameState ===
                     GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
                     <WordDetectivesAskQuestions
-                        isWordMaster={playerId === wordMaster.id}
+                        isWordMaster={wordMaster && playerId === wordMaster.id}
                         sendQuestion={sendQuestionToWordMaster}
                         clues={clues}
                     />
@@ -414,7 +410,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
                     <WordMasterChooseQuestions
-                        isWordMaster={playerId === wordMaster.id}
+                        isWordMaster={wordMaster && playerId === wordMaster.id}
                         questions={questions}
                         sendAnswer={sendAnswerOfWordMaster}
                     />
@@ -422,7 +418,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
                     <ShowQuestionsChosed
-                        isWordMaster={playerId === wordMaster.id}
+                        isWordMaster={wordMaster && playerId === wordMaster.id}
                         question={
                             questions[questionAnswered.index]
                                 ? questions[questionAnswered.index].question

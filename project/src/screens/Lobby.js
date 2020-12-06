@@ -70,22 +70,19 @@ function Lobby(props) {
         }
     }, [players, playerId, setIsHost]);
 
-    // update roles
+    // update my role
     useEffect(() => {
-        if (isHost) {
-            // only the host should do this
-            // as a convention, the host will be the first word master
-            const hostRole = !players.find(p => p.id === playerId).role;
-            if (hostRole !== 'word_master')
-            {
-                // we only change if needed
-                // everyone starts as word_detective, then we set the host as the word_master
-                const data = Object.fromEntries(players.map(p => [`/players/${p.id}/role`, 'word_detective']));
-                data[`/players/${playerId}/role`] = 'word_master';
+        // as a convention, the host will be the first word master
+        const targetRole = isHost ? 'word_master' : 'word_detective';
+        const player = players.find(p => p.id === playerId);
+        if (!player) {
+            return;
+        }
 
-                console.log(`setting player roles for ${Object.entries(data)}`)
-                updateRoom(data);
-            }
+        if (player.role !== targetRole) {
+            updateRoom({ 
+                [`/players/${playerId}/role`]: targetRole
+             });
         }
     }, [isHost, players, playerId, updateRoom]);
 
@@ -163,7 +160,8 @@ function Lobby(props) {
                     name: playerName,
                     score: 0,
                     creationDate: database.ServerValue.TIMESTAMP,
-                    status: PlayerStatus.CONNECTED
+                    status: PlayerStatus.CONNECTED,
+                    playedAsWordMaster: false,
                 }
             });
             firebase.onDisconnect(roomId, playerId);
