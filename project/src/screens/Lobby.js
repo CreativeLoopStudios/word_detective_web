@@ -31,6 +31,8 @@ function Lobby(props) {
     const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
     const [heartbeatData, setHeartbeatData] = useState(null);
     const [localClockStart, setLocalClockStart] = useState(null);
+    const [gameState, setGameState] = useState(null);
+    const [heartbeats, setHeartbeats] = useState({});
 
     const lobbyUrl = window.location.href;
     const { playerId } = sessionContext.state;
@@ -59,107 +61,141 @@ function Lobby(props) {
 
     // update host status
     useEffect(() => {
-        if (players.length > 0 && !isHost) {
-            // as a convention, the host is always the first player to enter the room
-            const shouldBeHost = players[0].id === playerId;
+        const connectedPlayers = players.filter(p => p.status === "connected");
+        if (connectedPlayers) {
+            // as a convention, the host is always the player that was created first
+            const sortedPlayerIds = connectedPlayers.map(p => p.id).sort((a, b) => a.creationDate - b.creationDate);
+            const shouldBeHost = sortedPlayerIds[0] === playerId;
             setIsHost(shouldBeHost);
-
-            let data = {};
-            if (shouldBeHost) {
-                data = {
-                    host: playerId,
-                    [`/players/${playerId}/role`]: 'word_master'
-                };
-            } else {
-                data[`/players/${playerId}/role`] = 'word_detective';
-            }
-            updateRoom(data);
         }
-    }, [players, playerId, setIsHost, isHost, updateRoom]);
+    }, [players, playerId, setIsHost]);
 
-    // add heartbeat info if needed
+    // update roles
+    useEffect(() => {
+        if (isHost) {
+            // only the host should do this
+            // as a convention, the host will be the first word master
+            const hostRole = !players.find(p => p.id === playerId).role;
+            if (hostRole !== 'word_master')
+            {
+                // we only change if needed
+                // everyone starts as word_detective, then we set the host as the word_master
+                const data = Object.fromEntries(players.map(p => [`/players/${p.id}/role`, 'word_detective']));
+                data[`/players/${playerId}/role`] = 'word_master';
+
+                console.log(`setting player roles for ${Object.entries(data)}`)
+                updateRoom(data);
+            }
+        }
+    }, [isHost, players, playerId, updateRoom]);
+
+    // set my initial heartbeat info
     useEffect(() => {
         if (!heartbeatData) {
             updateRoom({
                 [`heartbeats/${playerId}`]: database.ServerValue.TIMESTAMP
             });
-
             const now = firestore.Timestamp.now();
             setLocalClockStart(now);
-
-            console.log('setting heartbeat to', now)
+            console.log('setting heartbeat to', now);
         }
     }, [heartbeatData, playerId, setLocalClockStart, updateRoom]);
 
-    // firebase snapshot
+    // finish setting my heartbeat info
+    useEffect(() => {
+         // finish setting my heartbeat
+         if (!heartbeatData && playerId in heartbeats && heartbeats[playerId]) {
+            const localClockEnd = firestore.Timestamp.now();
+            const lastValue = heartbeats[playerId];
+            console.log('heartbeat snapshot')
+
+            // round trip time (total latency)
+            const rtt = localClockEnd - localClockStart;
+            // time to write something to firestore
+            const writeTime = lastValue - localClockStart;
+            // time to read something from firestore (dissemination)
+            const readTime = localClockEnd - lastValue;
+
+            const payload = { rtt, writeTime, readTime };
+            console.log(payload)
+
+            sessionContext.dispatch({
+                type: SET_HEARTBEAT_DATA,
+                payload,
+            });
+            setHeartbeatData(payload);
+        }
+    }, [setHeartbeatData, heartbeatData, playerId, heartbeats, localClockStart, firebase, sessionContext]);
+
+    // update data from snapshots
     useEffect(() => {
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
         collectionRef.on('value', (snapshot) => {
-            console.log("new room snapshot");
             const room = snapshot.val();
             if (!room) {
                 return;
             }
+            console.log("new room snapshot");
 
-            const { players: _roomPlayers, heartbeats, state } = room;
+            const { players: _roomPlayers, heartbeats: roomHeartbeats, state } = room;
             const roomPlayers = Object.values(_roomPlayers || {});
+
+            // players are sorted by creating date
             setPlayers(roomPlayers.sort((a, b) => a.creationDate - b.creationDate));
-
-            const playerInRoom = roomPlayers && roomPlayers.map(p => p.id).includes(playerId);
-            // add player in room
-            if (!playerInRoom) {
-                updateRoom({
-                    [`/players/${playerId}`]: {
-                        id: playerId,
-                        name: playerName,
-                        score: 0,
-                        creationDate: database.ServerValue.TIMESTAMP,
-                        status: PlayerStatus.CONNECTED
-                    }
-                });
-
-                firebase.onDisconnect(roomId, playerId);
-            } else if (roomPlayers.find(p => p.id === playerId).status !== PlayerStatus.CONNECTED) {
-                updateRoom({
-                    [`/players/${playerId}`]: {
-                        status: PlayerStatus.CONNECTED
-                    }
-                });
-            }
-
-            // finish setting the heartbeat
-            if (!heartbeatData && playerId in heartbeats && heartbeats[playerId]) {
-                const localClockEnd = firestore.Timestamp.now();
-                const lastValue = heartbeats[playerId];
-                console.log('heartbeat snapshot')
-
-                // round trip time (total latency)
-                const rtt = localClockEnd - localClockStart;
-                // time to write something to firestore
-                const writeTime = lastValue - localClockStart;
-                // time to read something from firestore (dissemination)
-                const readTime = localClockEnd - lastValue;
-
-                const payload = { rtt, writeTime, readTime };
-                console.log(payload)
-
-                sessionContext.dispatch({
-                    type: SET_HEARTBEAT_DATA,
-                    payload,
-                });
-                setHeartbeatData(payload);
-            }
-
-            if (state === GameState.WORD_MASTER_CHOOSE_WORD) {
-                history.push(`/${roomId}/game`);
-            }
+            setGameState(state);
+            setHeartbeats(roomHeartbeats);
         });
 
-        return () => {
-            collectionRef.off();
-        };
-    }, [playerId, playerName, heartbeatData, firebase, roomId, sessionContext, localClockStart, history]);
+        return () => collectionRef.off();
+    }, [setGameState, setPlayers, setHeartbeats, firebase, roomId]);
 
+    // add myself to the room
+    useEffect(() => {
+        if (!players) return;
+
+        const playerInRoom = players.map(p => p.id).includes(playerId);
+        if (!playerInRoom) {
+            // add myself to the room
+            console.log(`adding myself to the room: ${playerId} (${playerName})`);
+            updateRoom({
+                [`/players/${playerId}`]: {
+                    id: playerId,
+                    name: playerName,
+                    score: 0,
+                    creationDate: database.ServerValue.TIMESTAMP,
+                    status: PlayerStatus.CONNECTED
+                }
+            });
+            firebase.onDisconnect(roomId, playerId);
+        }
+    }, [players, playerId, updateRoom, firebase, playerName, roomId]);
+
+    // set myself as connected
+    useEffect(() => {
+        if (!players || !playerId) return;
+
+        const player = players.find(p => p.id === playerId);
+        // possibly player is not in the room yet
+        if (!player) return;
+
+        if (player.status !== PlayerStatus.CONNECTED) {
+            console.log(`setting myself as connected: ${playerId} (${playerName})`);
+            updateRoom({
+                [`/players/${playerId}`]: {
+                    status: PlayerStatus.CONNECTED
+                }
+            });
+        } 
+    }, [players, playerId, updateRoom, playerName]);
+
+    // state watcher
+    useEffect(() => {
+        if (gameState === GameState.WORD_MASTER_CHOOSE_WORD) {
+            history.push(`/${roomId}/game`);
+        }
+    }, [gameState, roomId, history])
+
+    // render template
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
@@ -169,8 +205,8 @@ function Lobby(props) {
                     </h1>
 
                     <ul>
-                        {players.map((player) => (
-                            <li key={player.id}>{player.name} - Status: {player.status}</li>
+                        {players.map((player, idx) => (
+                            <li key={player.id}>{player.name} - Status: {player.status} - Id: {player.id}</li>
                         ))}
                     </ul>
                 </Grid>
@@ -213,7 +249,7 @@ function Lobby(props) {
                 </Grid>
 
                 <Grid item xs={12}>
-                    {isHost && (
+                    {isHost && players.length > 1 && (
                         <Button
                             variant="contained"
                             color="primary"
@@ -221,6 +257,10 @@ function Lobby(props) {
                         >
                             Começar!
                         </Button>
+                    )}
+
+                    {isHost && players.length === 1 && (
+                        <h3>Aguardando demais jogadores</h3>
                     )}
 
                     {!isHost && <h3>Aguardando Host</h3>}

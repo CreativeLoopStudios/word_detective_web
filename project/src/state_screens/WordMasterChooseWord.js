@@ -42,11 +42,11 @@ function WordMasterChooseWord(props) {
                                 <h2>Escolha uma palavra para os detetives:</h2>
 
                                 <div>
-                                    {props.words.map((word) => (
+                                    {props.words.map((word, idx) => (
                                         <Button
                                             variant="contained"
                                             color="primary"
-                                            key={word}
+                                            key={idx}
                                             className={classes.word}
                                             onClick={() => props.onClickWord(word)}
                                         >

@@ -16,12 +16,12 @@ function withCountdown(BaseComponent) {
             const splitSecond = counter % 1;
             counter = (counter - splitSecond) | 0;
     
-            const h = setInterval(() => {
+            const h = setInterval(async () => {
                 setCountdown(counter);
                 if (counter === 0) {
                     clearInterval(h);
                     if (callback) {
-                        callback();
+                        await callback();
                     }
                 } else {
                     counter -= 1;
