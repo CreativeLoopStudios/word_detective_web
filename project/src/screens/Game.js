@@ -44,7 +44,7 @@ const giveScoreToPlayer = (player, score) => {
 const Game = (props) => {
     const classes = useStyles();
 
-    const { playerId, playerName, heartbeatData } = useContext(SessionContext).state;
+    const { playerId, playerName } = useContext(SessionContext).state;
     const { firebase } = props;
 
     const [categoriesToChoose, setCategoriesToChoose] = useState([]);
@@ -52,10 +52,11 @@ const Game = (props) => {
     const [wordsToChoose, setWordsToChoose] = useState([]);
 
     const [currentGameState, setCurrentGameState] = useState("");
+    const [currentCountdownState, setCurrentCountdownState] = useState("");
 
     const [wordMaster, setWordMaster] = useState({});
     const [wordDetectives, setWordDetectives] = useState([]);
-    const [isHost, setIsHost] = useState(false);
+    const [host, setHost] = useState(null);
 
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
@@ -75,16 +76,19 @@ const Game = (props) => {
     const categoriesToChooseRef = useRef();
     categoriesToChooseRef.current = categoriesToChoose;
 
+    // computed variables
+    const isWordMaster = wordMaster && wordMaster.id === playerId;
+    const isHost = host && host.id === playerId;
+    const loading = !(playersByScore.length > 0 && wordDetectives.length > 0 && wordMaster && host);
+    const currentPlayer = (playersByScore && playersByScore.find(p => p.id === playerId)) || null;
+
     const updateRoom = useCallback((data) => {
         return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
     }, [firebase, roomId]);
 
-    // lightweight computed variable ;)
-    const loading = !(playersByScore.length > 0 && wordDetectives.length > 0 && wordMaster);
-
     const sendHunchToDiscoverWord = (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound(playersByScore.find(p => p.id === playerId));
+            endRound(currentPlayer);
         }
     };
 
@@ -166,6 +170,84 @@ const Game = (props) => {
         });
     }, [wordMaster, updateRoom, turns]);
 
+    const endRoundWithoutPoints = useCallback(() => {
+        return updateRoom({
+            state: GameState.END_ROUND,
+            turns: 0
+        });
+    }, [updateRoom]);
+
+    const resetTurn = useCallback(async () => {
+        if (TURNS_BEFORE_ROUND_ENDS <= turns + 1) {
+            await endRound();
+            return;
+        }
+
+        await updateRoom({
+            state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
+            question_answered: null,
+            questions: null,
+            turns: turns + 1,
+        });
+    }, [updateRoom, endRound, turns]);
+
+    const determineRandomWord = useCallback(async () => {
+        const randomCategoryIndex = Math.randomInt(0, categoriesToChooseRef.current.length);
+        const randomCategory = categoriesToChooseRef.current[randomCategoryIndex];
+
+        const categoryToChooseFrom = await firebase.getCollection(CATEGORIES_COLLECTION).doc(randomCategory.id).get();
+        
+        const randomWordIndex = Math.randomInt(0, categoryToChooseFrom.data().words.length);
+        const wordOfTheRound = categoryToChooseFrom.data().words[randomWordIndex];
+
+        await updateRoom({
+            state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
+            category_of_the_round: randomCategory,
+            word_of_the_round: wordOfTheRound
+        });
+    }, [updateRoom, firebase]);
+
+    const endGame = useCallback(() => {
+        return updateRoom({
+            state: GameState.END_GAME,
+        });
+    }, [updateRoom]);
+
+    const newRound = useCallback(() => {
+        const availablePlayers = playersByScore.filter(p => p.status === PlayerStatus.CONNECTED);
+        if (availablePlayers.length < 2) {
+            // not enough players to continue
+            console.log('impossible to advance to new round; ending game')
+            return endGame();
+        }
+
+        const availableToBeWm = availablePlayers.filter(p => !p.playedAsWordMaster && p.id !== wordMaster.id);
+        if (availableToBeWm.length === 0) {
+            // everybody was already the WM once
+            console.log('no available WMs; ending game')
+            return endGame();
+        }
+
+        const newRound = rounds + 1;
+        const newWordMasterId = availableToBeWm[0].id;
+        const prevWordMasterId = playersByScore.filter(player => player.role === 'word_master')[0].id;
+        console.log(`selecting ${newWordMasterId} as the new word master`)
+
+        const data = {
+            state: GameState.WORD_MASTER_CHOOSE_WORD,
+            question_answered: null,
+            questions: null,
+            clues: null,
+            word_of_the_round: "",
+            rounds: newRound
+        };
+        data[`/players/${prevWordMasterId}/role`] = 'word_detective';
+        data[`/players/${prevWordMasterId}/playedAsWordMaster`] = true;
+        data[`/players/${newWordMasterId}/role`] = 'word_master';
+
+        return updateRoom(data);
+    }, [updateRoom, endGame, rounds, playersByScore, wordMaster]);
+
     // room setup
     useEffect(() => {
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
@@ -175,17 +257,15 @@ const Game = (props) => {
                 return;
             }
 
-            console.log("new room snapshot");
+            console.log("new room setup");
             const playersByCreation = Object.values(room.players).sort((a, b) => a.creationDate - b.creationDate);
             setPlayersByScore(playersByCreation.sort((a, b) => b.score - a.score));
 
-            setCurrentGameState(room.state);
-            setTurns(room.turns);
-            setRounds(room.rounds);
-
             // host will always be the first player to join that is not disconnected
             const connectedPlayers = playersByCreation.filter(p => p.status === PlayerStatus.CONNECTED);
-            setIsHost(connectedPlayers.length > 0 && connectedPlayers[0].id === playerId);
+            if (connectedPlayers.length > 0) {
+                setHost(connectedPlayers[0]);
+            }
 
             setWordMaster(playersByCreation.find(player => player.role === 'word_master'));
             setWordDetectives(playersByCreation.filter(player => player.role === 'word_detective'));
@@ -198,172 +278,106 @@ const Game = (props) => {
             setCategoryOfRound(room.category_of_the_round || {});
 
             setWordOfRound(room.word_of_the_round);
+
+            setTurns(room.turns);
+            setRounds(room.rounds);
+            setCurrentGameState(room.state);
         });
 
         return () => collectionRef.off();
-    }, [setCurrentGameState, setTurns, setIsHost, setWordMaster, setWordDetectives, setQuestions, setClues, 
-        setCategoriesToChoose, setCategoryOfRound, setWordOfRound, setPlayersByScore, firebase, playerId, roomId]);
+    }, [setCurrentGameState, setTurns, setHost, setWordMaster, setWordDetectives, setQuestions, setClues, 
+        setCategoriesToChoose, setCategoryOfRound, setWordOfRound, setPlayersByScore, firebase, playerId, roomId, currentGameState]);
 
     // set myself as connected
     useEffect(() => {
-        if (playersByScore.length === 0) return;
+        if (!currentPlayer) {
+            return;
+        }
 
-        const player = playersByScore.find(p => p.id === playerId);
-        if (player.status !== PlayerStatus.CONNECTED) {
-            console.log(`setting myself as connected: ${playerId}`);
+        if (currentPlayer.status !== PlayerStatus.CONNECTED) {
+            console.log(`setting ${currentPlayer.name} as connected`)
             updateRoom({
-                [`/players/${playerId}/status`]: PlayerStatus.CONNECTED
+                [`/players/${currentPlayer.id}/status`]: PlayerStatus.CONNECTED
             });
+            firebase.onDisconnect(roomId, currentPlayer.id);
         } 
-    }, [playersByScore, playerId, updateRoom]);
+    }, [playersByScore, roomId, currentPlayer, firebase, updateRoom]);
 
-    // set 
-    useEffect(() => {
-        
-    });
-
-    // game state machine
+    // host watch if WM is disconnected
     useEffect(() => {
         if (!currentGameState || loading) {
             return;
         }
-        console.log(`state is: ${currentGameState}`);
 
-        const endRoundWithoutPoints = () => {
-            return updateRoom({
-                state: GameState.END_ROUND,
-                turns: 0
-            });
-        };
+        if (isHost && wordMaster.status === PlayerStatus.DISCONNECTED && currentGameState !== GameState.END_ROUND 
+            && currentGameState !== GameState.WM_DISCONNECTED && currentGameState !== GameState.END_GAME) {
+            console.log('host has detected that the word master has disconnected')
+            updateRoom({
+                state: GameState.WM_DISCONNECTED
+            })
+        }
+    }, [currentGameState, wordMaster, loading, isHost, updateRoom]);
 
-        const resetTurn = async (turns) => {
-            if (TURNS_BEFORE_ROUND_ENDS <= turns + 1) {
-                await endRound();
-                return;
-            }
+    // game state machine
+    useEffect(() => {
+        if (currentCountdownState === currentGameState || loading) {
+            return;
+        }
+        console.log(`game state machine: ${currentGameState}`);
 
-            await updateRoom({
-                state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
-                question_answered: null,
-                questions: null,
-                turns: turns + 1,
-            });
-        };
+        let timer = 0;
+        let callback = null;
 
-        const beginCountdown = (countFrom, callback) => {
-            console.log(`counting from ${countFrom}`);
-            doCountdown(countFrom, callback);
-        };
-
-        const determineRandomWord = async () => {
-            const randomCategoryIndex = Math.randomInt(0, categoriesToChooseRef.current.length);
-            const randomCategory = categoriesToChooseRef.current[randomCategoryIndex];
-
-            const categoryToChooseFrom = await firebase.getCollection(CATEGORIES_COLLECTION).doc(randomCategory.id).get();
-            
-            const randomWordIndex = Math.randomInt(
-                0,
-                categoryToChooseFrom.data().words.length
-            );
-            const wordOfTheRound = categoryToChooseFrom.data().words[randomWordIndex];
-
-            await updateRoom({
-                state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
-                category_of_the_round: randomCategory,
-                word_of_the_round: wordOfTheRound
-            });
-        };
-
-        const endGame = () => {
-            return updateRoom({
-                state: GameState.END_GAME,
-            });
-        };
-
-        const newRound = async (rounds, players) => {
-            const availableToBeWm = players.filter(p => p.status === PlayerStatus.CONNECTED && !p.playedAsWordMaster);
-
-            if (availableToBeWm.length > 0) {
-                const newRound = rounds + 1;
-                const newWordMasterId = availableToBeWm[0].id;
-                const prevWordMasterId = players.filter(player => player.role === 'word_master')[0].id;
-
-                const data = {
-                    state: GameState.WORD_MASTER_CHOOSE_WORD,
-                    question_answered: null,
-                    questions: null,
-                    clues: null,
-                    word_of_the_round: "",
-                    rounds: newRound
-                };
-                if (newWordMasterId !== prevWordMasterId) {
-                    // if the ids are equal, it means that the word_master disconnected an connected again
-                    data[`/players/${prevWordMasterId}/role`] = 'word_detective';
-                    data[`/players/${prevWordMasterId}/playedAsWordMaster`] = true;
-                    data[`/players/${newWordMasterId}/role`] = 'word_master';
-                }
-
-                await updateRoom(data);
-            } else {
-                // game ends when nobody that is connected exists that haven't already FINISHED a round as Word Master
-                await endGame();
-            }
-        };
-
-        (async () => {
-            if (isHost && wordMaster.status === PlayerStatus.DISCONNECTED && currentGameState !== GameState.END_ROUND) {
-                // end the round so we can elect a new wordMaster
-                await endRoundWithoutPoints();
-                return;
-            }
-
-            let timer = 0;
-            let callback = null;
-
-            switch (currentGameState) {
-                case GameState.WORD_MASTER_CHOOSE_WORD:
-                    // at this state, the word master is choosing the challenge word
-                    timer = 15;
-                    callback = wordMaster.id === playerId && determineRandomWord;
-                    break;
-                case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
-                    // WDs are writing questions
-                    // we have transitions to this exact state, so we need to protect this
-                    timer = questions.length === 0 ? 30 : -1;
-                    callback = isHost && (async () => {
-                        await updateRoom({
-                            state: GameState.WORD_MASTER_CHOOSE_QUESTION,
-                        });
+        switch (currentGameState) {
+            case GameState.WORD_MASTER_CHOOSE_WORD:
+                // at this state, the word master is choosing the challenge word
+                timer = 15;
+                callback = isWordMaster && determineRandomWord;
+                break;
+            case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
+                // WDs are writing questions
+                timer = 30
+                callback = isHost && (async () => {
+                    await updateRoom({
+                        state: GameState.WORD_MASTER_CHOOSE_QUESTION,
                     });
-                    break;
-                case GameState.WORD_MASTER_CHOOSE_QUESTION:
-                    timer = 20;
-                    callback = isHost && (async () => {
-                        console.log('triggering callback for choose question timeout');
-                        await updateRoom({
-                            question_answered: null,
-                            state: GameState.SHOW_QUESTION_CHOSE
-                        });
+                });
+                break;
+            case GameState.WORD_MASTER_CHOOSE_QUESTION:
+                timer = 20;
+                callback = isHost && (() => {
+                    console.log('triggering callback for choose question timeout');
+                    return updateRoom({
+                        question_answered: null,
+                        state: GameState.SHOW_QUESTION_CHOSE
                     });
-                    break;
-                case GameState.SHOW_QUESTION_CHOSE:
-                    timer = 20;
-                    callback = isHost && (() => resetTurn(turns));
-                    break;
-                case GameState.END_ROUND:
-                    timer = 10;
-                    callback = isHost && (() => newRound(rounds, playersByScore));
-                    break;
-                default:
-                    break;
-            }
+                });
+                break;
+            case GameState.SHOW_QUESTION_CHOSE:
+                timer = 20;
+                callback = isHost && resetTurn;
+                break;
+            case GameState.END_ROUND:
+                timer = 10;
+                callback = isHost && newRound;
+                break;
+            case GameState.WM_DISCONNECTED:
+                timer = 5;
+                callback = isHost && endRoundWithoutPoints;
+                break;
+            default:
+                break;
+        }
 
-            if (timer > 0) {
-                beginCountdown(timer, callback || null);
-            }
-        })();
-    }, [endRound, updateRoom, turns, currentGameState, questions, wordMaster, firebase, doCountdown, 
-        playerId, roomId, isHost, playersByScore, rounds, loading]);
+        if (timer > 0) {
+            console.log(`counting from ${timer}`)
+            doCountdown(timer, callback || null);
+        }
+
+        setCurrentCountdownState(currentGameState);
+    }, [endRound, updateRoom, endRoundWithoutPoints, doCountdown, determineRandomWord, newRound, resetTurn, 
+        setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, 
+        currentCountdownState]);
 
     // render loading
     if (loading) {
@@ -380,7 +394,8 @@ const Game = (props) => {
                     wordMaster={wordMaster}
                     wordDetectives={wordDetectives}
                     category={categoryOfRound}
-                    word={wordMaster && playerId === wordMaster.id ? wordOfRound : null}
+                    word={isWordMaster ? wordOfRound : null}
+                    host={host}
                 />
 
                 <Grid item xs={12}>
@@ -391,7 +406,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
                     <WordMasterChooseWord
-                        isWordMaster={wordMaster && playerId === wordMaster.id}
+                        isWordMaster={isWordMaster}
                         categories={categoriesToChoose}
                         onClickCategory={chooseCategory}
                         words={wordsToChoose}
@@ -402,7 +417,7 @@ const Game = (props) => {
                 {currentGameState ===
                     GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
                     <WordDetectivesAskQuestions
-                        isWordMaster={wordMaster && playerId === wordMaster.id}
+                        isWordMaster={isWordMaster}
                         sendQuestion={sendQuestionToWordMaster}
                         clues={clues}
                     />
@@ -410,7 +425,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
                     <WordMasterChooseQuestions
-                        isWordMaster={wordMaster && playerId === wordMaster.id}
+                        isWordMaster={isWordMaster}
                         questions={questions}
                         sendAnswer={sendAnswerOfWordMaster}
                     />
@@ -418,7 +433,7 @@ const Game = (props) => {
 
                 {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
                     <ShowQuestionsChosed
-                        isWordMaster={wordMaster && playerId === wordMaster.id}
+                        isWordMaster={isWordMaster}
                         question={
                             questions[questionAnswered.index]
                                 ? questions[questionAnswered.index].question
@@ -428,6 +443,10 @@ const Game = (props) => {
                         sendHunchToDiscoverWord={sendHunchToDiscoverWord}
                         clues={clues}
                     />
+                )}
+
+                {currentGameState === GameState.WM_DISCONNECTED && (
+                    <span>O WordMaster desconectou! Iniciando nova rodada...</span>
                 )}
 
                 {currentGameState === GameState.END_ROUND && (
