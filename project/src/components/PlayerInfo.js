@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
 function PlayerInfo(props) {
     const classes = useStyles();
-    const { wordMaster, word, wordDetectives, category } = props;
+    const { wordMaster, word, wordDetectives, category, host } = props;
 
     return (
         <>
@@ -25,10 +25,12 @@ function PlayerInfo(props) {
                     <p>{category.name}</p>
                 </Grid>
             }
-            <Grid item xs={2}>
+
+            <Grid item xs>
                 <h2>Word Master</h2>
                 <Badge color={wordMaster.status === PlayerStatus.CONNECTED ? 'primary' : 'secondary'} variant="dot">
                     <Avatar style={{ backgroundColor: "green" }}>
+                        {wordMaster.id === host.id && "*"}
                         {wordMaster && wordMaster.name.substring(0, 2)}
                     </Avatar>
                 </Badge>
@@ -40,7 +42,7 @@ function PlayerInfo(props) {
                     </>
                 )}
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs>
                 <h2>Word Detectives</h2>
                 <div className={classes.avatarContainer}>
                     {wordDetectives
@@ -48,6 +50,7 @@ function PlayerInfo(props) {
                         <div className={classes.avatarItem} key={detective.id}>
                             <Badge color={detective.status === PlayerStatus.CONNECTED ? 'primary' : 'secondary'} variant="dot">
                                 <Avatar>
+                                    {detective.id === host.id && "*"}
                                     {detective.name.substring(0, 2)}
                                 </Avatar>
                             </Badge>
