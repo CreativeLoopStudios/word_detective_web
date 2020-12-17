@@ -29,7 +29,16 @@ function WordDetectivesAskQuestions(props) {
         <>
             {props.isWordMaster && (
                 <Grid item xs={12}>
-                    <h3>Aguarde os Word Detectives fazerem suas perguntas!</h3>
+                    <h3>Perguntas sendo feitas pelos Word Detectives, confira abaixo assim que forem feitas:</h3>
+                    <ul>
+                        {props.questions.map((q, index) => (
+                            <div key={index}>
+                                <li className={classes.question}>
+                                    {q.question}
+                                </li>
+                            </div>
+                        ))}
+                    </ul>
                 </Grid>
             )}
 

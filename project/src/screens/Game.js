@@ -420,6 +420,7 @@ const Game = (props) => {
                         isWordMaster={isWordMaster}
                         sendQuestion={sendQuestionToWordMaster}
                         clues={clues}
+                        questions={questions}
                     />
                 )}
 
