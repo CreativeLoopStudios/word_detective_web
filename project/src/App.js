@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
@@ -24,6 +24,15 @@ const useStyles = makeStyles((theme) => ({
 
 function App() {
     const classes = useStyles();
+
+    useEffect(() => {
+        window.addEventListener("beforeunload", (ev) => {
+            ev.preventDefault();
+            const confirmationMessage = "Você tem certeza que gostaria de sair?";
+            ev.returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
+    }, []);
 
     return (
         <Router>
