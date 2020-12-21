@@ -61,6 +61,7 @@ const Game = (props) => {
     const [questions, setQuestions] = useState([]);
     const [questionAnswered, setQuestionAnswered] = useState({});
     const [clues, setClues] = useState([]);
+    const [hunches, setHunches] = useState([]);
 
     const [categoryOfRound, setCategoryOfRound] = useState({});
     const [wordOfRound, setWordOfRound] = useState("");
@@ -86,9 +87,18 @@ const Game = (props) => {
         return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
     }, [firebase, roomId]);
 
+    const roomPushToList = useCallback((attr, data) => {
+        return firebase.pushToList(ROOMS_COLLECTION, roomId, attr, data);
+    }, [firebase, roomId]);
+
     const sendHunchToDiscoverWord = (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
-            endRound(currentPlayer);
+            return endRound(currentPlayer);
+        }
+        else {
+            return roomPushToList('hunches', {
+                text: hunch
+            });
         }
     };
 
@@ -98,7 +108,7 @@ const Game = (props) => {
             playerToScore,
             SCORE_TO_QUESTION_SELECTED
         );
-        const futureClues = firebase.pushToList(ROOMS_COLLECTION, roomId, 'clues', {
+        const futureClues = roomPushToList('clues', {
             question: questions[questionIndex],
             answer,
         });
@@ -115,7 +125,7 @@ const Game = (props) => {
     };
 
     const sendQuestionToWordMaster = (question) => {
-        return firebase.pushToList(ROOMS_COLLECTION, roomId, 'questions', {
+        return roomPushToList('questions', {
             question: question,
             player: playerId
         });
@@ -188,6 +198,7 @@ const Game = (props) => {
             question_answered: null,
             questions: null,
             turns: turns + 1,
+            hunches: null
         });
     }, [updateRoom, endRound, turns]);
 
@@ -273,6 +284,7 @@ const Game = (props) => {
             setQuestions(Object.values(room.questions || {}));
             setQuestionAnswered(room.question_answered || {});
             setClues(Object.values(room.clues || {}));
+            setHunches(Object.values(room.hunches || {}));
 
             setCategoriesToChoose(room.categories || []);
             setCategoryOfRound(room.category_of_the_round || {});
@@ -285,7 +297,7 @@ const Game = (props) => {
         });
 
         return () => collectionRef.off();
-    }, [setCurrentGameState, setTurns, setHost, setWordMaster, setWordDetectives, setQuestions, setClues, 
+    }, [setCurrentGameState, setTurns, setHost, setWordMaster, setWordDetectives, setQuestions, setClues, setHunches,
         setCategoriesToChoose, setCategoryOfRound, setWordOfRound, setPlayersByScore, firebase, playerId, roomId, currentGameState]);
 
     // set myself as connected
@@ -443,6 +455,7 @@ const Game = (props) => {
                         answer={questionAnswered.answer}
                         sendHunchToDiscoverWord={sendHunchToDiscoverWord}
                         clues={clues}
+                        hunches={hunches}
                     />
                 )}
 

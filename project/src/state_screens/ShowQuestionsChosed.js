@@ -13,16 +13,16 @@ function ShowQuestionsChosed(props) {
 
     const [hunchInput, setHunchInput] = useState("");
 
-    const handleKeyDown = (event) => {
+    const handleKeyDown = async (event) => {
         if (event.key === "Enter") {
             setHunchInput("");
-            props.sendHunchToDiscoverWord(hunchInput);
+            await props.sendHunchToDiscoverWord(hunchInput);
         }
     };
 
-    const onClickButton = () => {
+    const onClickButton = async () => {
         setHunchInput("");
-        props.sendHunchToDiscoverWord(hunchInput)
+        await props.sendHunchToDiscoverWord(hunchInput)
     };
 
     return (
@@ -30,7 +30,7 @@ function ShowQuestionsChosed(props) {
             <h3>Pergunta escolhida do Word Master:</h3>
 
             {
-                (props.question && props.answer) ? (
+                props.question && props.answer ? (
                 <ul>
                     <li className={classes.question}>{props.question}</li>
                     <li className={classes.question}>
@@ -48,8 +48,19 @@ function ShowQuestionsChosed(props) {
                 <Clues clues={props.clues} />
             )}
 
-            {props.isWordMaster && (
+            {props.isWordMaster && props.hunches && props.hunches.length === 0 && (
                 <h3>Aguardando palpites dos Word Detectives</h3>
+            )}
+
+            {props.isWordMaster && props.hunches && props.hunches.length > 0 && (
+                <div>
+                    <h3>Palpites</h3>
+                    <ul>
+                        {props.hunches.map((hunch, i) => (
+                            <li key={i}>{hunch.text}</li>
+                        ))}
+                    </ul>
+                </div>
             )}
 
             {!props.isWordMaster && (
