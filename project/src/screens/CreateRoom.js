@@ -85,10 +85,10 @@ function CreateRoom(props) {
             categoriesChecked,
             isPrivate
         );
-        props.firebase.logEvent(FirebaseEvents.ROOM_CREATED, {
-            [FirebaseEvents.NUMBER_OF_PLAYERS]: numberOfPlayers,
-            [FirebaseEvents.CATEGORIES]: categoriesChecked,
-            [FirebaseEvents.IS_PRIVATE]: isPrivate,
+        props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
+            [FirebaseEvents.PROP.NUMBER_OF_PLAYERS]: numberOfPlayers,
+            [FirebaseEvents.PROP.CATEGORIES]: categoriesChecked,
+            [FirebaseEvents.PROP.IS_PRIVATE]: isPrivate,
         });
         history.push(`/${roomId}/lobby`);
     };

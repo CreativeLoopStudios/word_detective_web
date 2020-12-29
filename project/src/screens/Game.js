@@ -22,6 +22,7 @@ import {
 } from "../state_screens";
 import { PlayerInfo } from "../components";
 import { useParams } from "react-router-dom";
+import FirebaseEvents from "../firebase_events";
 
 const WORDS_TO_CHOOSE = 5;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -132,6 +133,7 @@ const Game = (props) => {
     };
 
     const chooseWord = (word) => {
+        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_WORD, word);
         return updateRoom({
             state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
             word_of_the_round: word,
