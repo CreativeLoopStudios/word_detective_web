@@ -10,9 +10,8 @@ import {
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
-import {
-    CATEGORIES_COLLECTION,
-} from "../firebase/collections";
+import { CATEGORIES_COLLECTION } from "../firebase/collections";
+import FirebaseEvents from "../firebase_events";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -73,8 +72,24 @@ function CreateRoom(props) {
     };
 
     const handleSubmit = async () => {
-        const categoriesChecked = categories.filter(c => c.isChecked).map(c => ({ id: c.id, name: c.name, description: c.description }));
-        const roomId = await props.firebase.createNewRoom(name, numberOfPlayers, categoriesChecked, isPrivate);
+        const categoriesChecked = categories
+            .filter((c) => c.isChecked)
+            .map((c) => ({
+                id: c.id,
+                name: c.name,
+                description: c.description,
+            }));
+        const roomId = await props.firebase.createNewRoom(
+            name,
+            numberOfPlayers,
+            categoriesChecked,
+            isPrivate
+        );
+        props.firebase.logEvent(FirebaseEvents.ROOM_CREATED, {
+            [FirebaseEvents.NUMBER_OF_PLAYERS]: numberOfPlayers,
+            [FirebaseEvents.CATEGORIES]: categoriesChecked,
+            [FirebaseEvents.IS_PRIVATE]: isPrivate,
+        });
         history.push(`/${roomId}/lobby`);
     };
 
