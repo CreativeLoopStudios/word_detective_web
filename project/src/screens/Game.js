@@ -338,6 +338,12 @@ const Game = (props) => {
                 [`/players/${currentPlayer.id}/status`]: PlayerStatus.CONNECTED
             });
             firebase.onDisconnect(roomId, currentPlayer.id);
+
+            firebase.logEvent(FirebaseEvents.EVENTS.STATUS_CHANGED, {
+                [FirebaseEvents.PROP.ROOM_ID]: roomId,
+                [FirebaseEvents.PROP.PLAYER_ID]: currentPlayer.id,
+                [FirebaseEvents.PROP.STATUS]: PlayerStatus.CONNECTED
+            });
         } 
     }, [playersByScore, roomId, currentPlayer, firebase, updateRoom]);
 
