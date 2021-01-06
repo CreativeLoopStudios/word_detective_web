@@ -97,6 +97,11 @@ const Game = (props) => {
             return endRound(currentPlayer);
         }
         else {
+            firebase.logEvent(FirebaseEvents.EVENTS.TYPED_HUNCH, {
+                [FirebaseEvents.PROP.ROOM_ID]: roomId,
+                [FirebaseEvents.PROP.PLAYER_ID]: playerId,
+                [FirebaseEvents.PROP.HUNCH]: hunch
+            });
             return roomPushToList('hunches', {
                 text: hunch
             });
@@ -112,6 +117,12 @@ const Game = (props) => {
         const futureClues = roomPushToList('clues', {
             question: questions[questionIndex],
             answer,
+        });
+
+        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_QUESTION, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYER_ID]: playerToScore.id,
+            [FirebaseEvents.PROP.QUESTION]: questions[questionIndex]
         });
 
         await updateRoom({
@@ -230,6 +241,10 @@ const Game = (props) => {
     }, [updateRoom, firebase]);
 
     const endGame = useCallback(() => {
+        firebase.logEvent(FirebaseEvents.EVENTS.FINAL_SCORE, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYERS]: playersByScore.map(p => ({ playerId: p.id, score: p.score }))
+        });
         return updateRoom({
             state: GameState.END_GAME,
         });
