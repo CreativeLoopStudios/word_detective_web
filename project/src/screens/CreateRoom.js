@@ -86,6 +86,7 @@ function CreateRoom(props) {
             isPrivate
         );
         props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
             [FirebaseEvents.PROP.NUMBER_OF_PLAYERS]: numberOfPlayers,
             [FirebaseEvents.PROP.CATEGORIES]: categoriesChecked,
             [FirebaseEvents.PROP.IS_PRIVATE]: isPrivate,

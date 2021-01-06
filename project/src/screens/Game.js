@@ -126,6 +126,11 @@ const Game = (props) => {
     };
 
     const sendQuestionToWordMaster = (question) => {
+        firebase.logEvent(FirebaseEvents.EVENTS.ASKED_QUESTION, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYER_ID]: playerId,
+            [FirebaseEvents.PROP.QUESTION]: question
+        });
         return roomPushToList('questions', {
             question: question,
             player: playerId
@@ -133,7 +138,11 @@ const Game = (props) => {
     };
 
     const chooseWord = (word) => {
-        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_WORD, word);
+        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_WORD, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.ROUND]: rounds,
+            [FirebaseEvents.PROP.WORD]: word
+        });
         return updateRoom({
             state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
             word_of_the_round: word,
