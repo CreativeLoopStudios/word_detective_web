@@ -248,7 +248,7 @@ const Game = (props) => {
         return updateRoom({
             state: GameState.END_GAME,
         });
-    }, [updateRoom]);
+    }, [updateRoom, firebase, roomId, playersByScore]);
 
     const newRound = useCallback(() => {
         const availablePlayers = playersByScore.filter(p => p.status === PlayerStatus.CONNECTED);
