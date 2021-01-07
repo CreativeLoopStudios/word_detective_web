@@ -2,8 +2,10 @@ import app from "firebase/app";
 import "firebase/firestore";
 import "firebase/database";
 import "firebase/analytics";
+import "firebase/auth";
 import { ROOMS_COLLECTION } from "./collections";
 import PlayerStatus from "../player_status";
+import { SET_PLAYER_ID } from '../actions';
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -83,6 +85,17 @@ class Firebase {
 
     logEvent = (event, value) => {
         this.analytics.logEvent(event, value);
+    };
+
+    signIn = async (sessionCtx) => {
+        console.log('Setting up playerId');
+        const userCred = await app.auth().signInAnonymously();
+        console.log('signup done')
+        const userId = userCred.user.uid;
+        sessionCtx.dispatch({
+            type: SET_PLAYER_ID,
+            payload: userId
+        });
     };
 }
 

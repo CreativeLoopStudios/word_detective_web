@@ -45,7 +45,8 @@ const giveScoreToPlayer = (player, score) => {
 const Game = (props) => {
     const classes = useStyles();
 
-    const { playerId, playerName } = useContext(SessionContext).state;
+    const sessionContext = useContext(SessionContext);
+    const { playerId, playerName } = sessionContext.state;
     const { firebase } = props;
 
     const [categoriesToChoose, setCategoriesToChoose] = useState([]);
@@ -285,6 +286,13 @@ const Game = (props) => {
         return updateRoom(data);
     }, [updateRoom, endGame, rounds, playersByScore, wordMaster]);
 
+    // sign up user
+    useEffect(() => {
+        if (!playerId) {
+           firebase.signIn(sessionContext);
+        }
+    }, [firebase, playerId, sessionContext]);
+
     // room setup
     useEffect(() => {
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
@@ -324,7 +332,7 @@ const Game = (props) => {
 
         return () => collectionRef.off();
     }, [setCurrentGameState, setTurns, setHost, setWordMaster, setWordDetectives, setQuestions, setClues, setHunches,
-        setCategoriesToChoose, setCategoryOfRound, setWordOfRound, setPlayersByScore, firebase, playerId, roomId, currentGameState]);
+        setCategoriesToChoose, setCategoryOfRound, setWordOfRound, setPlayersByScore, firebase, roomId, currentGameState]);
 
     // set myself as connected
     useEffect(() => {
@@ -420,8 +428,7 @@ const Game = (props) => {
 
         setCurrentCountdownState(currentGameState);
     }, [endRound, updateRoom, endRoundWithoutPoints, doCountdown, determineRandomWord, newRound, resetTurn, 
-        setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, 
-        currentCountdownState]);
+        setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, currentCountdownState]);
 
     // render loading
     if (loading) {
