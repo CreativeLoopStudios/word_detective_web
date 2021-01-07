@@ -1,6 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../../actions';
-import { v4 as uuidv4 } from 'uuid';
+import { SET_PLAYER_ID, SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../../actions';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 const SessionContext = React.createContext();
@@ -13,6 +12,11 @@ const initialState = {
 
 const reducer = (state, action) => {
     switch (action.type) {
+        case SET_PLAYER_ID:
+            return {
+                ...state,
+                playerId: action.payload
+            }
         case SET_PLAYER_NAME:
             return {
                 ...state,
@@ -38,9 +42,6 @@ const generateUserName = () => {
 
 const SessionContextProvider = (props) => {
     const localState = JSON.parse(localStorage.getItem("SessionContext")) || initialState;
-    if (localState.playerId === undefined || localState.playerId === null) {
-        localState.playerId = uuidv4();
-    }
     if (!localState.playerName) {
         localState.playerName = generateUserName();
     }

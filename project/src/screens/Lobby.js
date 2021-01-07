@@ -59,10 +59,17 @@ function Lobby(props) {
         });
     }
 
+    // sign up user
+    useEffect(() => {
+        if (!playerId) {
+           firebase.signIn(sessionContext);
+        }
+    }, [firebase, playerId, sessionContext]);
+
     // update host status
     useEffect(() => {
         const connectedPlayers = players.filter(p => p.status === "connected");
-        if (connectedPlayers) {
+        if (connectedPlayers && playerId) {
             // as a convention, the host is always the player that was created first
             const sortedPlayerIds = connectedPlayers.map(p => p.id).sort((a, b) => a.creationDate - b.creationDate);
             const shouldBeHost = sortedPlayerIds[0] === playerId;
@@ -88,7 +95,7 @@ function Lobby(props) {
 
     // set my initial heartbeat info
     useEffect(() => {
-        if (!heartbeatData) {
+        if (!heartbeatData && playerId) {
             updateRoom({
                 [`heartbeats/${playerId}`]: database.ServerValue.TIMESTAMP
             });
@@ -101,7 +108,7 @@ function Lobby(props) {
     // finish setting my heartbeat info
     useEffect(() => {
          // finish setting my heartbeat
-         if (!heartbeatData && playerId in heartbeats && heartbeats[playerId]) {
+         if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId]) {
             const localClockEnd = firestore.Timestamp.now();
             const lastValue = heartbeats[playerId];
             console.log('heartbeat snapshot')
@@ -148,7 +155,7 @@ function Lobby(props) {
 
     // add myself to the room
     useEffect(() => {
-        if (!players) return;
+        if (!players || !playerId) return;
 
         const playerInRoom = players.map(p => p.id).includes(playerId);
         if (!playerInRoom) {
@@ -170,7 +177,9 @@ function Lobby(props) {
 
     // set myself as connected
     useEffect(() => {
-        if (!players || !playerId) return;
+        if (!players || !playerId) {
+            return;
+        }
 
         const player = players.find(p => p.id === playerId);
         // possibly player is not in the room yet
