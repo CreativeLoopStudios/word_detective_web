@@ -22,6 +22,7 @@ import {
 } from "../state_screens";
 import { PlayerInfo } from "../components";
 import { useParams } from "react-router-dom";
+import FirebaseEvents from "../firebase_events";
 
 const WORDS_TO_CHOOSE = 5;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -96,6 +97,11 @@ const Game = (props) => {
             return endRound(currentPlayer);
         }
         else {
+            firebase.logEvent(FirebaseEvents.EVENTS.TYPED_HUNCH, {
+                [FirebaseEvents.PROP.ROOM_ID]: roomId,
+                [FirebaseEvents.PROP.PLAYER_ID]: playerId,
+                [FirebaseEvents.PROP.HUNCH]: hunch
+            });
             return roomPushToList('hunches', {
                 text: hunch
             });
@@ -113,6 +119,12 @@ const Game = (props) => {
             answer,
         });
 
+        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_QUESTION, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYER_ID]: playerToScore.id,
+            [FirebaseEvents.PROP.QUESTION]: questions[questionIndex]
+        });
+
         await updateRoom({
             question_answered: {
                 index: questionIndex,
@@ -125,6 +137,11 @@ const Game = (props) => {
     };
 
     const sendQuestionToWordMaster = (question) => {
+        firebase.logEvent(FirebaseEvents.EVENTS.ASKED_QUESTION, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYER_ID]: playerId,
+            [FirebaseEvents.PROP.QUESTION]: question
+        });
         return roomPushToList('questions', {
             question: question,
             player: playerId
@@ -132,6 +149,11 @@ const Game = (props) => {
     };
 
     const chooseWord = (word) => {
+        firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_WORD, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.ROUND]: rounds,
+            [FirebaseEvents.PROP.WORD]: word
+        });
         return updateRoom({
             state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
             word_of_the_round: word,
@@ -219,10 +241,14 @@ const Game = (props) => {
     }, [updateRoom, firebase]);
 
     const endGame = useCallback(() => {
+        firebase.logEvent(FirebaseEvents.EVENTS.FINAL_SCORE, {
+            [FirebaseEvents.PROP.ROOM_ID]: roomId,
+            [FirebaseEvents.PROP.PLAYERS]: playersByScore.map(p => ({ playerId: p.id, score: p.score }))
+        });
         return updateRoom({
             state: GameState.END_GAME,
         });
-    }, [updateRoom]);
+    }, [updateRoom, firebase, roomId, playersByScore]);
 
     const newRound = useCallback(() => {
         const availablePlayers = playersByScore.filter(p => p.status === PlayerStatus.CONNECTED);
@@ -312,6 +338,12 @@ const Game = (props) => {
                 [`/players/${currentPlayer.id}/status`]: PlayerStatus.CONNECTED
             });
             firebase.onDisconnect(roomId, currentPlayer.id);
+
+            firebase.logEvent(FirebaseEvents.EVENTS.STATUS_CHANGED, {
+                [FirebaseEvents.PROP.ROOM_ID]: roomId,
+                [FirebaseEvents.PROP.PLAYER_ID]: currentPlayer.id,
+                [FirebaseEvents.PROP.STATUS]: PlayerStatus.CONNECTED
+            });
         } 
     }, [playersByScore, roomId, currentPlayer, firebase, updateRoom]);
 

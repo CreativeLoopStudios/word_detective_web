@@ -1,6 +1,7 @@
 import app from "firebase/app";
 import "firebase/firestore";
 import "firebase/database";
+import "firebase/analytics";
 import { ROOMS_COLLECTION } from "./collections";
 import PlayerStatus from "../player_status";
 
@@ -12,7 +13,7 @@ const firebaseConfig = {
     storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
     messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
     appId: process.env.REACT_APP_ID,
-    measurementId: process.env.REACT_MEASUREMENT_ID,
+    measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
 
 class Firebase {
@@ -20,6 +21,7 @@ class Firebase {
         app.initializeApp(firebaseConfig);
         this.db = app.firestore();
         this.realtimeDb = app.database();
+        this.analytics = app.analytics();
     }
 
     getCollection = (collection_name, id) => {
@@ -77,6 +79,10 @@ class Firebase {
         });
 
         return res.id;
+    };
+
+    logEvent = (event, value) => {
+        this.analytics.logEvent(event, value);
     };
 }
 
