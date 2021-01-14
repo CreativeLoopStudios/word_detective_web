@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom"
 import {
   makeStyles,
   Button,
   Grid,
+  TextField
 } from "@material-ui/core";
+import SessionContext from "../context/Session";
+import { withFirebase } from "../firebase/context";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -13,9 +16,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Home() {
+function Home(props) {
   const history = useHistory();
   const classes = useStyles();
+  const { firebase } = props;
+  const sessionContext = useContext(SessionContext);
+
+  const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
+
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+    firebase.signIn(sessionContext);
+    history.push("/create-room");
+  };
 
   return (
     <div className={classes.root}>
@@ -25,10 +38,14 @@ function Home() {
             </Grid>
 
             <Grid item xs={12}>
+                <TextField fullWidth label="Seu nome" value={playerName || ''} onChange={(ev) => setPlayerName(ev.target.value)} />
+            </Grid>
+
+            <Grid item xs={12}>
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => history.push("/create-room")}
+                    onClick={handleSubmit}
                 >
                     Criar Sala
                 </Button>
@@ -38,4 +55,4 @@ function Home() {
 );
 }
 
-export default Home;
+export default withFirebase(Home);

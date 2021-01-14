@@ -53,6 +53,7 @@ function Lobby(props) {
             payload: newName 
         });
         setPlayerName(newName);
+        firebase.updateDisplayName(newName);
 
         updateRoom({
             [`/players/${playerId}/name`]: newName
