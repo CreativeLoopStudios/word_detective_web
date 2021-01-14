@@ -5,7 +5,7 @@ import "firebase/analytics";
 import "firebase/auth";
 import { ROOMS_COLLECTION } from "./collections";
 import PlayerStatus from "../player_status";
-import { SET_PLAYER_ID } from '../actions';
+import { SET_PLAYER_ID, SET_FIREBASE_USER } from '../actions';
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -90,11 +90,24 @@ class Firebase {
     signIn = async (sessionCtx) => {
         console.log('Setting up playerId');
         const userCred = await app.auth().signInAnonymously();
+        await app.auth().currentUser.updateProfile({
+            displayName: sessionCtx.state.playerName
+        })
         console.log('signup done')
         const userId = userCred.user.uid;
         sessionCtx.dispatch({
             type: SET_PLAYER_ID,
             payload: userId
+        });
+        sessionCtx.dispatch({
+            type: SET_FIREBASE_USER,
+            payload: userCred
+        });
+    };
+
+    updateDisplayName = async (newName) => {
+        await app.auth().currentUser.updateProfile({
+            displayName: newName
         });
     };
 }
