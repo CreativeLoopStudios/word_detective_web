@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     makeStyles,
     Button,
@@ -12,6 +12,7 @@ import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
 import { CATEGORIES_COLLECTION } from "../firebase/collections";
 import FirebaseEvents from "../firebase_events";
+import SessionContext from "../context/Session";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,6 +24,8 @@ const useStyles = makeStyles((theme) => ({
 function CreateRoom(props) {
     const classes = useStyles();
     const history = useHistory();
+    const sessionContext = useContext(SessionContext);
+
     const categoriesLimit = 3;
 
     const [name, setName] = useState("");
@@ -83,7 +86,8 @@ function CreateRoom(props) {
             name,
             numberOfPlayers,
             categoriesChecked,
-            isPrivate
+            isPrivate,
+            sessionContext.state.playerId
         );
         props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
