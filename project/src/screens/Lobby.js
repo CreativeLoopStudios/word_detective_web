@@ -10,6 +10,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { database, firestore } from "firebase/app";
 import PlayerStatus from "../player_status";
+import { CreateRoom } from "../screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -218,6 +219,11 @@ function Lobby(props) {
                         ))}
                     </ul>
                 </Grid>
+
+                {isHost && <Grid item xs={12}>
+                    <CreateRoom roomId={roomId}  />
+                </Grid>}
+
 
                 <Grid item xs={12}>
                     <Grid container>

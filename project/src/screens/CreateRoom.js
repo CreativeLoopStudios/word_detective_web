@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
     makeStyles,
     Button,
@@ -8,11 +8,9 @@ import {
     FormControlLabel,
     Switch,
 } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
-import { CATEGORIES_COLLECTION } from "../firebase/collections";
+import { CATEGORIES_COLLECTION, ROOMS_COLLECTION } from "../firebase/collections";
 import FirebaseEvents from "../firebase_events";
-import SessionContext from "../context/Session";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,11 +21,10 @@ const useStyles = makeStyles((theme) => ({
 
 function CreateRoom(props) {
     const classes = useStyles();
-    const history = useHistory();
-    const sessionContext = useContext(SessionContext);
 
     const categoriesLimit = 3;
 
+    const { roomId } = props;
     const [name, setName] = useState("");
     const [numberOfPlayers, setNumberOfPlayers] = useState(4);
     const [isPrivate, setIsPrivate] = useState(true);
@@ -40,16 +37,19 @@ function CreateRoom(props) {
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
 
+            const roomInfo = (await props.firebase.getCollection(ROOMS_COLLECTION).doc(roomId).get()).data();
+            const checkedCategoryIds = (roomInfo.categories || []).map(c => c.id);
+
             const categoriesMapped = categories.docs.map((c) => ({
                 ...c.data(),
                 id: c.id,
-                isChecked: false,
+                isChecked: checkedCategoryIds.includes(c.id),
             }));
             setCategories(categoriesMapped);
         };
 
         fetchCategories();
-    }, [props.firebase]);
+    }, [props.firebase, roomId]);
 
     const handleChange = (evt) => {
         const numberOfAlreadyChecked = categories.reduce((total, c) => {
@@ -82,12 +82,14 @@ function CreateRoom(props) {
                 name: c.name,
                 description: c.description,
             }));
-        const roomId = await props.firebase.createNewRoom(
-            name,
-            numberOfPlayers,
-            categoriesChecked,
-            isPrivate,
-            sessionContext.state.playerId
+        await props.firebase.updateRoom(
+            roomId,
+            {
+                name,
+                categories: categoriesChecked,
+                number_of_players: numberOfPlayers,
+                is_private: isPrivate
+            }
         );
         props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
@@ -95,14 +97,13 @@ function CreateRoom(props) {
             [FirebaseEvents.PROP.CATEGORIES]: categoriesChecked,
             [FirebaseEvents.PROP.IS_PRIVATE]: isPrivate,
         });
-        history.push(`/${roomId}/lobby`);
     };
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12}>
-                    <h1>Criação da Sala</h1>
+                    <h1>Configuração da Sala</h1>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -167,7 +168,7 @@ function CreateRoom(props) {
                         color="primary"
                         onClick={handleSubmit}
                     >
-                        Criar
+                        Salvar
                     </Button>
                 </Grid>
             </Grid>

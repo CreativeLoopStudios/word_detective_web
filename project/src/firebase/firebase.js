@@ -56,21 +56,27 @@ class Firebase {
         this.realtimeDb.ref(`rooms/${roomId}/players/${playerId}/status`).onDisconnect().set(PlayerStatus.DISCONNECTED);
     };
 
-    createNewRoom = async (roomName, numberOfPlayers, categories, isPrivate, creatorId) => {
-        const res = await this.db.collection(ROOMS_COLLECTION).add({
+    updateRoom = async (roomId, data) => {
+        await this.db.collection(ROOMS_COLLECTION).doc(roomId).update(data);
+        await this.realtimeDb.ref(ROOMS_COLLECTION + '/' + roomId).update({ categories: data.categories });
+    }
+
+    createNewRoom = async (creatorId) => {
+        const res = await this.db.collection(ROOMS_COLLECTION).add({ createdBy: creatorId, is_private: true });
+        /*const res = await this.db.collection(ROOMS_COLLECTION).add({
             createdBy: creatorId,
             name: roomName,
             categories: categories,
             number_of_players: numberOfPlayers,
             is_private: isPrivate
-        });
+        });*/
         
-        this.realtimeDb.ref(ROOMS_COLLECTION + '/' + res.id).set({
+        await this.realtimeDb.ref(ROOMS_COLLECTION + '/' + res.id).set({
             host: '',
             state: '',
             players: {},
             heartbeats: {},
-            categories: categories,
+            //categories: categories,
             turns: 0,
             rounds: 0,
             word_of_the_round: '',
@@ -103,6 +109,7 @@ class Firebase {
             type: SET_FIREBASE_USER,
             payload: userCred
         });
+        return userId;
     };
 
     updateDisplayName = async (newName) => {
