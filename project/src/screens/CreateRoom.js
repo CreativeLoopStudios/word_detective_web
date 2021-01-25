@@ -53,14 +53,18 @@ function CreateRoom(props) {
         fetchCategories();
     }, [props.firebase, roomId]);
 
-    const handleChange = (evt) => {
-        const numberOfAlreadyChecked = newCategories.reduce((total, c) => {
+    const countChecks = (arr) => {
+        return arr.reduce((total, c) => {
             if (c.isChecked) {
                 return (total += 1);
             } else {
                 return total;
             }
         }, 0);
+    }
+
+    const handleChange = (evt) => {
+        const numberOfAlreadyChecked = countChecks(newCategories);
         if (numberOfAlreadyChecked === categoriesLimit && evt.target.checked)
             return;
 
@@ -104,11 +108,13 @@ function CreateRoom(props) {
         });
     };
 
+    useEffect(() => {
+        props.onChangeRoomConfig(countChecks(currentCategories) > 0);
+    }, [currentCategories, props])
+
     const shouldDisableSaving = useMemo(() => {
         const checked_1 = currentCategories.map(c => c.isChecked); 
         const checked_2 = newCategories.map(c => c.isChecked);
-        console.log('current', checked_1)
-        console.log('new', checked_2)
         return [...Array(checked_1.length).keys()].map((idx => checked_1[idx] === checked_2[idx])).every(v => v);
     }, [currentCategories, newCategories]);
 
