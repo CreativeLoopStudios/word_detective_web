@@ -24,10 +24,11 @@ function Home(props) {
 
   const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
-    firebase.signIn(sessionContext);
-    history.push("/create-room");
+    const playerId = await firebase.signIn(sessionContext);
+    const roomId = await firebase.createNewRoom(playerId);
+    history.push(`/${roomId}/lobby`);
   };
 
   return (

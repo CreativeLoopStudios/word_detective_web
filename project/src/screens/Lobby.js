@@ -10,6 +10,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { database, firestore } from "firebase/app";
 import PlayerStatus from "../player_status";
+import { CreateRoom } from "../screens";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -33,6 +34,7 @@ function Lobby(props) {
     const [localClockStart, setLocalClockStart] = useState(null);
     const [gameState, setGameState] = useState(null);
     const [heartbeats, setHeartbeats] = useState({});
+    const [isRoomConfigured, setIsRoomConfigured] = useState(false);
 
     const lobbyUrl = window.location.href;
     const { playerId } = sessionContext.state;
@@ -58,6 +60,10 @@ function Lobby(props) {
         updateRoom({
             [`/players/${playerId}/name`]: newName
         });
+    };
+
+    const onChangeRoomConfig = (isConfigured) => {
+        setIsRoomConfigured(isConfigured);
     }
 
     // sign up user
@@ -219,6 +225,11 @@ function Lobby(props) {
                     </ul>
                 </Grid>
 
+                {isHost && <Grid item xs={12}>
+                    <CreateRoom roomId={roomId} onChangeRoomConfig={onChangeRoomConfig}  />
+                </Grid>}
+
+
                 <Grid item xs={12}>
                     <Grid container>
                         <Grid item>
@@ -257,7 +268,7 @@ function Lobby(props) {
                 </Grid>
 
                 <Grid item xs={12}>
-                    {isHost && players.length > 1 && (
+                    {isHost && players.length > 1 && isRoomConfigured && (
                         <Button
                             variant="contained"
                             color="primary"
@@ -265,6 +276,10 @@ function Lobby(props) {
                         >
                             Começar!
                         </Button>
+                    )}
+
+                    {isHost && !isRoomConfigured && (
+                        <h3>Selecione ao menos uma categoria!</h3>
                     )}
 
                     {isHost && players.length === 1 && (

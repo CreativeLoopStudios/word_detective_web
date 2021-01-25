@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
     makeStyles,
     Button,
@@ -8,11 +8,9 @@ import {
     FormControlLabel,
     Switch,
 } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
-import { CATEGORIES_COLLECTION } from "../firebase/collections";
+import { CATEGORIES_COLLECTION, ROOMS_COLLECTION } from "../firebase/collections";
 import FirebaseEvents from "../firebase_events";
-import SessionContext from "../context/Session";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,16 +21,16 @@ const useStyles = makeStyles((theme) => ({
 
 function CreateRoom(props) {
     const classes = useStyles();
-    const history = useHistory();
-    const sessionContext = useContext(SessionContext);
 
     const categoriesLimit = 3;
 
+    const { roomId } = props;
     const [name, setName] = useState("");
     const [numberOfPlayers, setNumberOfPlayers] = useState(4);
     const [isPrivate, setIsPrivate] = useState(true);
 
-    const [categories, setCategories] = useState([]);
+    const [currentCategories, setCurrentCategories] = useState([]);
+    const [newCategories, setNewCategories] = useState([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -40,34 +38,44 @@ function CreateRoom(props) {
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
 
+            const roomInfo = (await props.firebase.getCollection(ROOMS_COLLECTION).doc(roomId).get()).data();
+            const checkedCategoryIds = (roomInfo.categories || []).map(c => c.id);
+
             const categoriesMapped = categories.docs.map((c) => ({
                 ...c.data(),
                 id: c.id,
-                isChecked: false,
+                isChecked: checkedCategoryIds.includes(c.id),
             }));
-            setCategories(categoriesMapped);
+            setCurrentCategories([...categoriesMapped]);
+            setNewCategories([...categoriesMapped]);
         };
 
         fetchCategories();
-    }, [props.firebase]);
+    }, [props.firebase, roomId]);
 
-    const handleChange = (evt) => {
-        const numberOfAlreadyChecked = categories.reduce((total, c) => {
+    const countChecks = (arr) => {
+        return arr.reduce((total, c) => {
             if (c.isChecked) {
                 return (total += 1);
             } else {
                 return total;
             }
         }, 0);
+    }
+
+    const handleChange = (evt) => {
+        const numberOfAlreadyChecked = countChecks(newCategories);
         if (numberOfAlreadyChecked === categoriesLimit && evt.target.checked)
             return;
 
-        categories.forEach((c) => {
+        const newArr = newCategories.map(c => {
+            const c_copy = {...c};
             if (c.name === evt.target.value) {
-                c.isChecked = evt.target.checked;
+                c_copy.isChecked = evt.target.checked;
             }
+            return c_copy;
         });
-        setCategories([...categories]);
+        setNewCategories(newArr);
     };
 
     const handleChangeIsPrivate = () => {
@@ -75,34 +83,46 @@ function CreateRoom(props) {
     };
 
     const handleSubmit = async () => {
-        const categoriesChecked = categories
+        const categoriesChecked = newCategories
             .filter((c) => c.isChecked)
             .map((c) => ({
                 id: c.id,
                 name: c.name,
                 description: c.description,
             }));
-        const roomId = await props.firebase.createNewRoom(
-            name,
-            numberOfPlayers,
-            categoriesChecked,
-            isPrivate,
-            sessionContext.state.playerId
+        await props.firebase.updateRoom(
+            roomId,
+            {
+                name,
+                categories: categoriesChecked,
+                number_of_players: numberOfPlayers,
+                is_private: isPrivate
+            }
         );
+        setCurrentCategories(newCategories);
         props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
             [FirebaseEvents.PROP.NUMBER_OF_PLAYERS]: numberOfPlayers,
             [FirebaseEvents.PROP.CATEGORIES]: categoriesChecked,
             [FirebaseEvents.PROP.IS_PRIVATE]: isPrivate,
         });
-        history.push(`/${roomId}/lobby`);
     };
+
+    useEffect(() => {
+        props.onChangeRoomConfig(countChecks(currentCategories) > 0);
+    }, [currentCategories, props])
+
+    const shouldDisableSaving = useMemo(() => {
+        const checked_1 = currentCategories.map(c => c.isChecked); 
+        const checked_2 = newCategories.map(c => c.isChecked);
+        return [...Array(checked_1.length).keys()].map((idx => checked_1[idx] === checked_2[idx])).every(v => v);
+    }, [currentCategories, newCategories]);
 
     return (
         <div className={classes.root}>
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12}>
-                    <h1>Criação da Sala</h1>
+                    <h1>Configuração da Sala</h1>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -129,7 +149,7 @@ function CreateRoom(props) {
                 <Grid item xs={12}>
                     <h2>Categorias</h2>
 
-                    {categories.map((c) => (
+                    {newCategories.map((c) => (
                         <FormControlLabel
                             key={c.id}
                             control={
@@ -166,8 +186,9 @@ function CreateRoom(props) {
                         variant="contained"
                         color="primary"
                         onClick={handleSubmit}
+                        disabled={shouldDisableSaving}
                     >
-                        Criar
+                        Salvar
                     </Button>
                 </Grid>
             </Grid>
