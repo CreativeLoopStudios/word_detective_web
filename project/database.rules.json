@@ -1,6 +1,18 @@
 {
-  "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
-  }
+    "rules": {
+        ".read": "false",
+        ".write": "false",
+        "rooms": {
+            "$roomsId": {
+                ".read": "auth != null",
+                ".write": "auth != null && ((newData.val() != data.val() && data.child('players').child(auth.uid).exists()) || !data.exists())",
+                "heartbeats": {
+                    ".write": "auth != null"
+                },
+                "players": {
+                    ".write": "auth != null"
+                }
+            }
+        }
+    }
 }
