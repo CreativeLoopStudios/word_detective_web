@@ -36,6 +36,8 @@ function Lobby(props) {
     const [heartbeats, setHeartbeats] = useState({});
     const [isRoomConfigured, setIsRoomConfigured] = useState(false);
 
+    const [isPlayerAdded, setIsPlayerAdded] = useState(false);
+
     const lobbyUrl = window.location.href;
     const { playerId } = sessionContext.state;
     const { firebase } = props;
@@ -140,6 +142,8 @@ function Lobby(props) {
 
     // update data from snapshots
     useEffect(() => {
+        if (!isPlayerAdded) return;
+
         const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
         collectionRef.on('value', (snapshot) => {
             const room = snapshot.val();
@@ -158,7 +162,7 @@ function Lobby(props) {
         });
 
         return () => collectionRef.off();
-    }, [setGameState, setPlayers, setHeartbeats, firebase, roomId]);
+    }, [firebase, roomId, isPlayerAdded]);
 
     // add myself to the room
     useEffect(() => {
@@ -177,6 +181,9 @@ function Lobby(props) {
                     status: PlayerStatus.CONNECTED,
                     playedAsWordMaster: false,
                 }
+            })
+            .then(() => {
+                setIsPlayerAdded(true);
             });
             firebase.onDisconnect(roomId, playerId);
         }
