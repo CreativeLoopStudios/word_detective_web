@@ -12,17 +12,30 @@ function WordDetectivesAskQuestions(props) {
     const classes = useStyles();
 
     const [questionInput, setQuestionInput] = useState("");
+    const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
+
+    const normalizeText = (text) => {
+        return text.toLowerCase()
+                   .normalize("NFD") // remove accents
+                   .replace(/[^\w]+/g, ""); // remove everything that is not alphanumeric, like punctuation.
+    };
+
+    const handleQuestionSend = (text) => {
+        const normalizedQuestions = props.questions.map(q => normalizeText(q.question));
+        const normalizedText = normalizeText(text);
+        const isAlreadyAsked = normalizedQuestions.includes(normalizedText);
+
+        if (!isAlreadyAsked) {
+            setQuestionInput("");
+            props.sendQuestion(text);
+        }
+        setQuestionAlreadyAsked(isAlreadyAsked);
+    };
 
     const handleKeyDown = (event) => {
         if (event.key === "Enter") {
-            setQuestionInput("");
-            props.sendQuestion(questionInput);
+            handleQuestionSend(questionInput);
         }
-    };
-
-    const onClickButton = () => {
-        setQuestionInput("");
-        props.sendQuestion(questionInput)
     };
 
     return (
@@ -59,12 +72,14 @@ function WordDetectivesAskQuestions(props) {
                             setQuestionInput(event.target.value)
                         }
                         onKeyDown={handleKeyDown}
+                        helperText={isQuestionAlreadyAsked && "Pergunta já feita!"}
+                        error={isQuestionAlreadyAsked}
                     />
                     <Button
                         variant="contained"
                         color="primary"
                         className={classes.word}
-                        onClick={onClickButton}
+                        onClick={() => handleQuestionSend(questionInput)}
                     >
                         Enviar
                     </Button>
