@@ -12,17 +12,20 @@ function ShowQuestionsChosed(props) {
     const classes = useStyles();
 
     const [hunchInput, setHunchInput] = useState("");
+    const [error, setError] = useState(false);
 
     const handleKeyDown = async (event) => {
         if (event.key === "Enter") {
             setHunchInput("");
-            await props.sendHunchToDiscoverWord(hunchInput);
+            const error = await props.sendHunchToDiscoverWord(hunchInput);
+            setError(error);
         }
     };
 
     const onClickButton = async () => {
         setHunchInput("");
-        await props.sendHunchToDiscoverWord(hunchInput)
+        const error = await props.sendHunchToDiscoverWord(hunchInput)
+        setError(error);
     };
 
     return (
@@ -77,6 +80,8 @@ function ShowQuestionsChosed(props) {
                                 setHunchInput(event.target.value)
                             }
                             onKeyDown={handleKeyDown}
+                            error={error}
+                            helperText={error ? 'Palpite incorreto' : ''}
                         />
                         <Button
                             variant="contained"

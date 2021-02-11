@@ -95,7 +95,8 @@ const Game = (props) => {
 
     const sendHunchToDiscoverWord = (hunch) => {
         if (hunch.toLowerCase() === wordOfRound.toLowerCase()) {
-            return endRound(currentPlayer);
+            endRound(currentPlayer);
+            return false;
         }
         else {
             firebase.logEvent(FirebaseEvents.EVENTS.TYPED_HUNCH, {
@@ -103,9 +104,10 @@ const Game = (props) => {
                 [FirebaseEvents.PROP.PLAYER_ID]: playerId,
                 [FirebaseEvents.PROP.HUNCH]: hunch
             });
-            return roomPushToList('hunches', {
+            roomPushToList('hunches', {
                 text: hunch
             });
+            return true;
         }
     };
 
