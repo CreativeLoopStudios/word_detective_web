@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function WordDetectivesAskQuestions(props) {
+function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clues }) {
     const classes = useStyles();
 
     const [questionInput, setQuestionInput] = useState("");
@@ -21,13 +21,13 @@ function WordDetectivesAskQuestions(props) {
     };
 
     const handleQuestionSend = (text) => {
-        const normalizedQuestions = props.questions.map(q => normalizeText(q.question));
+        const normalizedQuestions = questions.map(q => normalizeText(q.question));
         const normalizedText = normalizeText(text);
         const isAlreadyAsked = normalizedQuestions.includes(normalizedText);
 
         if (!isAlreadyAsked) {
             setQuestionInput("");
-            props.sendQuestion(text);
+            sendQuestion(text);
         }
         setQuestionAlreadyAsked(isAlreadyAsked);
     };
@@ -40,11 +40,11 @@ function WordDetectivesAskQuestions(props) {
 
     return (
         <>
-            {props.isWordMaster && (
+            {isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Perguntas sendo feitas pelos Word Detectives, confira abaixo assim que forem feitas:</h3>
                     <ul>
-                        {props.questions.map((q, index) => (
+                        {questions.map((q, index) => (
                             <div key={index}>
                                 <li className={classes.question}>
                                     {q.question}
@@ -55,11 +55,11 @@ function WordDetectivesAskQuestions(props) {
                 </Grid>
             )}
 
-            {!props.isWordMaster && (
+            {!isWordMaster && (
                 <>
-                {props.clues && (
+                {clues && (
                     <Grid item xs={12}>
-                        <Clues clues={props.clues} />
+                        <Clues clues={clues} />
                     </Grid>
                 )}
                 <Grid item xs={12}>

@@ -11,17 +11,17 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function WordMasterChooseQuestions(props) {
+function WordMasterChooseQuestions({ isWordMaster, questions, sendAnswer }) {
     const classes = useStyles();
 
     return (
         <>
-            {props.isWordMaster && (
+            {isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Escolha a pergunta e a sua resposta:</h3>
 
                     <ul>
-                        {props.questions.map((q, index) => (
+                        {questions.map((q, index) => (
                             <div key={index}>
                                 <li className={classes.question}>
                                     {q.question}
@@ -30,7 +30,7 @@ function WordMasterChooseQuestions(props) {
                                     variant="contained"
                                     color="primary"
                                     onClick={() =>
-                                        props.sendAnswer(index, "SIM", q.player)
+                                        sendAnswer(index, "SIM", q.player)
                                     }
                                 >
                                     SIM
@@ -39,7 +39,7 @@ function WordMasterChooseQuestions(props) {
                                     variant="contained"
                                     color="secondary"
                                     onClick={() =>
-                                        props.sendAnswer(index, "NÃO", q.player)
+                                        sendAnswer(index, "NÃO", q.player)
                                     }
                                 >
                                     NÃO
@@ -50,12 +50,12 @@ function WordMasterChooseQuestions(props) {
                 </Grid>
             )}
 
-            {!props.isWordMaster && (
+            {!isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Perguntas enviadas ao Word Master:</h3>
 
                     <ul>
-                        {props.questions.map((q, index) => (
+                        {questions.map((q, index) => (
                             <li key={index} className={classes.question}>
                                 {q.question}
                             </li>

@@ -76,11 +76,11 @@ class Firebase {
             state: '',
             players: {},
             heartbeats: {},
-            //categories: categories,
             turns: 0,
             rounds: 0,
             word_of_the_round: '',
             category_of_the_round: {},
+            playerWhoDiscoveredWord: null,
             questions: {},
             question_answered: null,
             clues: {}

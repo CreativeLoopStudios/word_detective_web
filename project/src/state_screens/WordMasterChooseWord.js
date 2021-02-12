@@ -7,26 +7,26 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function WordMasterChooseWord(props) {
+function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory, onClickWord }) {
     const classes = useStyles();
 
     return (
         <>
-            {props.isWordMaster && (
+            {isWordMaster && (
                 <Grid item xs={12}>
                     {
-                        props.categories.length > 0 && props.words.length === 0 && (
+                        categories.length > 0 && words.length === 0 && (
                             <>
                                 <h2>Escolha uma categoria:</h2>
 
                                 <div>
-                                    {props.categories.map((category) => (
+                                    {categories.map((category) => (
                                         <Button
                                             variant="contained"
                                             color="primary"
                                             key={category.id}
                                             className={classes.word}
-                                            onClick={() => props.onClickCategory(category)}
+                                            onClick={() => onClickCategory(category)}
                                         >
                                             {category.name}
                                         </Button>
@@ -37,18 +37,18 @@ function WordMasterChooseWord(props) {
                     }
 
                     {
-                        props.categories.length > 0 && props.words.length > 0 && (
+                        categories.length > 0 && words.length > 0 && (
                             <>
                                 <h2>Escolha uma palavra para os detetives:</h2>
 
                                 <div>
-                                    {props.words.map((word, idx) => (
+                                    {words.map((word, idx) => (
                                         <Button
                                             variant="contained"
                                             color="primary"
                                             key={idx}
                                             className={classes.word}
-                                            onClick={() => props.onClickWord(word)}
+                                            onClick={() => onClickWord(word)}
                                         >
                                             {word}
                                         </Button>
@@ -60,7 +60,7 @@ function WordMasterChooseWord(props) {
                 </Grid>
             )}
 
-            {!props.isWordMaster && (
+            {!isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Aguarde o Word Master escolher a palavra da rodada</h3>
                 </Grid>

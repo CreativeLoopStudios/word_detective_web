@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function ShowQuestionsChosed(props) {
+function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, sendHunchToDiscoverWord }) {
     const classes = useStyles();
 
     const [hunchInput, setHunchInput] = useState("");
@@ -17,14 +17,14 @@ function ShowQuestionsChosed(props) {
     const handleKeyDown = async (event) => {
         if (event.key === "Enter") {
             setHunchInput("");
-            const error = await props.sendHunchToDiscoverWord(hunchInput);
+            const error = await sendHunchToDiscoverWord(hunchInput);
             setError(error);
         }
     };
 
     const onClickButton = async () => {
         setHunchInput("");
-        const error = await props.sendHunchToDiscoverWord(hunchInput)
+        const error = await sendHunchToDiscoverWord(hunchInput)
         setError(error);
     };
 
@@ -33,11 +33,11 @@ function ShowQuestionsChosed(props) {
             <h3>Pergunta escolhida do Word Master:</h3>
 
             {
-                props.question && props.answer ? (
+                question && answer ? (
                 <ul>
-                    <li className={classes.question}>{props.question}</li>
+                    <li className={classes.question}>{question}</li>
                     <li className={classes.question}>
-                        Resposta: <b>{props.answer}</b>
+                        Resposta: <b>{answer}</b>
                     </li>
                 </ul>
                 ) : (
@@ -47,26 +47,26 @@ function ShowQuestionsChosed(props) {
                 )
             }
 
-            {props.clues && (
-                <Clues clues={props.clues} />
+            {clues && (
+                <Clues clues={clues} />
             )}
 
-            {props.isWordMaster && props.hunches && props.hunches.length === 0 && (
+            {isWordMaster && hunches && hunches.length === 0 && (
                 <h3>Aguardando palpites dos Word Detectives</h3>
             )}
 
-            {props.isWordMaster && props.hunches && props.hunches.length > 0 && (
+            {isWordMaster && hunches && hunches.length > 0 && (
                 <div>
                     <h3>Palpites</h3>
                     <ul>
-                        {props.hunches.map((hunch, i) => (
+                        {hunches.map((hunch, i) => (
                             <li key={i}>{hunch.text}</li>
                         ))}
                     </ul>
                 </div>
             )}
 
-            {!props.isWordMaster && (
+            {!isWordMaster && (
                 <>
                     <h3>Dê o seu palpite da palavra:</h3>
 

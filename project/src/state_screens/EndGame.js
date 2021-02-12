@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function EndGame(props) {
+function EndGame({ players }) {
     const classes = useStyles();
 
     return (
@@ -24,7 +24,7 @@ function EndGame(props) {
             <h3>Pontuação final!</h3>
 
             <ul>
-                {props.players.map((p, index) => {
+                {players.map((p, index) => {
                     let className = classes.default;
                     switch (index) {
                         case 0:

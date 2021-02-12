@@ -70,6 +70,8 @@ const Game = (props) => {
 
     const [playersByScore, setPlayersByScore] = useState([]);
 
+    const [playerWhoDiscoveredWord, setPlayerWhoDiscoveredWord] = useState(null);
+
     const [rounds, setRounds] = useState(0);
     const [turns, setTurns] = useState(0);
 
@@ -200,6 +202,7 @@ const Game = (props) => {
         await updateRoom({
             state: GameState.END_ROUND,
             turns: 0,
+            playerWhoDiscoveredWord: playerWhoGuessed ? playerWhoGuessed.id : null,
             ...wordMasterWithScore,
             ...playerWhoGuessedWithScore
         });
@@ -208,7 +211,8 @@ const Game = (props) => {
     const endRoundWithoutPoints = useCallback(() => {
         return updateRoom({
             state: GameState.END_ROUND,
-            turns: 0
+            turns: 0,
+            playerWhoDiscoveredWord: null
         });
     }, [updateRoom]);
 
@@ -279,7 +283,8 @@ const Game = (props) => {
             questions: null,
             clues: null,
             word_of_the_round: "",
-            rounds: newRound
+            rounds: newRound,
+            playerWhoDiscoveredWord: null
         };
         data[`/players/${prevWordMasterId}/role`] = 'word_detective';
         data[`/players/${prevWordMasterId}/playedAsWordMaster`] = true;
@@ -316,6 +321,8 @@ const Game = (props) => {
 
             setWordMaster(playersByCreation.find(player => player.role === 'word_master'));
             setWordDetectives(playersByCreation.filter(player => player.role === 'word_detective'));
+
+            setPlayerWhoDiscoveredWord(playersByCreation.find(p => p.id === room.playerWhoDiscoveredWord));
 
             setQuestions(Object.values(room.questions || {}));
             setQuestionAnswered(room.question_answered || {});
@@ -505,7 +512,7 @@ const Game = (props) => {
                 )}
 
                 {currentGameState === GameState.END_ROUND && (
-                    <EndRound word={wordOfRound} />
+                    <EndRound word={wordOfRound} playerWhoDiscovered={playerWhoDiscoveredWord} />
                 )}
 
                 {currentGameState === GameState.END_GAME && (
