@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import Clues from '../components/Clues';
+import SearchIcon from "@material-ui/icons/Search";
 import { makeStyles, Button, Grid, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     word: {
         margin: 16,
     },
+    icon: {
+        fontSize: 80
+    }
 }));
 
 function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clues }) {
@@ -40,6 +44,10 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
     return (
         <>
+            <Grid item xs={12}>
+                <SearchIcon color="primary" className={classes.icon} />
+            </Grid>
+
             {isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Perguntas sendo feitas pelos Word Detectives, confira abaixo assim que forem feitas:</h3>

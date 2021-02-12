@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { makeStyles, Grid, TextField, Button } from "@material-ui/core";
+import LocationSearchingIcon from "@material-ui/icons/LocationSearching";
 import Clues from '../components/Clues';
 
 const useStyles = makeStyles((theme) => ({
     question: {
         fontSize: 24,
     },
+    icon: {
+        fontSize: 80
+    }
 }));
 
 function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, sendHunchToDiscoverWord }) {
@@ -50,6 +54,10 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
             {clues && (
                 <Clues clues={clues} />
             )}
+
+            <Grid item xs={12}>
+                <LocationSearchingIcon color="primary" className={classes.icon} />
+            </Grid>
 
             {isWordMaster && hunches && hunches.length === 0 && (
                 <h3>Aguardando palpites dos Word Detectives</h3>
