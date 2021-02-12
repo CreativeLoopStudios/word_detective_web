@@ -63,16 +63,8 @@ class Firebase {
 
     createNewRoom = async (creatorId) => {
         const res = await this.db.collection(ROOMS_COLLECTION).add({ createdBy: creatorId, is_private: true });
-        /*const res = await this.db.collection(ROOMS_COLLECTION).add({
-            createdBy: creatorId,
-            name: roomName,
-            categories: categories,
-            number_of_players: numberOfPlayers,
-            is_private: isPrivate
-        });*/
-        
+
         await this.realtimeDb.ref(ROOMS_COLLECTION + '/' + res.id).set({
-            host: '',
             state: '',
             players: {},
             heartbeats: {},
