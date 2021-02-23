@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
 function PlayerInfo(props) {
     const classes = useStyles();
-    const { wordMaster, word, wordDetectives, category, host } = props;
+    const { wordMaster, word, wordDetectives, category, host, rounds } = props;
 
     return (
         <>
@@ -25,6 +25,11 @@ function PlayerInfo(props) {
                     <p>{category.name}</p>
                 </Grid>
             }
+
+            <Grid item xs={12}>
+                <h2>Rodada</h2>
+                <p>{rounds + 1}</p>
+            </Grid>
 
             <Grid item xs>
                 <h2>Word Master</h2>

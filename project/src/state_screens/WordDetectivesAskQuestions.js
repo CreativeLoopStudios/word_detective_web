@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Clues from '../components/Clues';
 import SearchIcon from "@material-ui/icons/Search";
-import { makeStyles, Button, Grid, TextField } from "@material-ui/core";
+import { makeStyles, Button, Grid, TextField, InputAdornment } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     word: {
@@ -74,6 +74,10 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                     <TextField
                         id="standard-basic"
                         label="Qual sua pergunta para o Word Master?"
+                        placeholder="Escreva a pergunta de sim/não para o Word Master..."
+                        InputProps={{
+                            endAdornment: <InputAdornment position="start">?</InputAdornment>
+                        }}
                         fullWidth
                         value={questionInput}
                         onChange={(event) =>

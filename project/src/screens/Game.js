@@ -142,6 +142,9 @@ const Game = (props) => {
     };
 
     const sendQuestionToWordMaster = (question) => {
+        if (question.indexOf('?') === -1) {
+            question += '?';
+        }
         firebase.logEvent(FirebaseEvents.EVENTS.ASKED_QUESTION, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
             [FirebaseEvents.PROP.PLAYER_ID]: playerId,
@@ -203,6 +206,7 @@ const Game = (props) => {
             state: GameState.END_ROUND,
             turns: 0,
             playerWhoDiscoveredWord: playerWhoGuessed ? playerWhoGuessed.id : null,
+            hunches: null,
             ...wordMasterWithScore,
             ...playerWhoGuessedWithScore
         });
@@ -212,7 +216,8 @@ const Game = (props) => {
         return updateRoom({
             state: GameState.END_ROUND,
             turns: 0,
-            playerWhoDiscoveredWord: null
+            playerWhoDiscoveredWord: null,
+            hunches: null
         });
     }, [updateRoom]);
 
@@ -456,6 +461,7 @@ const Game = (props) => {
                     category={categoryOfRound}
                     word={isWordMaster ? wordOfRound : null}
                     host={host}
+                    rounds={rounds}
                 />
 
                 <Grid item xs={12}>
