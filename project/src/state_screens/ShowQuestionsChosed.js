@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { makeStyles, Grid, TextField, Button } from "@material-ui/core";
 import LocationSearchingIcon from "@material-ui/icons/LocationSearching";
 import Clues from '../components/Clues';
+import { useFocusOnRender } from "../hooks";
 
 const useStyles = makeStyles((theme) => ({
     question: {
@@ -15,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
 function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, sendHunchToDiscoverWord }) {
     const classes = useStyles();
 
+    const hunchInputRef = useFocusOnRender(null)
     const [hunchInput, setHunchInput] = useState("");
     const [error, setError] = useState(false);
 
@@ -81,6 +83,7 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
                     <Grid item xs={12}>
                         <TextField
                             id="standard-basic"
+                            inputRef={hunchInputRef}
                             label="Escreva seu palpite"
                             fullWidth
                             value={hunchInput}

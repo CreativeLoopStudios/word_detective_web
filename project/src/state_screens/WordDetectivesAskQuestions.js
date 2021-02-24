@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Clues from '../components/Clues';
 import SearchIcon from "@material-ui/icons/Search";
 import { makeStyles, Button, Grid, TextField, InputAdornment } from "@material-ui/core";
+import { useFocusOnRender } from "../hooks";
 
 const useStyles = makeStyles((theme) => ({
     word: {
@@ -15,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
 function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clues }) {
     const classes = useStyles();
 
+    const questionInputRef = useFocusOnRender(null)
     const [questionInput, setQuestionInput] = useState("");
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
 
@@ -73,6 +75,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                 <Grid item xs={12}>
                     <TextField
                         id="standard-basic"
+                        inputRef={questionInputRef}
                         label="Qual sua pergunta para o Word Master?"
                         placeholder="Escreva a pergunta de sim/não para o Word Master..."
                         InputProps={{
