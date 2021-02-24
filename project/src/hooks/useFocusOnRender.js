@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function useFocusOnRender (initialValue) {
     const inputRef = useRef(initialValue)
@@ -7,7 +7,7 @@ export default function useFocusOnRender (initialValue) {
         if (inputRef.current != null) {
             inputRef.current.focus()
         }
-    }, [inputRef.current]);
+    }, [inputRef]);
 
     return inputRef
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Clues from '../components/Clues';
 import SearchIcon from "@material-ui/icons/Search";
 import { makeStyles, Button, Grid, TextField, InputAdornment } from "@material-ui/core";
