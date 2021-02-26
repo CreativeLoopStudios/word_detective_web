@@ -1,42 +1,60 @@
 import React from 'react';
-import { Button as MuiButton, makeStyles } from '@material-ui/core'
+import { Button as MuiButton, makeStyles, withStyles } from '@material-ui/core'
 import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    borderRadius: '3rem',
-    fontWeight: 'bold'
+    borderRadius: '2rem',
+    fontWeight: 'bold',
+    padding: '.9rem'
   },
 }));
 
 /**
  * Primary UI component for user interaction
  */
-export const Button = ({ primary, backgroundColor, size, label, ...props }) => {
+export const Button = ({ kind, backgroundColor, hoverColor, size, label, ...props }) => {
+  const CustomButton = withStyles(theme => {
+    const bg = backgroundColor || theme.palette[kind].main;
+    const hc = hoverColor || theme.palette[kind].light;
+    return {
+      root: {
+        backgroundColor: bg,
+        color: theme.palette.getContrastText(bg),
+        '&:hover': {
+          backgroundColor: hc,
+        },
+      }
+    }
+  })(MuiButton);
+
   const classes = useStyles();
   return (
-    <MuiButton
+    <CustomButton
       variant="contained"
       disableElevation
-      size={size || "medium"}
-      color={backgroundColor || "secondary"}
+      size={size}
       className={classes.root}
       {...props}
     >
       {label}
-    </MuiButton>
+    </CustomButton>
   );
 };
 
 Button.propTypes = {
   /**
-   * Is this the principal call to action on the page?
+   * The button color style
    */
-  primary: PropTypes.bool,
+  kind: PropTypes.oneOf(['primary', 'secondary', 'info']),
   /**
    * What background color to use
    */
   backgroundColor: PropTypes.string,
+  /**
+   * What background color to use when hovering
+   */
+  hoverColor: PropTypes.string,
   /**
    * How large should the button be?
    */
@@ -53,6 +71,7 @@ Button.propTypes = {
 
 Button.defaultProps = {
   backgroundColor: null,
+  hoverColor: undefined,
   primary: false,
   size: 'medium',
   onClick: undefined,
