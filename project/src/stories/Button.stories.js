@@ -1,25 +1,30 @@
 import React from 'react';
 
-import { Button } from './Button';
+import { Button } from '../components/Button';
 
 export default {
-  title: 'Example/Button',
+  title: 'WD/Button',
   component: Button,
   argTypes: {
     backgroundColor: { control: 'color' },
-  },
+    hoverColor: { control: 'color' },
+    variant: {
+      control: { type: 'select', options: ['contained', 'outlined'] }
+    }
+  }, 
 };
 
 const Template = (args) => <Button {...args} />;
 
 export const Primary = Template.bind({});
 Primary.args = {
-  primary: true,
+  kind: 'primary',
   label: 'Button',
 };
 
 export const Secondary = Template.bind({});
 Secondary.args = {
+  kind: 'secondary',
   label: 'Button',
 };
 
@@ -32,5 +37,11 @@ Large.args = {
 export const Small = Template.bind({});
 Small.args = {
   size: 'small',
+  label: 'Button',
+};
+
+export const Outlined = Template.bind({});
+Outlined.args = {
+  variant: 'outlined',
   label: 'Button',
 };
