@@ -8,6 +8,9 @@ export default {
   argTypes: {
     backgroundColor: { control: 'color' },
     hoverColor: { control: 'color' },
+    variant: {
+      control: { type: 'select', options: ['contained', 'outlined'] }
+    }
   }, 
 };
 
@@ -34,5 +37,11 @@ Large.args = {
 export const Small = Template.bind({});
 Small.args = {
   size: 'small',
+  label: 'Button',
+};
+
+export const Outlined = Template.bind({});
+Outlined.args = {
+  variant: 'outlined',
   label: 'Button',
 };

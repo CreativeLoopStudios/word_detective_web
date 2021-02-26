@@ -9,20 +9,23 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
     padding: '1.1rem',
     fontFamily: 'gothic, sans-serif',
+    borderWidth: '.2rem',
   },
 }));
 
 /**
  * Primary UI component for user interaction
  */
-export const Button = ({ kind, backgroundColor, hoverColor, size, label, ...props }) => {
+export const Button = ({ kind, variant, backgroundColor, hoverColor, size, label, ...props }) => {
   const CustomButton = withStyles(theme => {
-    const bg = backgroundColor || theme.palette[kind].main;
+    const mainColor = backgroundColor || theme.palette[kind].main;
+    const bg = variant === "contained" ?  mainColor : undefined;
     const hc = hoverColor || theme.palette[kind].light;
     return {
       root: {
+        borderColor: mainColor,
         backgroundColor: bg,
-        color: theme.palette.getContrastText(bg),
+        color: variant === "contained" ? theme.palette.getContrastText(bg) : mainColor,
         '&:hover': {
           backgroundColor: hc,
         },
@@ -33,7 +36,7 @@ export const Button = ({ kind, backgroundColor, hoverColor, size, label, ...prop
   const classes = useStyles();
   return (
     <CustomButton
-      variant="contained"
+      variant={variant}
       disableElevation
       size={size}
       className={classes.root}
@@ -49,6 +52,10 @@ Button.propTypes = {
    * The button color style
    */
   kind: PropTypes.oneOf(['primary', 'secondary', 'info']),
+  /**
+   * The button variant style
+   */
+  variant: PropTypes.oneOf(['contained', 'outlined']),
   /**
    * What background color to use
    */
@@ -77,4 +84,5 @@ Button.defaultProps = {
   hoverColor: undefined,
   size: 'medium',
   onClick: undefined,
+  variant: 'contained',
 };
