@@ -70,9 +70,9 @@ Button.propTypes = {
 };
 
 Button.defaultProps = {
+  kind: 'primary',
   backgroundColor: null,
   hoverColor: undefined,
-  primary: false,
   size: 'medium',
   onClick: undefined,
 };
