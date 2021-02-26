@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -9,6 +9,7 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Home, Lobby, Game } from "./screens";
+import theme from './themes';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -36,36 +37,38 @@ function App() {
 
     return (
         <Router>
-            <CssBaseline />
-            <Container maxWidth="lg">
-                <AppBar position="static">
-                    <Toolbar>
-                        <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            color="inherit"
-                            aria-label="menu"
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography variant="h6" className={classes.title}>
-                            Word Detective Online
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Container maxWidth="lg">
+                    <AppBar position="static">
+                        <Toolbar>
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                color="inherit"
+                                aria-label="menu"
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Typography variant="h6" className={classes.title}>
+                                Word Detective Online
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
 
-                <Switch>
-                    <Route path="/:roomId/game">
-                        <Game />
-                    </Route>
-                    <Route path="/:roomId/lobby">
-                        <Lobby />
-                    </Route>
-                    <Route path="/">
-                        <Home />
-                    </Route>
-                </Switch>
-            </Container>
+                    <Switch>
+                        <Route path="/:roomId/game">
+                            <Game />
+                        </Route>
+                        <Route path="/:roomId/lobby">
+                            <Lobby />
+                        </Route>
+                        <Route path="/">
+                            <Home />
+                        </Route>
+                    </Switch>
+                </Container>
+            </ThemeProvider>
         </Router>
     );
 }
