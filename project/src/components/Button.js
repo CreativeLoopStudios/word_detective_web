@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button as MuiButton, makeStyles, withStyles } from '@material-ui/core'
 import PropTypes from 'prop-types';
-import '../fonts/gothic.css';
 
 const useStyles = makeStyles((theme) => ({
   root: {
