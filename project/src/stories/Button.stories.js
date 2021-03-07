@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Button } from '../components/Button';
+import '../fonts/gothic.css';
 
 export default {
   title: 'WD/Button',

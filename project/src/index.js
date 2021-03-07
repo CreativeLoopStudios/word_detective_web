@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import "fontsource-roboto";
+import './fonts/gothic.css';
 import Firebase, { FirebaseContext } from "./firebase";
 import { SessionContextProvider } from "./context/Session";
 
