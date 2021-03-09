@@ -1,5 +1,5 @@
 import React from "react";
-import { InputBase, makeStyles, withStyles } from "@material-ui/core";
+import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
 import PropTypes from "prop-types";
 
 const useStyles = makeStyles((theme) => ({
@@ -7,6 +7,12 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: "bold",
         fontFamily: "gothic, sans-serif",
     },
+    label: {
+        color: 'white',
+        fontFamily: "gothic, sans-serif",
+        fontSize: '0.9rem',
+        marginBottom: '1rem'
+    }
 }));
 
 /**
@@ -17,24 +23,37 @@ export const Input = ({ label, placeholder, type, onChange, ...props }) => {
     const CustomInput = withStyles((theme) => {
         return {
             root: {
-                '& .MuiInputBase-input': {
+                "& .MuiInputBase-input": {
                     borderRadius: 30,
-                    height: '2rem',
-                    textAlign: 'center',
-                    background: '#E3E3E3 0% 0% no-repeat padding-box'
-                }
+                    height: "2rem",
+                    textAlign: "center",
+                    background: "#E3E3E3 0% 0% no-repeat padding-box",
+                },
             },
         };
     })(InputBase);
 
     return (
-        <CustomInput
-            className={classes.root}
-            placeholder={placeholder}
-            type={type}
-            onChange={onChange}
-            {...props}
-        />
+        <>
+            <Grid container direction="column">
+                {
+                    label &&
+                    <Grid item xs={12} className={classes.label}>
+                        <label htmlFor="input">{label}</label>
+                    </Grid>
+                }
+                <Grid item xs={12}>
+                    <CustomInput
+                        id="input"
+                        className={classes.root}
+                        placeholder={placeholder}
+                        type={type}
+                        onChange={onChange}
+                        {...props}
+                    />
+                </Grid>
+            </Grid>
+        </>
     );
 };
 
