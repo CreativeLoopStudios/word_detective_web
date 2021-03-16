@@ -1,5 +1,7 @@
 import React from 'react';
-import Background from '../components/Background';
+
+import { Background } from '../components';
+
 import '../fonts/gothic.css';
 
 export default {

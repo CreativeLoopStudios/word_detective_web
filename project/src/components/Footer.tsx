@@ -19,7 +19,7 @@ const useTypes = makeStyles(() => ({
     }
 }));
 
-type Props = {
+export type Props = {
     onClickFacebook: () => void;
     onClickInstagram: () => void;
     onClickYoutube: () => void;

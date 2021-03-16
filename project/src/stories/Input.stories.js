@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Input } from "../components/Input";
+import { Input } from "../components";
+
 import "../fonts/gothic.css";
 
 export default {

@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Primary UI component for user interaction
  */
-export const Input = ({ label, placeholder, type, onChange, ...props }) => {
+function Input({ label, placeholder, type, onChange, ...props }) {
     const classes = useStyles();
     const CustomInput = withStyles((theme) => {
         return {
@@ -82,3 +82,5 @@ Input.defaultProps = {
     type: "text",
     onChange: undefined,
 };
+
+export default Input;

@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Background = ({ children }) => {
+function Background({ children }) {
   const classes = useStyles();
 
   return (

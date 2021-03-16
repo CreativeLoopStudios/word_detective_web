@@ -14,11 +14,11 @@ const useTypes = makeStyles(() => ({
     },
 }));
 
-type Props = {
+export type Props = {
     children?: React.ReactNode,
 }
 
-const MainContainer = ({ children }: Props) => {
+function MainContainer({ children }: Props) {
     const classes = useTypes();
     return (
         <Paper elevation={1} className={classes.paper}>
@@ -27,7 +27,7 @@ const MainContainer = ({ children }: Props) => {
     );
 }
 
-MainContainer.propTypes = {}
-MainContainer.defaultProps = {}
+MainContainer.propTypes = {};
+MainContainer.defaultProps = {};
 
 export default MainContainer;
