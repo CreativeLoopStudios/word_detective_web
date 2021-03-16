@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, makeStyles, Paper } from "@material-ui/core";
+import { makeStyles, Paper } from "@material-ui/core";
 
 const useTypes = makeStyles(() => ({
     paper: {

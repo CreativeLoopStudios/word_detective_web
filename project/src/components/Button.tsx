@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button as MuiButton, makeStyles, withStyles } from '@material-ui/core'
+import { Button as MuiButton, makeStyles, Theme, withStyles } from '@material-ui/core'
 import PropTypes from 'prop-types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     borderRadius: '2rem',
     fontWeight: 'bold',
@@ -12,19 +12,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export type Props = {
+  kind: 'primary' | 'secondary' | 'info';
+  variant?: 'contained' | 'outlined';
+  backgroundColor?: string;
+  hoverColor?: string;
+  size?: 'small' | 'medium' | 'large';
+  label: string;
+  onClick: () => void;
+};
+
 /**
  * Primary UI component for user interaction
  */
-function Button({ kind, variant, backgroundColor, hoverColor, size, label, ...props }) {
-  const CustomButton = withStyles(theme => {
-    const mainColor = backgroundColor || theme.palette[kind].main;
-    const bg = variant === "contained" ?  mainColor : undefined;
-    const hc = hoverColor || theme.palette[kind].light;
+function Button({ kind, variant, backgroundColor, hoverColor, size, label, onClick }: Props) {
+  const classes = useStyles();
+
+  const CustomButton = withStyles(({ palette }: Theme) => {
+    const mainColor: string = backgroundColor || palette[kind].main;
+    const bg: string = variant === "contained" ?  mainColor : '';
+    const hc: string = hoverColor || palette[kind].light;
     return {
       root: {
         borderColor: mainColor,
         backgroundColor: bg,
-        color: variant === "contained" ? theme.palette.getContrastText(bg) : mainColor,
+        color: variant === "contained" ? palette.getContrastText(bg) : mainColor,
         '&:hover': {
           backgroundColor: hc,
         },
@@ -32,14 +44,13 @@ function Button({ kind, variant, backgroundColor, hoverColor, size, label, ...pr
     }
   })(MuiButton);
 
-  const classes = useStyles();
   return (
     <CustomButton
       variant={variant}
       disableElevation
       size={size}
       className={classes.root}
-      {...props}
+      onClick={onClick}
     >
       {label}
     </CustomButton>
