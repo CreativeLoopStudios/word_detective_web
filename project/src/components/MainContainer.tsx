@@ -18,7 +18,7 @@ type Props = {
     children?: React.ReactNode,
 }
 
-export const MainContainer = ({ children }: Props) => {
+const MainContainer = ({ children }: Props) => {
     const classes = useTypes();
     return (
         <Paper elevation={1} className={classes.paper}>
@@ -29,3 +29,5 @@ export const MainContainer = ({ children }: Props) => {
 
 MainContainer.propTypes = {}
 MainContainer.defaultProps = {}
+
+export default MainContainer;
