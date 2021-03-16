@@ -1,4 +1,8 @@
 import React from 'react';
+
+import { Story } from '@storybook/react';
+
+import { Props as FooterProps } from '../components/Footer';
 import { Footer } from '../components';
 
 export default {
@@ -13,7 +17,7 @@ export default {
   }
 };
 
-const Template = (args) => <Footer {...args} />
+const Template: Story<FooterProps> = (args) => <Footer {...args} />
 
 export const Dark = Template.bind({});
 Dark.parameters = {

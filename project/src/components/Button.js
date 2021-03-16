@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Primary UI component for user interaction
  */
-export const Button = ({ kind, variant, backgroundColor, hoverColor, size, label, ...props }) => {
+function Button({ kind, variant, backgroundColor, hoverColor, size, label, ...props }) {
   const CustomButton = withStyles(theme => {
     const mainColor = backgroundColor || theme.palette[kind].main;
     const bg = variant === "contained" ?  mainColor : undefined;
@@ -85,3 +85,5 @@ Button.defaultProps = {
   onClick: undefined,
   variant: 'contained',
 };
+
+export default Button;

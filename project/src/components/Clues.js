@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Clue = (props) => {
+function Clue (props) {
     const classes = useStyles();
 
     return (

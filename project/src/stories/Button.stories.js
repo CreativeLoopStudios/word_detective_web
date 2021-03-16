@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Button } from '../components/Button';
+import { Button } from '../components';
+
 import '../fonts/gothic.css';
 
 export default {
