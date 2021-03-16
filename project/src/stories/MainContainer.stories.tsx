@@ -1,5 +1,5 @@
 import React from 'react';
-import { MainContainer } from '../components/MainContainer.tsx';
+import { MainContainer } from '../components';
 import { Button } from '../components/Button';
 
 export default {

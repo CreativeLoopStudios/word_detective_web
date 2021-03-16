@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const Background = ({ children }) => {
+const Background = ({ children }) => {
   const classes = useStyles();
 
   return (
@@ -33,3 +33,5 @@ export const Background = ({ children }) => {
     </div>
   );
 };
+
+export default Background;
