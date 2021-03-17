@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, makeStyles, Paper } from "@material-ui/core";
+import { makeStyles, Paper } from "@material-ui/core";
 
 const useTypes = makeStyles(() => ({
     paper: {
@@ -7,10 +7,11 @@ const useTypes = makeStyles(() => ({
         minWidth: 500,
         minHeight: 300,
         borderRadius: '1rem',
-        backgroundColor: 'rgba(0,0,0,.8)',
+        backgroundColor: 'rgba(33,33,33,.8)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: '4rem'
     },
 }));
 

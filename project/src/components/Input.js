@@ -11,7 +11,8 @@ const useStyles = makeStyles((theme) => ({
         color: 'white',
         fontFamily: "gothic, sans-serif",
         fontSize: '0.9rem',
-        marginBottom: '1rem'
+        marginBottom: '1rem',
+        textAlign: 'center'
     }
 }));
 
@@ -26,6 +27,7 @@ function Input({ label, placeholder, type, onChange, ...props }) {
                 "& .MuiInputBase-input": {
                     borderRadius: 30,
                     height: "2rem",
+                    color: 'black',
                     textAlign: "center",
                     background: "#E3E3E3 0% 0% no-repeat padding-box",
                 },
@@ -49,6 +51,7 @@ function Input({ label, placeholder, type, onChange, ...props }) {
                         placeholder={placeholder}
                         type={type}
                         onChange={onChange}
+                        fullWidth
                         {...props}
                     />
                 </Grid>

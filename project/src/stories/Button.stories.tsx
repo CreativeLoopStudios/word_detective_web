@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { Story } from '@storybook/react';
+
+import { Props as ButtonProps } from '../components/Button';
 import { Button } from '../components';
 
 import '../fonts/gothic.css';
@@ -16,7 +19,7 @@ export default {
   }, 
 };
 
-const Template = (args) => <Button {...args} />;
+const Template:Story<ButtonProps> = (args) => <Button {...args} />;
 
 export const Primary = Template.bind({});
 Primary.args = {
