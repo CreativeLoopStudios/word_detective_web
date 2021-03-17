@@ -1,19 +1,18 @@
-import React, { useState, useContext, MouseEvent } from "react";
+import React, { useState, useContext, MouseEvent, ChangeEvent } from "react";
 
 import { useHistory } from "react-router-dom";
 
 import {
     makeStyles,
-    Button,
-    Grid,
-    TextField
+    Grid
 } from "@material-ui/core";
 
 import SessionContext from "../context/Session";
 import { withFirebase } from "../firebase/context";
 import Firebase from "../firebase";
+import { Input, Button } from "../components";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         display: "flex",
         flex: 1,
@@ -31,35 +30,48 @@ function Login({ firebase }: Props) {
 
     const [playerName, setPlayerName] = useState<string>(sessionContext.state.playerName);
 
-    async function handleSubmit(event: MouseEvent): Promise<void> {
+    function handleSubmit(event: MouseEvent): void {
         event.preventDefault();
-        const playerId = await firebase.signIn(sessionContext);
-        const roomId = await firebase.createNewRoom(playerId);
-        history.push(`/${roomId}/lobby`);
+        firebase.signIn(sessionContext)
+            .then((playerId) => {
+                firebase.createNewRoom(playerId)
+                    .then((roomId) => {
+                        history.push(`/${roomId}/lobby`);
+                    });
+            });
     };
 
+    function handleInputName(event: ChangeEvent<HTMLInputElement>): void {
+        setPlayerName(event.target.value);
+    }
+
     return (
-        <div className={classes.root}>
-            <Grid container spacing={3} direction="row">
-                <Grid item xs={12}>
-                    <h1>Home</h1>
-                </Grid>
+        <Grid container spacing={3} alignItems="center" direction="column">
+            <Grid item>
+                <h1>Home</h1>
+            </Grid>
 
-                <Grid item xs={12}>
-                    <TextField fullWidth label="Seu nome" value={playerName || ''} onChange={(ev) => setPlayerName(ev.target.value)} />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                    >
-                        Criar Sala
-                </Button>
+            <Grid container item justify="center">
+                <Grid item xs={4}>
+                    <Input
+                        placeholder=""
+                        label="Digite seu nome:"
+                        type="text"
+                        onChange={handleInputName}
+                        value={playerName}
+                    />
                 </Grid>
             </Grid>
-        </div>
+
+            <Grid item>
+                <Button
+                    kind="primary"
+                    label="Criar Sala"
+                    backgroundColor="#ff0000"
+                    onClick={handleSubmit}
+                />
+            </Grid>
+        </Grid>
     );
 }
 

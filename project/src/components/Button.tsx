@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Button as MuiButton, makeStyles, Theme, withStyles } from '@material-ui/core'
 import PropTypes from 'prop-types';
 
@@ -6,7 +6,7 @@ const useStyles = makeStyles(() => ({
   root: {
     borderRadius: '2rem',
     fontWeight: 'bold',
-    padding: '1.1rem',
+    padding: '0.8rem 3rem',
     fontFamily: 'gothic, sans-serif',
     borderWidth: '.2rem',
   },
@@ -19,7 +19,7 @@ export type Props = {
   hoverColor?: string;
   size?: 'small' | 'medium' | 'large';
   label: string;
-  onClick: () => void;
+  onClick: (event: MouseEvent) => void;
 };
 
 /**

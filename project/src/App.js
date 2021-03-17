@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -8,22 +8,17 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import { Grid, makeStyles } from "@material-ui/core";
 
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import { Home, Lobby, Game, Login } from "./screens";
 import theme from "./themes";
-import { Background } from "./components";
+import { Background, Footer, MainContainer } from "./components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        flexGrow: 1,
+        marginTop: '10rem'
     },
 }));
 
@@ -31,13 +26,13 @@ function App() {
     const classes = useStyles();
 
     useEffect(() => {
-        window.addEventListener("beforeunload", (ev) => {
-            ev.preventDefault();
-            const confirmationMessage =
-                "Você tem certeza que gostaria de sair?";
-            ev.returnValue = confirmationMessage;
-            return confirmationMessage;
-        });
+        // window.addEventListener("beforeunload", (ev) => {
+        //     ev.preventDefault();
+        //     const confirmationMessage =
+        //         "Você tem certeza que gostaria de sair?";
+        //     ev.returnValue = confirmationMessage;
+        //     return confirmationMessage;
+        // });
     }, []);
 
     return (
@@ -45,40 +40,30 @@ function App() {
             <ThemeProvider theme={theme}>
                 <Background>
                     <CssBaseline />
-                    <Container maxWidth="lg">
-                        <AppBar position="static">
-                            <Toolbar>
-                                <IconButton
-                                    edge="start"
-                                    className={classes.menuButton}
-                                    color="inherit"
-                                    aria-label="menu"
-                                >
-                                    <MenuIcon />
-                                </IconButton>
-                                <Typography
-                                    variant="h6"
-                                    className={classes.title}
-                                >
-                                    Word Detective Online
-                                </Typography>
-                            </Toolbar>
-                        </AppBar>
-
-                        <Switch>
-                            <Route path="/:roomId/game">
-                                <Game />
-                            </Route>
-                            <Route path="/:roomId/lobby">
-                                <Lobby />
-                            </Route>
-                            <Route path="/login">
-                                <Login />
-                            </Route>
-                            <Route path="/">
-                                <Home />
-                            </Route>
-                        </Switch>
+                    <Container disableGutters className={classes.root}>
+                        <Grid container justify="center" spacing={2}>
+                            <Grid item xs={8}>
+                                <MainContainer>
+                                    <Switch>
+                                        <Route path="/:roomId/game">
+                                            <Game />
+                                        </Route>
+                                        <Route path="/:roomId/lobby">
+                                            <Lobby />
+                                        </Route>
+                                        <Route path="/login">
+                                            <Login />
+                                        </Route>
+                                        <Route path="/">
+                                            <Home />
+                                        </Route>
+                                    </Switch>
+                                </MainContainer>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Footer />
+                            </Grid>
+                        </Grid>
                     </Container>
                 </Background>
             </ThemeProvider>
