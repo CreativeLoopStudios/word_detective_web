@@ -1,7 +1,11 @@
-import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import logo from '../assets/logo.png';
 import PropTypes from 'prop-types';
+import React from 'react';
+import logo from '../assets/logo.png';
+
+type StyleProps = {
+    color: string,
+}
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -11,9 +15,11 @@ const useStyles = makeStyles(() => ({
         height: '100px',
         overflow: 'hidden',
         borderRadius: '50%',
-        backgroundColor: 'black',
         padding: '100px'
     },
+    rootColor: ({ color }: StyleProps) => ({
+        backgroundColor: color,
+    }),
     img: {
         width: 'auto',
         height: '100%',
@@ -21,15 +27,16 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-export type Props = {
+export type LogoProps = {
     variant?: 'round',
+    color?: string,
 }
 
-function Logo({ variant }: Props) {
-    const classes = useStyles();
+function Logo({ variant, color }: LogoProps) {
+    const classes = useStyles({ color: color || 'black' });
 
     return (
-        <div className={classes.root}>
+        <div className={`${classes.root} ${classes.rootColor}`}>
             <img alt="Word Detective" src={logo} className={classes.img} />
         </div>
     )
@@ -37,9 +44,11 @@ function Logo({ variant }: Props) {
 
 Logo.propTypes = {
     variant: PropTypes.oneOf(['round']),
+    color: PropTypes.string,
 };
 Logo.defaultProps = {
     variant: 'round',
+    color: 'black',
 };
 
 export default Logo;

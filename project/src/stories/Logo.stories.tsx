@@ -2,12 +2,15 @@ import React from 'react';
 
 import { Story } from '@storybook/react';
 
-import { Props as LogoProps } from '../components/Logo';
+import { LogoProps } from '../components/Logo';
 import { Logo } from '../components';
 
 export default {
   title: 'WD/Logo',
-  component: Logo
+  component: Logo,
+  argTypes: {
+    color: { control: 'color' },
+  }
 };
 
 const Template: Story<LogoProps> = (args) => <Logo {...args} />
