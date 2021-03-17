@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Story } from '@storybook/react';
 
-import { LogoProps } from '../components/Logo';
+import { LogoProps, Sizes } from '../components/Logo';
 import { Logo } from '../components';
 
 export default {
@@ -10,6 +10,9 @@ export default {
   component: Logo,
   argTypes: {
     color: { control: 'color' },
+    size: {
+        control: { type: 'select', options: Object.keys(Sizes) }
+    }
   }
 };
 
