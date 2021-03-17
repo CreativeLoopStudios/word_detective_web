@@ -2,22 +2,12 @@ import React, { useState, useContext, MouseEvent, ChangeEvent } from "react";
 
 import { useHistory } from "react-router-dom";
 
-import {
-    makeStyles,
-    Grid
-} from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
 import SessionContext from "../context/Session";
 import { withFirebase } from "../firebase/context";
 import Firebase from "../firebase";
 import { Input, Button } from "../components";
-
-const useStyles = makeStyles(() => ({
-    root: {
-        display: "flex",
-        flex: 1,
-    },
-}));
 
 type Props = {
     firebase: Firebase
@@ -25,7 +15,6 @@ type Props = {
 
 function Login({ firebase }: Props) {
     const history = useHistory();
-    const classes = useStyles();
     const sessionContext = useContext(SessionContext);
 
     const [playerName, setPlayerName] = useState<string>(sessionContext.state.playerName);
