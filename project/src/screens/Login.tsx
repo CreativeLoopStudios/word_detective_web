@@ -48,7 +48,7 @@ function Login({ firebase }: Props) {
     return (
         <Grid container spacing={3} alignItems="center" direction="column">
             <Grid item>
-                <h1>Home</h1>
+                <h1>Logo</h1>
             </Grid>
 
             <Grid container item justify="center">

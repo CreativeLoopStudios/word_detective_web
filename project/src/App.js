@@ -12,7 +12,7 @@ import { Grid, makeStyles } from "@material-ui/core";
 
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-import { Home, Lobby, Game, Login } from "./screens";
+import { Lobby, Game, Login } from "./screens";
 import theme from "./themes";
 import { Background, Footer, MainContainer } from "./components";
 
@@ -51,11 +51,8 @@ function App() {
                                         <Route path="/:roomId/lobby">
                                             <Lobby />
                                         </Route>
-                                        <Route path="/login">
-                                            <Login />
-                                        </Route>
                                         <Route path="/">
-                                            <Home />
+                                            <Login />
                                         </Route>
                                     </Switch>
                                 </MainContainer>
