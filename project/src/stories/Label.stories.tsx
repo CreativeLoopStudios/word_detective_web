@@ -18,7 +18,9 @@ export default {
     },
     size: {
       control: { type: 'select', options: ['subtitle1', 'body1', 'body2', 'h1', 'h2', 'h3'] }
-    }
+    },
+    underline: { control: 'boolean' },
+    italic: { control: 'boolean' },
   }, 
 };
 
@@ -49,5 +51,23 @@ Bold.args = {
   bold: true,
   children: [
     'Bold text'
+  ]
+};
+
+export const Italic = Template.bind({});
+Italic.args = {
+  kind: 'primary',
+  italic: true,
+  children: [
+    'Italic text'
+  ]
+};
+
+export const Underline = Template.bind({});
+Underline.args = {
+  kind: 'primary',
+  underline: true,
+  children: [
+    'Underline text'
   ]
 };
