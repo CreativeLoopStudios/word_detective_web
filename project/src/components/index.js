@@ -5,6 +5,7 @@ import MainContainer from './MainContainer';
 import Background from './Background';
 import Button from './Button';
 import Input from './Input';
+import Label from './Label';
 
 export {
     PlayerInfo,
@@ -13,5 +14,6 @@ export {
     Background,
     MainContainer,
     Button,
-    Input
+    Input,
+    Label
 };
