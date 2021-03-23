@@ -15,10 +15,12 @@ export type Props = {
     bold?: boolean;
     kind: 'primary' | 'secondary';
     size?: 'subtitle1' | 'body1' | 'body2' | 'h1' | 'h2' | 'h3';
+    underline?: boolean;
+    italic?: boolean;
     children: React.ReactNode;
 }
 
-function Label({ kind, color, bold, size, children }: Props) {
+function Label({ kind, color, bold, size, underline, italic, children }: Props) {
     const classes = useTypes();
 
     const CustomTypography = withStyles(() => {
@@ -34,7 +36,9 @@ function Label({ kind, color, bold, size, children }: Props) {
         return {
           root: {
             color: color || textColor,
-            fontWeight: bold ? 'bold' : 'normal'
+            fontWeight: bold ? 'bold' : 'normal',
+            fontStyle: italic ? 'italic' : 'normal',
+            textDecoration: underline ? 'underline' : 'normal'
           }
         }
       })(Typography);
@@ -52,13 +56,17 @@ Label.propTypes = {
     color: PropTypes.string,
     bold: PropTypes.bool,
     kind: PropTypes.string,
-    size: PropTypes.string
+    size: PropTypes.string,
+    underline: PropTypes.bool,
+    italic: PropTypes.bool,
 };
 Label.defaultProps = {
     color: null,
     bold: false,
     kind: 'primary',
-    size: 'body1'
+    size: 'body1',
+    underline: false,
+    italic: false
 };
 
 export default Label;
