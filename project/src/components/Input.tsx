@@ -2,10 +2,13 @@ import React from "react";
 import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
 import PropTypes from "prop-types";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         fontWeight: "bold",
         fontFamily: "gothic, sans-serif",
+        '& input[type=number]': {
+            paddingRight: '1rem'
+        }
     },
     label: {
         color: 'white',
@@ -16,12 +19,16 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-/**
- * Primary UI component for user interaction
- */
-function Input({ label, placeholder, type, onChange, ...props }) {
+export type Props = {
+    label?: string;
+    placeholder?: string;
+    type: 'text' | 'password' | 'number';
+    onChange: () => void;
+}
+
+function Input({ label, placeholder, type, onChange }: Props) {
     const classes = useStyles();
-    const CustomInput = withStyles((theme) => {
+    const CustomInput = withStyles(() => {
         return {
             root: {
                 "& .MuiInputBase-input": {
@@ -52,7 +59,6 @@ function Input({ label, placeholder, type, onChange, ...props }) {
                         type={type}
                         onChange={onChange}
                         fullWidth
-                        {...props}
                     />
                 </Grid>
             </Grid>

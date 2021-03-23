@@ -1,5 +1,8 @@
 import React from "react";
 
+import { Story } from '@storybook/react';
+
+import { Props as InputProps } from '../components/Input';
 import { Input } from "../components";
 
 import "../fonts/gothic.css";
@@ -13,7 +16,7 @@ export default {
     component: Input,
 };
 
-const Template = (args) => <Input {...args} />;
+const Template: Story<InputProps> = (args) => <Input {...args} />;
 
 export const Basic = Template.bind({});
 Basic.args = {
