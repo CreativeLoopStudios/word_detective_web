@@ -1,14 +1,11 @@
 import React from "react";
-import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
+import { InputBase, Select as BaseSelect, Grid, makeStyles, withStyles, MenuItem } from "@material-ui/core";
 import PropTypes from "prop-types";
 
 const useStyles = makeStyles(() => ({
     root: {
         fontWeight: "bold",
-        fontFamily: "gothic, sans-serif",
-        '& input[type=number]': {
-            paddingRight: '1rem'
-        }
+        fontFamily: "gothic, sans-serif"
     },
     label: {
         color: 'white',
@@ -16,17 +13,20 @@ const useStyles = makeStyles(() => ({
         fontSize: '0.9rem',
         marginBottom: '1rem',
         textAlign: 'center'
+    },
+    options: {
+        fontFamily: "gothic, sans-serif",
+        fontSize: '0.9rem'
     }
 }));
 
 export type Props = {
     label?: string;
-    placeholder?: string;
-    type: 'text' | 'password' | 'number';
+    options: Array<string>;
     onChange: () => void;
 }
 
-function Input({ label, placeholder, type, onChange }: Props) {
+function Select({ label, options, onChange }: Props) {
     const classes = useStyles();
     const CustomInput = withStyles(() => {
         return {
@@ -37,6 +37,7 @@ function Input({ label, placeholder, type, onChange }: Props) {
                     color: 'black',
                     textAlign: "center",
                     background: "#E3E3E3 0% 0% no-repeat padding-box",
+                    paddingTop: '1rem'
                 },
             },
         };
@@ -51,43 +52,42 @@ function Input({ label, placeholder, type, onChange }: Props) {
                 </Grid>
             }
             <Grid item xs={12}>
-                <CustomInput
-                    id="input"
+                <BaseSelect
                     className={classes.root}
-                    placeholder={placeholder}
-                    type={type}
+                    input={<CustomInput />}
                     onChange={onChange}
                     fullWidth
-                />
+                >
+                    {
+                        options.map((op, index) => (
+                            <MenuItem key={index} value={op} className={classes.options}>{op}</MenuItem>
+                        ))
+                    }
+                </BaseSelect>
             </Grid>
         </Grid>
     );
 };
 
-Input.propTypes = {
+Select.propTypes = {
     /**
      * What label text is shown, but if not provided, will not show label
      */
     label: PropTypes.string,
     /**
-     * What placeholder of the input
-     */
-    placeholder: PropTypes.string,
-    /**
      * What type the input have
      */
-    type: PropTypes.oneOf(["text", "password", "number"]),
+    options: PropTypes.array,
     /**
      * Optional click handler
      */
     onChange: PropTypes.func,
 };
 
-Input.defaultProps = {
+Select.defaultProps = {
     label: undefined,
-    placeholder: undefined,
-    type: "text",
+    options: [],
     onChange: undefined,
 };
 
-export default Input;
+export default Select;
