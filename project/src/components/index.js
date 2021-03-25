@@ -7,6 +7,7 @@ import Button from './Button';
 import Input from './Input';
 import Label from './Label';
 import Select from './Select';
+import Checkbox from './Checkbox';
 
 export {
     PlayerInfo,
@@ -17,5 +18,6 @@ export {
     Button,
     Input,
     Label,
-    Select
+    Select,
+    Checkbox
 };
