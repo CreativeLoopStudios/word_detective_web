@@ -4,7 +4,7 @@ import React from 'react';
 import logo from '../assets/logo.png';
 
 export type LogoProps = {
-    variant?: 'round',
+    variant?: 'round' | 'rect',
     color?: string,
     size?: 'small' | 'medium' | 'large',
 }
@@ -18,18 +18,21 @@ export const Sizes = {
 type StyleProps = {
     color: string,
     size: number,
+    borderRadius: string,
+    horizontalPadding: number,
+    verticalPadding: number,
 }
 
 
 const useStyles = makeStyles(() => ({
-    root: ({ size }: StyleProps) => ({
+    root: ({ size, borderRadius, horizontalPadding, verticalPadding }: StyleProps) => ({
         display: 'inline-block',
         position: 'relative',
         width: size,
         height: size,
         overflow: 'hidden',
-        borderRadius: '50%',
-        padding: size,
+        borderRadius,
+        padding: `${verticalPadding}px ${horizontalPadding}px ${verticalPadding}px ${horizontalPadding}px`,
     }),
     rootColor: ({ color }: StyleProps) => ({
         backgroundColor: color,
@@ -42,8 +45,13 @@ const useStyles = makeStyles(() => ({
 }))
 
 function Logo({ variant, color, size }: LogoProps) {
-    const classes = useStyles({ color: color || 'black', 
-                                size: Sizes[size || 'medium'] });
+    const pixelSize = Sizes[size || 'medium'];
+    const classes = useStyles({color: color || 'black', 
+                               size: pixelSize, 
+                               borderRadius: variant === 'round' ? '50%' : '0',
+                               horizontalPadding: pixelSize,
+                               verticalPadding: pixelSize / (variant === 'rect' ? 2 : 1),
+                             });
 
     return (
         <div className={`${classes.root} ${classes.rootColor}`}>
@@ -53,7 +61,7 @@ function Logo({ variant, color, size }: LogoProps) {
 }
 
 Logo.propTypes = {
-    variant: PropTypes.oneOf(['round']),
+    variant: PropTypes.oneOf(['round', 'box']),
     color: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(Sizes)),
 };

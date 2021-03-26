@@ -19,3 +19,5 @@ export default {
 const Template: Story<LogoProps> = (args) => <Logo {...args} />
 
 export const Round = Template.bind({});
+export const Rect = Template.bind({});
+Rect.args = { variant: 'rect' };
