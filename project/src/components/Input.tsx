@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
 import PropTypes from "prop-types";
 
@@ -23,10 +23,11 @@ export type Props = {
     label?: string;
     placeholder?: string;
     type: 'text' | 'password' | 'number';
-    onChange: () => void;
+    value: string;
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({ label, placeholder, type, onChange }: Props) {
+function Input({ label, placeholder, type, value, onChange }: Props) {
     const classes = useStyles();
     const CustomInput = withStyles(() => {
         return {
@@ -57,6 +58,7 @@ function Input({ label, placeholder, type, onChange }: Props) {
                     placeholder={placeholder}
                     type={type}
                     onChange={onChange}
+                    value={value}
                     fullWidth
                 />
             </Grid>
@@ -77,6 +79,7 @@ Input.propTypes = {
      * What type the input have
      */
     type: PropTypes.oneOf(["text", "password", "number"]),
+    value: PropTypes.string,
     /**
      * Optional click handler
      */
@@ -87,6 +90,7 @@ Input.defaultProps = {
     label: undefined,
     placeholder: undefined,
     type: "text",
+    value: undefined,
     onChange: undefined,
 };
 
