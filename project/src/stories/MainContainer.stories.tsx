@@ -18,3 +18,13 @@ export const WithButton = Template.bind({});
 WithButton.args = { children : [ 
   <Button kind="primary" variant="contained" label="Botão" />
 ] };
+
+export const WithSidebar = Template.bind({});
+WithSidebar.args = {
+  sidebar: (
+    <Button kind="primary" variant="contained" label="Botão" />
+  ),
+  children : [ 
+    <Button kind="primary" variant="contained" label="Botão" />
+  ]
+};

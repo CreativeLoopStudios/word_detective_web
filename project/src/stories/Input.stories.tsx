@@ -22,6 +22,7 @@ export const Basic = Template.bind({});
 Basic.args = {
     label: "Digite seu nome:",
     placeholder: "Basic...",
+    value: "",
     type: "text",
 };
 Basic.parameters = {
@@ -32,4 +33,5 @@ export const WithoutLabel = Template.bind({});
 WithoutLabel.args = {
     placeholder: "Basic...",
     type: "text",
+    value: ""
 };
