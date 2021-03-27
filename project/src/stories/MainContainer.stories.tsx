@@ -3,7 +3,7 @@ import React from 'react';
 import { Story } from '@storybook/react';
 
 import { Props as MainContainerProps } from '../components/MainContainer';
-import { MainContainer, Button } from '../components';
+import { MainContainer, Button, Logo } from '../components';
 
 export default {
   title: 'WD/MainContainer',
@@ -14,9 +14,9 @@ const Template: Story<MainContainerProps> = (args) => <MainContainer {...args} /
 
 export const Empty = Template.bind({});
 
-export const WithButton = Template.bind({});
-WithButton.args = { children : [ 
-  <Button kind="primary" variant="contained" label="Botão" />
+export const WithLogo = Template.bind({});
+WithLogo.args = { children : [ 
+  <Logo/>
 ] };
 
 export const WithSidebar = Template.bind({});

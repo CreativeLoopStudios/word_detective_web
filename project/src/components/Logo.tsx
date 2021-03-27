@@ -33,6 +33,7 @@ const useStyles = makeStyles(() => ({
         overflow: 'hidden',
         borderRadius,
         padding: `${verticalPadding}px ${horizontalPadding}px ${verticalPadding}px ${horizontalPadding}px`,
+        boxSizing: 'content-box',
     }),
     rootColor: ({ color }: StyleProps) => ({
         backgroundColor: color,

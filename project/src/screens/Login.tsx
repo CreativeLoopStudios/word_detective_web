@@ -7,7 +7,7 @@ import { Grid } from "@material-ui/core";
 import SessionContext from "../context/Session";
 import { withFirebase } from "../firebase/context";
 import Firebase from "../firebase";
-import { Input, Button } from "../components";
+import { Input, Button, Logo } from "../components";
 
 type Props = {
     firebase: Firebase
@@ -37,7 +37,7 @@ function Login({ firebase }: Props) {
     return (
         <Grid container spacing={3} alignItems="center" direction="column">
             <Grid item>
-                <h1>Logo</h1>
+                <Logo variant="round" size="medium" />
             </Grid>
 
             <Grid container item justify="center">
