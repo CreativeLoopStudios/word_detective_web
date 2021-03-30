@@ -12,9 +12,8 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function PlayerInfo(props) {
+function PlayerInfo({ wordMaster, word, wordDetectives, category, host, rounds }) {
     const classes = useStyles();
-    const { wordMaster, word, wordDetectives, category, host, rounds } = props;
 
     return (
         <>

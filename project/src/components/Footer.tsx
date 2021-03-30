@@ -10,7 +10,7 @@ import youtubeIcon from '../assets/youtube.png';
 import twitterIcon from '../assets/twitter.png';
 import creativeLoopLogo from '../assets/creativeloop-logo.png';
 
-const useTypes = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
     logo: {
         height: '1rem'
     },
@@ -28,7 +28,7 @@ export type Props = {
 }
 
 function Footer({ onClickFacebook, onClickInstagram, onClickYoutube, onClickTwitter, onClickLogo }: Props) {
-    const classes = useTypes();
+    const classes = useStyles();
     
     return (
         <div>

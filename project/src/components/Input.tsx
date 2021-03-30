@@ -29,6 +29,7 @@ export type Props = {
 
 function Input({ label, placeholder, type, value, onChange }: Props) {
     const classes = useStyles();
+    
     const CustomInput = withStyles(() => {
         return {
             root: {

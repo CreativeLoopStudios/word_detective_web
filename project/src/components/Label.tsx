@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Typography, makeStyles, Theme, withStyles } from "@material-ui/core";
+import { Typography, makeStyles, withStyles } from "@material-ui/core";
 
 import PropTypes from 'prop-types';
 
-const useTypes = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
     root: {
         fontFamily: 'gothic, sans-serif'
     }
@@ -15,13 +15,14 @@ export type Props = {
     bold?: boolean;
     kind: 'primary' | 'secondary';
     size?: 'subtitle1' | 'body1' | 'body2' | 'h1' | 'h2' | 'h3';
+    inline?: boolean;
     underline?: boolean;
     italic?: boolean;
     children: React.ReactNode;
 }
 
-function Label({ kind, color, bold, size, underline, italic, children }: Props) {
-    const classes = useTypes();
+function Label({ kind, color, bold, size, inline, underline, italic, children }: Props) {
+    const classes = useStyles();
 
     const CustomTypography = withStyles(() => {
         let textColor: string | undefined;
@@ -34,15 +35,16 @@ function Label({ kind, color, bold, size, underline, italic, children }: Props) 
                 break;
         }
         return {
-          root: {
-            color: color || textColor,
-            fontWeight: bold ? 'bold' : 'normal',
-            fontStyle: italic ? 'italic' : 'normal',
-            textDecoration: underline ? 'underline' : 'normal'
-          }
+            root: {
+                color: color || textColor,
+                fontWeight: bold ? 'bold' : 'normal',
+                fontStyle: italic ? 'italic' : 'normal',
+                textDecoration: underline ? 'underline' : 'normal',
+                display: inline ? 'inline-block' : null
+            }
         }
-      })(Typography);
-    
+    })(Typography);
+
     return (
         <CustomTypography
             variant={size}
@@ -57,6 +59,7 @@ Label.propTypes = {
     bold: PropTypes.bool,
     kind: PropTypes.string,
     size: PropTypes.string,
+    inline: PropTypes.bool,
     underline: PropTypes.bool,
     italic: PropTypes.bool,
 };
@@ -65,6 +68,7 @@ Label.defaultProps = {
     bold: false,
     kind: 'primary',
     size: 'body1',
+    inline: false,
     underline: false,
     italic: false
 };
