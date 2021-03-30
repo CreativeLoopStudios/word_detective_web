@@ -10,6 +10,7 @@ import Select from './Select';
 import Checkbox from './Checkbox';
 import Logo from './Logo';
 import PlayerRanking from './PlayerRanking';
+import Timer from './Timer';
 
 export {
     PlayerInfo,
@@ -23,5 +24,6 @@ export {
     Select,
     Checkbox,
     Logo,
-    PlayerRanking
+    PlayerRanking,
+    Timer,
 };
