@@ -11,6 +11,7 @@ import Checkbox from './Checkbox';
 import Logo from './Logo';
 import PlayerRanking from './PlayerRanking';
 import Timer from './Timer';
+import Switch from './Switch';
 
 export {
     PlayerInfo,
@@ -26,4 +27,5 @@ export {
     Logo,
     PlayerRanking,
     Timer,
+    Switch,
 };
