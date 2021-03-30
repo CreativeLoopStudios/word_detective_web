@@ -3,7 +3,6 @@ import React from 'react';
 import { Story } from '@storybook/react';
 
 import { Props as MainContainerProps } from '../components/MainContainer';
-import { Props as PlayerRankingProps } from '../components/PlayerRanking';
 import { MainContainer, PlayerRanking } from '../components';
 
 export default {

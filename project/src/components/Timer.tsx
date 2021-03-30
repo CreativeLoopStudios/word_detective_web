@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, CircularProgress, makeStyles, Typography } from "@material-ui/core";
+import { Box, CircularProgress, makeStyles } from "@material-ui/core";
 
 export type Props = {
     value: number;

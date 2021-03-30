@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React  from 'react'
 import { Story } from '@storybook/react'
 import { Switch } from '../components'
 import { Props } from '../components/Switch'
