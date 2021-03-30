@@ -9,6 +9,7 @@ import Label from './Label';
 import Select from './Select';
 import Checkbox from './Checkbox';
 import Logo from './Logo';
+import PlayerRanking from './PlayerRanking';
 
 export {
     PlayerInfo,
@@ -22,4 +23,5 @@ export {
     Select,
     Checkbox,
     Logo,
+    PlayerRanking
 };

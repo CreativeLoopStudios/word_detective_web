@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Typography, makeStyles, Theme, withStyles } from "@material-ui/core";
+import { Typography, makeStyles, withStyles } from "@material-ui/core";
 
 import PropTypes from 'prop-types';
 
-const useTypes = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
     root: {
         fontFamily: 'gothic, sans-serif'
     }
@@ -21,7 +21,7 @@ export type Props = {
 }
 
 function Label({ kind, color, bold, size, underline, italic, children }: Props) {
-    const classes = useTypes();
+    const classes = useStyles();
 
     const CustomTypography = withStyles(() => {
         let textColor: string | undefined;

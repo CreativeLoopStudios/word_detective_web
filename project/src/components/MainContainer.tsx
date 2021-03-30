@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles, Paper } from "@material-ui/core";
 
-const useTypes = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
     paper: {
         maxWidth: 900,
         minWidth: 500,
@@ -35,7 +35,8 @@ export type Props = {
 }
 
 function MainContainer({ sidebar, children }: Props) {
-    const classes = useTypes();
+    const classes = useStyles();
+    
     return (
         <Paper elevation={1} className={classes.paper}>
             {children}
