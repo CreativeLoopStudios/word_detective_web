@@ -12,6 +12,9 @@ import { Math } from "../utils";
 type StyleProps = {
     backgroundImage: string;
     backgroundColor: string;
+    backgroundSize: string;
+    backgroundPosition: string;
+    border: string;
 }
 
 export const BackgroundColors = [
@@ -23,17 +26,17 @@ export const BackgroundColors = [
 const useStyles = makeStyles({
     item: {
     },
-    circle: ({ backgroundImage, backgroundColor }: StyleProps) => ({
+    circle: ({ backgroundImage, backgroundColor, backgroundSize, backgroundPosition, border }: StyleProps) => ({
         backgroundColor: backgroundColor,
         backgroundImage: `url(${backgroundImage})`,
-        backgroundPosition: 'center',
+        backgroundPosition: backgroundPosition,
         backgroundRepeat: 'no-repeat',
-        backgroundSize: '2rem',
+        backgroundSize: backgroundSize,
         borderRadius: 100,
-        border: '2px solid yellow',
+        border: border,
         padding: '0.5rem',
-        width: '1.5rem',
-        height: '1.5rem'
+        width: '1.8rem',
+        height: '1.8rem'
     })
 });
 
@@ -46,20 +49,26 @@ export type Props = {
 function PlayerRankingItem({ isWordMaster, playerName, score }: Props) {
     const classes = useStyles({
         backgroundImage: (isWordMaster) ? openBook : detective,
-        backgroundColor: (isWordMaster) ? 'red' : BackgroundColors[Math.randomInt(0, 3)]
+        backgroundColor: (isWordMaster) ? 'red' : BackgroundColors[Math.randomInt(0, 3)],
+        backgroundSize: (isWordMaster) ? '1.8rem' : '2.5rem',
+        backgroundPosition: (isWordMaster) ? 'center' : 'bottom',
+        border: (isWordMaster) ? '2px solid yellow' : 'none',
     });
 
     return (
-        <Grid container direction="row" item className={classes.item}>
-            <div className={classes.circle}></div>
+        <Grid container item className={classes.item} alignItems="center">
+            <Grid item xs={3}>
+                <div className={classes.circle}></div>
+            </Grid>
 
-            <Grid container item>
+            <Grid container direction="column" item xs={9}>
                 <Grid item>
-                    <Label>{playerName}</Label>
+                    <Label kind="secondary">{playerName}</Label>
                 </Grid>
 
                 <Grid item>
-                    <Label>{score}</Label>
+                    <Label inline bold>Pontos:</Label>&nbsp;
+                    <Label kind="secondary" inline bold>{score}</Label>
                 </Grid>
             </Grid>
         </Grid>

@@ -19,6 +19,7 @@ export default {
     size: {
       control: { type: 'select', options: ['subtitle1', 'body1', 'body2', 'h1', 'h2', 'h3'] }
     },
+    inline: { control: 'boolean' },
     underline: { control: 'boolean' },
     italic: { control: 'boolean' },
   }, 

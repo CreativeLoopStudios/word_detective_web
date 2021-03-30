@@ -25,7 +25,7 @@ function PlayerRanking({ players }: Props) {
     const classes = useStyles();
     
     return (
-        <Grid container className={classes.container}>
+        <Grid container className={classes.container} spacing={2}>
             {
                 players.map((player, index) => (
                     <PlayerRankingItem
