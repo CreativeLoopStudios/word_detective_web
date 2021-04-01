@@ -13,6 +13,7 @@ import PlayerRanking from './PlayerRanking';
 import Timer from './Timer';
 import Switch from './Switch';
 import AlertBox from './AlertBox';
+import QuestionsBox from './QuestionsBox';
 
 export {
     PlayerInfo,
@@ -29,5 +30,6 @@ export {
     PlayerRanking,
     Timer,
     Switch,
-    AlertBox
+    AlertBox,
+    QuestionsBox
 };

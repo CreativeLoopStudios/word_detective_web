@@ -6,7 +6,7 @@ const useStyles = makeStyles(() => ({
   root: {
     borderRadius: '2rem',
     fontWeight: 'bold',
-    padding: '0.8rem 3rem',
+    padding: '0.5rem 2rem',
     fontFamily: 'gothic, sans-serif',
     borderWidth: '.2rem',
   },
