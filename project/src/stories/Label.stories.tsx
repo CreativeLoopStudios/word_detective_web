@@ -17,7 +17,7 @@ export default {
       control: { type: 'select', options: ['primary', 'secondary'] }
     },
     size: {
-      control: { type: 'select', options: ['subtitle1', 'body1', 'body2', 'h1', 'h2', 'h3'] }
+      control: { type: 'select', options: ['subtitle1', 'body1', 'body2', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }
     },
     inline: { control: 'boolean' },
     underline: { control: 'boolean' },
