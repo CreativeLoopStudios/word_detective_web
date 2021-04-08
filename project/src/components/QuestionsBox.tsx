@@ -1,14 +1,11 @@
 import React, { MouseEvent } from 'react';
 
-import { Grid, makeStyles } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
 import PropTypes from 'prop-types';
 
 import Button from './Button';
 import Label from './Label';
-
-const useStyles = makeStyles(() => ({
-}));
 
 export type Props = {
     questions: Array<string>;
@@ -17,8 +14,6 @@ export type Props = {
 }
 
 function QuestionsBox({ questions, onClickAfirmative, onClickNegative }: Props) {
-    const classes = useStyles();
-    
     return (
         <Grid container item alignItems="center" spacing={4}>
             {
