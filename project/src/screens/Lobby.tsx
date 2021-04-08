@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback, MouseEvent } from "react";
 import { makeStyles, Button, Grid, TextField, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 import { useHistory, useParams } from "react-router-dom";
@@ -6,11 +6,14 @@ import { withFirebase } from "../firebase/context";
 import SessionContext from "../context/Session";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import GameState from "../state_of_play";
-import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
 import { database, firestore } from "firebase/app";
 import PlayerStatus from "../player_status";
 import { CreateRoom } from "../screens";
+
+import Firebase from "../firebase";
+import { HeartbeatData, Player } from "../types";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -19,39 +22,42 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function Lobby(props) {
-    const { roomId } = useParams();
+type Props = {
+    firebase: Firebase
+}
+
+function Lobby({ firebase }: Props) {
+    const { roomId } = useParams<{ roomId: string }>();
     const classes = useStyles();
     const history = useHistory();
 
     const sessionContext = useContext(SessionContext);
 
-    const [players, setPlayers] = useState([]);
-    const [copied, setCopied] = useState(false);
-    const [isHost, setIsHost] = useState(false);
-    const [playerName, setPlayerName] = useState(sessionContext.state.playerName);
-    const [heartbeatData, setHeartbeatData] = useState(null);
-    const [localClockStart, setLocalClockStart] = useState(null);
-    const [gameState, setGameState] = useState(null);
-    const [heartbeats, setHeartbeats] = useState({});
-    const [isRoomConfigured, setIsRoomConfigured] = useState(false);
-
-    const [isPlayerAdded, setIsPlayerAdded] = useState(false);
+    const { playerId } = sessionContext.state;
 
     const lobbyUrl = window.location.href;
-    const { playerId } = sessionContext.state;
-    const { firebase } = props;
+
+    const [players, setPlayers] = useState<Array<Player>>([]);
+    const [copied, setCopied] = useState<boolean>(false);
+    const [isHost, setIsHost] = useState<boolean>(false);
+    const [playerName, setPlayerName] = useState<string>(sessionContext.state.playerName);
+    const [heartbeatData, setHeartbeatData] = useState<HeartbeatData | null>(null);
+    const [localClockStart, setLocalClockStart] = useState<firestore.Timestamp | null>(null);
+    const [gameState, setGameState] = useState(null);
+    const [heartbeats, setHeartbeats] = useState<any>({});
+    const [isRoomConfigured, setIsRoomConfigured] = useState<boolean>(false);
+    const [isPlayerAdded, setIsPlayerAdded] = useState<boolean>(false);
 
     const updateRoom = useCallback((data) => {
         return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
     }, [firebase, roomId]);
 
-    const handleSubmit = (evt) => {
+    const handleSubmit = (evt: MouseEvent) => {
         evt.preventDefault();
         updateRoom({ state: GameState.WORD_MASTER_CHOOSE_WORD });
     }
 
-    const commitPlayerName = (newName) => {
+    const commitPlayerName = (newName: string) => {
         sessionContext.dispatch({
             type: SET_PLAYER_NAME,
             payload: newName 
@@ -64,7 +70,7 @@ function Lobby(props) {
         });
     };
 
-    const onChangeRoomConfig = (isConfigured) => {
+    const onChangeRoomConfig = (isConfigured: boolean) => {
         setIsRoomConfigured(isConfigured);
     }
 
@@ -77,11 +83,11 @@ function Lobby(props) {
 
     // update host status
     useEffect(() => {
-        const connectedPlayers = players.filter(p => p.status === "connected");
+        const connectedPlayers: Array<Player> = players.filter(p => p.status === "connected");
         if (connectedPlayers && playerId) {
             // as a convention, the host is always the player that was created first
-            const sortedPlayerIds = connectedPlayers.map(p => p.id).sort((a, b) => a.creationDate - b.creationDate);
-            const shouldBeHost = sortedPlayerIds[0] === playerId;
+            const sortedPlayerIds: Array<string> = connectedPlayers.sort((a, b) => a.creationDate - b.creationDate).map(p => p.id);
+            const shouldBeHost: boolean = sortedPlayerIds[0] === playerId;
             setIsHost(shouldBeHost);
         }
     }, [players, playerId, setIsHost]);
@@ -117,19 +123,19 @@ function Lobby(props) {
     // finish setting my heartbeat info
     useEffect(() => {
          // finish setting my heartbeat
-         if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId]) {
+         if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId] && localClockStart) {
             const localClockEnd = firestore.Timestamp.now();
             const lastValue = heartbeats[playerId];
             console.log('heartbeat snapshot')
 
             // round trip time (total latency)
-            const rtt = localClockEnd - localClockStart;
+            const rtt = localClockEnd.toMillis() - localClockStart.toMillis();
             // time to write something to firestore
-            const writeTime = lastValue - localClockStart;
+            const writeTime = lastValue - localClockStart.toMillis();
             // time to read something from firestore (dissemination)
-            const readTime = localClockEnd - lastValue;
+            const readTime = localClockEnd.toMillis() - lastValue;
 
-            const payload = { rtt, writeTime, readTime };
+            const payload: HeartbeatData = { rtt, writeTime, readTime };
             console.log(payload)
 
             sessionContext.dispatch({
@@ -153,7 +159,7 @@ function Lobby(props) {
             console.log("new room snapshot");
 
             const { players: _roomPlayers, heartbeats: roomHeartbeats, state } = room;
-            const roomPlayers = Object.values(_roomPlayers || {});
+            const roomPlayers: Array<Player> = Object.values(_roomPlayers || {});
 
             // players are sorted by creating date
             setPlayers(roomPlayers.sort((a, b) => a.creationDate - b.creationDate));
@@ -257,7 +263,7 @@ function Lobby(props) {
                         </Grid>
 
                         <Grid item xs={6}>
-                            <TextField fullWidth label="Link" readOnly value={lobbyUrl} />
+                            <TextField fullWidth label="Link" value={lobbyUrl} />
                         </Grid>
 
                         <Grid item>
