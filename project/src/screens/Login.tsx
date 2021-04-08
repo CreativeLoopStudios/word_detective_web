@@ -1,4 +1,4 @@
-import React, { useState, useContext, MouseEvent, ChangeEvent } from "react";
+import React, { useState, useContext, MouseEvent } from "react";
 
 import { useHistory } from "react-router-dom";
 
@@ -30,8 +30,8 @@ function Login({ firebase }: Props) {
             });
     };
 
-    function handleInputName(event: ChangeEvent<HTMLInputElement>): void {
-        setPlayerName(event.target.value);
+    function handleInputName(text: string): void {
+        setPlayerName(text);
     }
 
     return (

@@ -24,25 +24,25 @@ export type Props = {
     placeholder?: string;
     type: 'text' | 'password' | 'number';
     value: string;
-    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    onChange: (text: string) => void;
 }
+
+const CustomInput = withStyles(() => {
+    return {
+        root: {
+            "& .MuiInputBase-input": {
+                borderRadius: 30,
+                height: "2rem",
+                color: 'black',
+                textAlign: "center",
+                background: "#E3E3E3 0% 0% no-repeat padding-box",
+            },
+        },
+    };
+})(InputBase);
 
 function Input({ label, placeholder, type, value, onChange }: Props) {
     const classes = useStyles();
-    
-    const CustomInput = withStyles(() => {
-        return {
-            root: {
-                "& .MuiInputBase-input": {
-                    borderRadius: 30,
-                    height: "2rem",
-                    color: 'black',
-                    textAlign: "center",
-                    background: "#E3E3E3 0% 0% no-repeat padding-box",
-                },
-            },
-        };
-    })(InputBase);
 
     return (
         <Grid container direction="column">
@@ -58,7 +58,7 @@ function Input({ label, placeholder, type, value, onChange }: Props) {
                     className={classes.root}
                     placeholder={placeholder}
                     type={type}
-                    onChange={onChange}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
                     value={value}
                     fullWidth
                 />
