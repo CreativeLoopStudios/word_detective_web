@@ -41,19 +41,17 @@ function App() {
                     <Container disableGutters className={classes.root}>
                         <Grid container justify="center" spacing={2}>
                             <Grid item xs={8}>
-                                <MainContainer>
-                                    <Switch>
-                                        <Route path="/:roomId/game">
-                                            <Game />
-                                        </Route>
-                                        <Route path="/:roomId/lobby">
-                                            <Lobby />
-                                        </Route>
-                                        <Route path="/">
-                                            <Login />
-                                        </Route>
-                                    </Switch>
-                                </MainContainer>
+                                <Switch>
+                                    <Route path="/:roomId/game">
+                                        <Game />
+                                    </Route>
+                                    <Route path="/:roomId/lobby">
+                                        <Lobby />
+                                    </Route>
+                                    <Route path="/">
+                                        <Login />
+                                    </Route>
+                                </Switch>
                             </Grid>
                             <Grid item xs={12}>
                                 <Footer />
