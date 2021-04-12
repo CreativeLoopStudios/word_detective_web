@@ -14,6 +14,7 @@ import Timer from './Timer';
 import Switch from './Switch';
 import AlertBox from './AlertBox';
 import QuestionsBox from './QuestionsBox';
+import PlayerHeader from './PlayerHeader';
 
 export {
     PlayerInfo,
@@ -31,5 +32,6 @@ export {
     Timer,
     Switch,
     AlertBox,
-    QuestionsBox
+    QuestionsBox,
+    PlayerHeader,
 };
