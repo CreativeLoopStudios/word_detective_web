@@ -40,7 +40,7 @@ function Label({ kind, color, bold, size, inline, underline, italic, children }:
                 fontWeight: bold ? 'bold' : 'normal',
                 fontStyle: italic ? 'italic' : 'normal',
                 textDecoration: underline ? 'underline' : 'normal',
-                display: inline ? 'inline-block' : 'inline'
+                display: inline ? 'inline-block' : 'normal'
             }
         }
     })(Typography);

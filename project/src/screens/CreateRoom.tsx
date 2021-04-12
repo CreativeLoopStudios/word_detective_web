@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { ChangeEvent, useState, useEffect, useMemo } from "react";
 import {
     makeStyles,
     Button,
@@ -11,38 +11,46 @@ import {
 import { withFirebase } from "../firebase/context";
 import { CATEGORIES_COLLECTION, ROOMS_COLLECTION } from "../firebase/collections";
 import FirebaseEvents from "../firebase_events";
+import Firebase from "../firebase";
+import { Category, Room } from "../types";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         display: "flex",
         flex: 1,
     },
 }));
 
-function CreateRoom(props) {
+type Props = {
+    roomId: string;
+    firebase: Firebase;
+    onChangeRoomConfig: (isConfigured: boolean) => void;
+}
+
+function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
     const classes = useStyles();
 
     const categoriesLimit = 3;
 
-    const { roomId } = props;
     const [name, setName] = useState("");
     const [numberOfPlayers, setNumberOfPlayers] = useState(4);
     const [isPrivate, setIsPrivate] = useState(true);
 
-    const [currentCategories, setCurrentCategories] = useState([]);
-    const [newCategories, setNewCategories] = useState([]);
+    const [currentCategories, setCurrentCategories] = useState<Array<Category>>([]);
+    const [newCategories, setNewCategories] = useState<Array<Category>>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
-            const categories = await props.firebase
+            const categories = await firebase
                 .getCollection(CATEGORIES_COLLECTION)
                 .get();
 
-            const roomInfo = (await props.firebase.getCollection(ROOMS_COLLECTION).doc(roomId).get()).data();
+            const roomRef = await firebase.getCollectionByDocId(ROOMS_COLLECTION, roomId).get();
+            const roomInfo: Room = roomRef.data() as Room;
             const checkedCategoryIds = (roomInfo.categories || []).map(c => c.id);
 
             const categoriesMapped = categories.docs.map((c) => ({
-                ...c.data(),
+                ...c.data() as Category,
                 id: c.id,
                 isChecked: checkedCategoryIds.includes(c.id),
             }));
@@ -51,9 +59,9 @@ function CreateRoom(props) {
         };
 
         fetchCategories();
-    }, [props.firebase, roomId]);
+    }, [firebase, roomId]);
 
-    const countChecks = (arr) => {
+    const countChecks = (arr: Array<Category>) => {
         return arr.reduce((total, c) => {
             if (c.isChecked) {
                 return (total += 1);
@@ -63,7 +71,7 @@ function CreateRoom(props) {
         }, 0);
     }
 
-    const handleChange = (evt) => {
+    const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
         const numberOfAlreadyChecked = countChecks(newCategories);
         if (numberOfAlreadyChecked === categoriesLimit && evt.target.checked)
             return;
@@ -90,7 +98,7 @@ function CreateRoom(props) {
                 name: c.name,
                 description: c.description,
             }));
-        await props.firebase.updateRoom(
+        await firebase.updateRoom(
             roomId,
             {
                 name,
@@ -100,7 +108,7 @@ function CreateRoom(props) {
             }
         );
         setCurrentCategories(newCategories);
-        props.firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
+        firebase.logEvent(FirebaseEvents.EVENTS.ROOM_CREATED, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
             [FirebaseEvents.PROP.NUMBER_OF_PLAYERS]: numberOfPlayers,
             [FirebaseEvents.PROP.CATEGORIES]: categoriesChecked,
@@ -109,8 +117,8 @@ function CreateRoom(props) {
     };
 
     useEffect(() => {
-        props.onChangeRoomConfig(countChecks(currentCategories) > 0);
-    }, [currentCategories, props])
+        onChangeRoomConfig(countChecks(currentCategories) > 0);
+    }, [currentCategories, onChangeRoomConfig])
 
     const shouldDisableSaving = useMemo(() => {
         const checked_1 = currentCategories.map(c => c.isChecked); 
@@ -142,7 +150,7 @@ function CreateRoom(props) {
                         variant="outlined"
                         value={numberOfPlayers}
                         type="number"
-                        onChange={(e) => setNumberOfPlayers(e.target.value)}
+                        onChange={(e) => setNumberOfPlayers(parseInt(e.target.value))}
                     />
                 </Grid>
 

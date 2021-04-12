@@ -41,7 +41,7 @@ const useStyles = makeStyles(() => ({
     rootColor: ({ color }: StyleProps) => ({
         backgroundColor: color,
     }),
-    img: ({ size }) => ({
+    img: ({ size }: StyleProps) => ({
         width: 'auto',
         height: '100%',
         marginLeft: -size / 2 - size / 10,
