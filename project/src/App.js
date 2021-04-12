@@ -24,13 +24,13 @@ function App() {
     const classes = useStyles();
 
     useEffect(() => {
-        window.addEventListener("beforeunload", (ev) => {
-            ev.preventDefault();
-            const confirmationMessage =
-                "Você tem certeza que gostaria de sair?";
-            ev.returnValue = confirmationMessage;
-            return confirmationMessage;
-        });
+        // window.addEventListener("beforeunload", (ev) => {
+        //     ev.preventDefault();
+        //     const confirmationMessage =
+        //         "Você tem certeza que gostaria de sair?";
+        //     ev.returnValue = confirmationMessage;
+        //     return confirmationMessage;
+        // });
     }, []);
 
     return (

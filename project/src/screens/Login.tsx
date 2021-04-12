@@ -23,10 +23,12 @@ function Login({ firebase }: Props) {
         event.preventDefault();
         firebase.signIn(sessionContext)
             .then((playerId) => {
-                firebase.createNewRoom(playerId)
+                if (playerId) {
+                    firebase.createNewRoom(playerId)
                     .then((roomId) => {
                         history.push(`/${roomId}/lobby`);
                     });
+                }
             });
     };
 

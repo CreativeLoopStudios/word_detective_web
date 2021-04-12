@@ -1,4 +1,4 @@
-import app from "firebase/app";
+import app, { analytics, database, firestore } from "firebase/app";
 import "firebase/firestore";
 import "firebase/database";
 import "firebase/analytics";
@@ -19,6 +19,10 @@ const firebaseConfig = {
 };
 
 class Firebase {
+    db: firestore.Firestore;
+    realtimeDb: database.Database;
+    analytics: analytics.Analytics;
+
     constructor() {
         app.initializeApp(firebaseConfig);
         this.db = app.firestore();
@@ -26,42 +30,45 @@ class Firebase {
         this.analytics = app.analytics();
     }
 
-    getCollection = (collection_name, id) => {
-        if (id) return this.db.collection(collection_name).doc(id);
+    getCollection = (collection_name: string): firestore.CollectionReference => {
         return this.db.collection(collection_name);
     };
 
-    getRlCollection = (collection_name, id) => {
+    getCollectionByDocId = (collection_name: string, id: string): firestore.DocumentReference => {
+        return this.db.collection(collection_name).doc(id);
+    };
+
+    getRlCollection = (collection_name: string, id: string): database.Reference => {
         if (id) return this.realtimeDb.ref(collection_name + '/' + id);
         return this.realtimeDb.ref(collection_name);
     };
 
-    getItemById = async (collection_name, id) => {
+    getItemById = async (collection_name: string, id: string): Promise<firestore.DocumentSnapshot> => {
         return await this.db.collection(collection_name).doc(id).get();
     };
 
-    pushToList = async (collection_name, id, key, value) => {
-        await this.realtimeDb.ref(collection_name + '/' + id + '/' + key).push(value);
+    pushToList = async (collection_name: string, id: string, key: string, value: any): Promise<void> => {
+        await this.realtimeDb.ref(`${collection_name}/${id}/${key}`).push(value);
     };
 
-    updateById = async (collection_name, id, value) => {
+    updateById = async (collection_name: string, id: string, value: any): Promise<void> => {
         await this.db.collection(collection_name).doc(id).update(value);
     };
 
-    updateRlById = async (collection_name, id, value) => {
+    updateRlById = async (collection_name: string, id: string, value: any): Promise<void> => {
         await this.realtimeDb.ref(collection_name + '/' + id).update(value);
     };
 
-    onDisconnect = async (roomId, playerId) => {
+    onDisconnect = async (roomId: string, playerId: string): Promise<void> => {
         this.realtimeDb.ref(`rooms/${roomId}/players/${playerId}/status`).onDisconnect().set(PlayerStatus.DISCONNECTED);
     };
 
-    updateRoom = async (roomId, data) => {
+    updateRoom = async (roomId: string, data: any): Promise<void> => {
         await this.db.collection(ROOMS_COLLECTION).doc(roomId).update(data);
         await this.realtimeDb.ref(ROOMS_COLLECTION + '/' + roomId).update({ categories: data.categories });
     }
 
-    createNewRoom = async (creatorId) => {
+    createNewRoom = async (creatorId: string): Promise<string> => {
         const res = await this.db.collection(ROOMS_COLLECTION).add({ createdBy: creatorId, is_private: true });
 
         await this.realtimeDb.ref(ROOMS_COLLECTION + '/' + res.id).set({
@@ -81,33 +88,43 @@ class Firebase {
         return res.id;
     };
 
-    logEvent = (event, value) => {
+    logEvent = (event: string, value: any): void => {
         this.analytics.logEvent(event, value);
     };
 
-    signIn = async (sessionCtx) => {
+    signIn = async (sessionCtx: any): Promise<string | null> => {
         console.log('Setting up playerId');
         const userCred = await app.auth().signInAnonymously();
-        await app.auth().currentUser.updateProfile({
-            displayName: sessionCtx.state.playerName
-        })
+        const currentUser = app.auth().currentUser;
+        if (currentUser) {
+            await currentUser.updateProfile({
+                displayName: sessionCtx.state.playerName
+            })
+        }
         console.log('signup done')
-        const userId = userCred.user.uid;
-        sessionCtx.dispatch({
-            type: SET_PLAYER_ID,
-            payload: userId
-        });
-        sessionCtx.dispatch({
-            type: SET_FIREBASE_USER,
-            payload: userCred
-        });
+        let userId = null;
+        if (userCred.user) {
+            userId = userCred.user.uid;
+            sessionCtx.dispatch({
+                type: SET_PLAYER_ID,
+                payload: userId
+            });
+            sessionCtx.dispatch({
+                type: SET_FIREBASE_USER,
+                payload: userCred
+            });
+        }
+        
         return userId;
     };
 
-    updateDisplayName = async (newName) => {
-        await app.auth().currentUser.updateProfile({
-            displayName: newName
-        });
+    updateDisplayName = async (newName: string): Promise<void> => {
+        const currentUser = app.auth().currentUser;
+        if (currentUser) {
+            await currentUser.updateProfile({
+                displayName: newName
+            });
+        }
     };
 }
 

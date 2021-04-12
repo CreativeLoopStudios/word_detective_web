@@ -8,6 +8,23 @@ export type Player = {
     status: 'connected' | 'disconnected';
 };
 
+export type Category = {
+    id: string;
+    description: string;
+    lang: string;
+    name: string;
+    words: Array<string>;
+    isChecked?: boolean;
+};
+
+export type Room = {
+    categories: Array<Category>;
+    createdBy: string;
+    is_private: boolean;
+    name: string;
+    number_of_players: number;
+};
+
 export type HeartbeatData = {
     rtt: number;
     writeTime: number;

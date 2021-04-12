@@ -14,6 +14,7 @@ import { CreateRoom } from "../screens";
 
 import Firebase from "../firebase";
 import { HeartbeatData, Player } from "../types";
+import { Label, MainContainer } from "../components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -70,7 +71,7 @@ function Lobby({ firebase }: Props) {
         });
     };
 
-    const onChangeRoomConfig = (isConfigured: boolean) => {
+    const onChangeRoomConfig = (isConfigured: boolean): void => {
         setIsRoomConfigured(isConfigured);
     }
 
@@ -222,20 +223,14 @@ function Lobby({ firebase }: Props) {
         }
     }, [gameState, roomId, history])
 
-    // render template
     return (
-        <div className={classes.root}>
-            <Grid container spacing={3} direction="row">
+        <MainContainer
+            sidebar={<div></div>}
+        >
+            <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    <h1>
-                        Lobby - Bem vindo, {playerName}
-                    </h1>
-
-                    <ul>
-                        {players.map((player, idx) => (
-                            <li key={player.id}>{player.name} - Status: {player.status} - Id: {player.id}</li>
-                        ))}
-                    </ul>
+                    <Label kind="secondary" size="h4" bold>Configuração da sala</Label>
+                    <Label color="#979797">ID da Sala: {roomId}</Label>
                 </Grid>
 
                 {isHost && <Grid item xs={12}>
@@ -302,7 +297,7 @@ function Lobby({ firebase }: Props) {
                     {!isHost && <h3>Aguardando Host</h3>}
                 </Grid>
             </Grid>
-        </div>
+        </MainContainer>
     );
 }
 
