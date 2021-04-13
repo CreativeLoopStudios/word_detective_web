@@ -23,7 +23,7 @@ export type Props = {
     label?: string;
     placeholder?: string;
     type: 'text' | 'password' | 'number';
-    value: string;
+    value: string | number;
     onChange: (text: string) => void;
 }
 

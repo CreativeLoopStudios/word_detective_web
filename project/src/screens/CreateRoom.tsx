@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState, useEffect, useMemo } from "react";
+
 import {
     makeStyles,
     Button,
@@ -8,18 +9,17 @@ import {
     FormControlLabel,
     Switch,
 } from "@material-ui/core";
+
 import { withFirebase } from "../firebase/context";
 import { CATEGORIES_COLLECTION, ROOMS_COLLECTION } from "../firebase/collections";
 import FirebaseEvents from "../firebase_events";
 import Firebase from "../firebase";
+
 import { Category, Room } from "../types";
 
-const useStyles = makeStyles(() => ({
-    root: {
-        display: "flex",
-        flex: 1,
-    },
-}));
+import { Input, Select } from "../components";
+
+const useStyles = makeStyles(() => ({}));
 
 type Props = {
     roomId: string;
@@ -31,9 +31,14 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
     const classes = useStyles();
 
     const categoriesLimit = 3;
+    const numberOfPlayersOptions = [
+            { name: "2 jogadores", value: 2 },
+            { name: "3 jogadores", value: 3 },
+            { name: "4 jogadores", value: 4 },
+            { name: "5 jogadores", value: 5 }
+    ];
 
-    const [name, setName] = useState("");
-    const [numberOfPlayers, setNumberOfPlayers] = useState(4);
+    const [numberOfPlayers, setNumberOfPlayers] = useState(2);
     const [isPrivate, setIsPrivate] = useState(true);
 
     const [currentCategories, setCurrentCategories] = useState<Array<Category>>([]);
@@ -101,7 +106,7 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
         await firebase.updateRoom(
             roomId,
             {
-                name,
+                name: 'Sala Default',
                 categories: categoriesChecked,
                 number_of_players: numberOfPlayers,
                 is_private: isPrivate
@@ -116,6 +121,10 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
         });
     };
 
+    const handleSelectPlayers = (option: any) => {
+        setNumberOfPlayers(option.value)
+    };
+
     useEffect(() => {
         onChangeRoomConfig(countChecks(currentCategories) > 0);
     }, [currentCategories, onChangeRoomConfig])
@@ -127,80 +136,62 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
     }, [currentCategories, newCategories]);
 
     return (
-        <div className={classes.root}>
-            <Grid container spacing={3} direction="row">
-                <Grid item xs={12}>
-                    <h1>Configuração da Sala</h1>
-                </Grid>
+        <Grid container spacing={3} direction="row">
+            <Grid item xs={12}>
+                <Select
+                    label="N° de jogadores:"
+                    options={numberOfPlayersOptions}
+                    value={numberOfPlayers}
+                    onChange={handleSelectPlayers}
+                />
+            </Grid>
 
-                <Grid item xs={12}>
-                    <TextField
-                        id="outlined-basic"
-                        label="Nome da Sala"
-                        variant="outlined"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                </Grid>
+            <Grid item xs={12}>
+                <h2>Categorias</h2>
 
-                <Grid item xs={12}>
-                    <TextField
-                        id="outlined-basic"
-                        label="Número de Jogadores"
-                        variant="outlined"
-                        value={numberOfPlayers}
-                        type="number"
-                        onChange={(e) => setNumberOfPlayers(parseInt(e.target.value))}
-                    />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <h2>Categorias</h2>
-
-                    {newCategories.map((c) => (
-                        <FormControlLabel
-                            key={c.id}
-                            control={
-                                <Checkbox
-                                    checked={c.isChecked}
-                                    onChange={handleChange}
-                                    inputProps={{
-                                        "aria-label": "primary checkbox",
-                                    }}
-                                    name={c.name}
-                                    value={c.name}
-                                />
-                            }
-                            label={c.name}
-                        />
-                    ))}
-                </Grid>
-
-                <Grid item xs={12}>
+                {newCategories.map((c) => (
                     <FormControlLabel
+                        key={c.id}
                         control={
-                            <Switch
-                                checked={isPrivate}
-                                onChange={handleChangeIsPrivate}
-                                color="primary"
+                            <Checkbox
+                                checked={c.isChecked}
+                                onChange={handleChange}
+                                inputProps={{
+                                    "aria-label": "primary checkbox",
+                                }}
+                                name={c.name}
+                                value={c.name}
                             />
                         }
-                        label="Sala privada?"
+                        label={c.name}
                     />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                        disabled={shouldDisableSaving}
-                    >
-                        Salvar
-                    </Button>
-                </Grid>
+                ))}
             </Grid>
-        </div>
+
+            <Grid item xs={12}>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={isPrivate}
+                            onChange={handleChangeIsPrivate}
+                            color="primary"
+                        />
+                    }
+                    label="Sala privada?"
+                />
+            </Grid>
+
+            <Grid item xs={12}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={shouldDisableSaving}
+                >
+                    Salvar
+                </Button>
+            </Grid>
+        </Grid>
     );
 }
 
