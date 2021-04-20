@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback, MouseEvent } from "react";
-import { makeStyles, Button, Grid, TextField, Snackbar } from "@material-ui/core";
+import { makeStyles, Grid, TextField, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 import { useHistory, useParams } from "react-router-dom";
 import { withFirebase } from "../firebase/context";
@@ -14,7 +14,7 @@ import { CreateRoom } from "../screens";
 
 import Firebase from "../firebase";
 import { HeartbeatData, Player } from "../types";
-import { Label, MainContainer } from "../components";
+import { Button, Label, MainContainer } from "../components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,7 +61,7 @@ function Lobby({ firebase }: Props) {
     const commitPlayerName = (newName: string) => {
         sessionContext.dispatch({
             type: SET_PLAYER_NAME,
-            payload: newName 
+            payload: newName
         });
         setPlayerName(newName);
         firebase.updateDisplayName(newName);
@@ -78,7 +78,7 @@ function Lobby({ firebase }: Props) {
     // sign up user
     useEffect(() => {
         if (!playerId) {
-           firebase.signIn(sessionContext);
+            firebase.signIn(sessionContext);
         }
     }, [firebase, playerId, sessionContext]);
 
@@ -103,9 +103,9 @@ function Lobby({ firebase }: Props) {
         }
 
         if (player.role !== targetRole) {
-            updateRoom({ 
+            updateRoom({
                 [`/players/${playerId}/role`]: targetRole
-             });
+            });
         }
     }, [isHost, players, playerId, updateRoom]);
 
@@ -123,8 +123,8 @@ function Lobby({ firebase }: Props) {
 
     // finish setting my heartbeat info
     useEffect(() => {
-         // finish setting my heartbeat
-         if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId] && localClockStart) {
+        // finish setting my heartbeat
+        if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId] && localClockStart) {
             const localClockEnd = firestore.Timestamp.now();
             const lastValue = heartbeats[playerId];
             console.log('heartbeat snapshot')
@@ -189,9 +189,9 @@ function Lobby({ firebase }: Props) {
                     playedAsWordMaster: false,
                 }
             })
-            .then(() => {
-                setIsPlayerAdded(true);
-            });
+                .then(() => {
+                    setIsPlayerAdded(true);
+                });
             firebase.onDisconnect(roomId, playerId);
         }
     }, [players, playerId, updateRoom, firebase, playerName, roomId]);
@@ -213,7 +213,7 @@ function Lobby({ firebase }: Props) {
                     status: PlayerStatus.CONNECTED
                 }
             });
-        } 
+        }
     }, [players, playerId, updateRoom, playerName]);
 
     // state watcher
@@ -234,11 +234,11 @@ function Lobby({ firebase }: Props) {
                 </Grid>
 
                 {isHost && <Grid item xs={12}>
-                    <CreateRoom roomId={roomId} onChangeRoomConfig={onChangeRoomConfig}  />
+                    <CreateRoom roomId={roomId} onChangeRoomConfig={onChangeRoomConfig} />
                 </Grid>}
 
 
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                     <Grid container>
                         <Grid item>
                             <TextField fullWidth label="Nome" value={playerName || ''} onChange={(ev) => setPlayerName(ev.target.value)} />
@@ -249,28 +249,26 @@ function Lobby({ firebase }: Props) {
                             </Button>
                         </Grid>
                     </Grid>
-                </Grid>
+                </Grid> */}
 
-                <Grid item xs={12}>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <h3>Compartilhe o link com seus amigos!</h3>
-                        </Grid>
+                <Grid container item xs={12} spacing={2}>
+                    <Grid item xs={12}>
+                        <Label size="h6">Compartilhe o link com seus amigos!</Label>
+                    </Grid>
 
-                        <Grid item xs={6}>
-                            <TextField fullWidth label="Link" value={lobbyUrl} />
-                        </Grid>
+                    <Grid item xs={12}>
+                        <Label size="subtitle1" color="white" underline>{lobbyUrl}</Label>
+                    </Grid>
 
-                        <Grid item>
-                            <CopyToClipboard text={lobbyUrl}
-                                onCopy={() => setCopied(true)}>
-                                <Button variant="outlined" color="secondary">Copiar</Button>
-                            </CopyToClipboard>
-                        </Grid>
+                    <Grid item xs={12}>
+                        <CopyToClipboard text={lobbyUrl}
+                            onCopy={() => setCopied(true)}>
+                            <Button variant="outlined" backgroundColor="white" label="Copiar" />
+                        </CopyToClipboard>
                     </Grid>
 
                     <Snackbar open={copied} autoHideDuration={3000} onClose={() => setCopied(false)}
-                        anchorOrigin={{vertical: "top", horizontal: "center"}}>
+                        anchorOrigin={{ vertical: "top", horizontal: "center" }}>
                         <Alert severity="success">Copiado!</Alert>
                     </Snackbar>
                 </Grid>
@@ -279,22 +277,10 @@ function Lobby({ firebase }: Props) {
                     {isHost && players.length > 1 && isRoomConfigured && (
                         <Button
                             variant="contained"
-                            color="primary"
                             onClick={handleSubmit}
-                        >
-                            Começar!
-                        </Button>
+                            label="Começar!"
+                        />
                     )}
-
-                    {isHost && !isRoomConfigured && (
-                        <h3>Selecione ao menos uma categoria!</h3>
-                    )}
-
-                    {isHost && players.length === 1 && (
-                        <h3>Aguardando demais jogadores</h3>
-                    )}
-
-                    {!isHost && <h3>Aguardando Host</h3>}
                 </Grid>
             </Grid>
         </MainContainer>
