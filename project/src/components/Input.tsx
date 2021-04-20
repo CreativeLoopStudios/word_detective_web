@@ -80,7 +80,7 @@ Input.propTypes = {
      * What type the input have
      */
     type: PropTypes.oneOf(["text", "password", "number"]),
-    value: PropTypes.string,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     /**
      * Optional click handler
      */

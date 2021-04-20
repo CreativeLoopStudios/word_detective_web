@@ -1,11 +1,9 @@
-import React, { ChangeEvent, useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import {
     makeStyles,
     Button,
-    TextField,
     Grid,
-    Checkbox,
     FormControlLabel,
     Switch,
 } from "@material-ui/core";
@@ -17,7 +15,7 @@ import Firebase from "../firebase";
 
 import { Category, Room } from "../types";
 
-import { Input, Select } from "../components";
+import { Input, Select, Label, Checkbox } from "../components";
 
 const useStyles = makeStyles(() => ({}));
 
@@ -76,15 +74,15 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
         }, 0);
     }
 
-    const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (value: string, checked: boolean) => {
         const numberOfAlreadyChecked = countChecks(newCategories);
-        if (numberOfAlreadyChecked === categoriesLimit && evt.target.checked)
+        if (numberOfAlreadyChecked === categoriesLimit && checked)
             return;
 
         const newArr = newCategories.map(c => {
             const c_copy = {...c};
-            if (c.name === evt.target.value) {
-                c_copy.isChecked = evt.target.checked;
+            if (c.name === value) {
+                c_copy.isChecked = checked;
             }
             return c_copy;
         });
@@ -138,8 +136,8 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
     return (
         <Grid container spacing={3} direction="row">
             <Grid item xs={12}>
+                <Label bold>N° de jogadores:</Label>
                 <Select
-                    label="N° de jogadores:"
                     options={numberOfPlayersOptions}
                     value={numberOfPlayers}
                     onChange={handleSelectPlayers}
@@ -147,23 +145,15 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
             </Grid>
 
             <Grid item xs={12}>
-                <h2>Categorias</h2>
+                <Label bold>Escolha as categorias:</Label>
 
                 {newCategories.map((c) => (
-                    <FormControlLabel
+                    <Checkbox
                         key={c.id}
-                        control={
-                            <Checkbox
-                                checked={c.isChecked}
-                                onChange={handleChange}
-                                inputProps={{
-                                    "aria-label": "primary checkbox",
-                                }}
-                                name={c.name}
-                                value={c.name}
-                            />
-                        }
                         label={c.name}
+                        checked={c.isChecked}
+                        onChange={handleChange}
+                        value={c.name}
                     />
                 ))}
             </Grid>

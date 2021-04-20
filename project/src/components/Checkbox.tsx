@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 
 import { FormControlLabel, Checkbox as BaseCheckbox, makeStyles } from "@material-ui/core";
 
@@ -19,10 +19,12 @@ const useStyles = makeStyles(() => ({
 
 export type Props = {
     label: string;
-    onChange: () => void;
+    checked: boolean;
+    value: string | number;
+    onChange: (value: string, checked: boolean) => void;
 }
 
-function Checkbox({ label, onChange }: Props) {
+function Checkbox({ label, checked, value, onChange }: Props) {
     const classes = useStyles();
 
     return (
@@ -30,7 +32,9 @@ function Checkbox({ label, onChange }: Props) {
             className={classes.root}
             control={
                 <BaseCheckbox
-                    onChange={onChange}
+                    checked={checked}
+                    value={value}
+                    onChange={(evt: ChangeEvent<HTMLInputElement>) => onChange(evt.target.value, evt.target.checked)}
                 />
             }
             label={label}
@@ -43,6 +47,8 @@ Checkbox.propTypes = {
      * What label text is shown, but if not provided, will not show label
      */
     label: PropTypes.string,
+    checked: PropTypes.bool,
+    value:  PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     /**
      * Optional click handler
      */
@@ -51,6 +57,8 @@ Checkbox.propTypes = {
 
 Checkbox.defaultProps = {
     label: undefined,
+    checked: false,
+    value: undefined,
     onChange: undefined,
 };
 
