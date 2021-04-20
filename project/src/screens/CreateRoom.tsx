@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 
 import {
     makeStyles,
-    Button,
     Grid,
     FormControlLabel,
     Switch,
@@ -15,7 +14,7 @@ import Firebase from "../firebase";
 
 import { Category, Room } from "../types";
 
-import { Input, Select, Label, Checkbox } from "../components";
+import { Button, Select, Label, Checkbox } from "../components";
 
 const useStyles = makeStyles(() => ({}));
 
@@ -159,6 +158,8 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
             </Grid>
 
             <Grid item xs={12}>
+                <Label bold>Sala privada?</Label>
+
                 <FormControlLabel
                     control={
                         <Switch
@@ -167,19 +168,18 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
                             color="primary"
                         />
                     }
-                    label="Sala privada?"
+                    label=""
                 />
             </Grid>
 
             <Grid item xs={12}>
                 <Button
                     variant="contained"
-                    color="primary"
+                    kind="primary"
                     onClick={handleSubmit}
                     disabled={shouldDisableSaving}
-                >
-                    Salvar
-                </Button>
+                    label="Salvar"
+                />
             </Grid>
         </Grid>
     );
