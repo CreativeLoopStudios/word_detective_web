@@ -2,9 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 
 import {
     makeStyles,
-    Grid,
-    FormControlLabel,
-    Switch,
+    Grid
 } from "@material-ui/core";
 
 import { withFirebase } from "../firebase/context";
@@ -14,7 +12,7 @@ import Firebase from "../firebase";
 
 import { Category, Room } from "../types";
 
-import { Button, Select, Label, Checkbox } from "../components";
+import { Switch, Button, Select, Label, Checkbox } from "../components";
 
 const useStyles = makeStyles(() => ({}));
 
@@ -160,15 +158,9 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
             <Grid item xs={12}>
                 <Label bold>Sala privada?</Label>
 
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={isPrivate}
-                            onChange={handleChangeIsPrivate}
-                            color="primary"
-                        />
-                    }
-                    label=""
+                <Switch
+                    checked={isPrivate}
+                    onChange={handleChangeIsPrivate}
                 />
             </Grid>
 
