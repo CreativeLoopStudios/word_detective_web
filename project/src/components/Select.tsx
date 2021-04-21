@@ -22,11 +22,15 @@ const useStyles = makeStyles(() => ({
 
 export type Props = {
     label?: string;
-    options: Array<string>;
-    onChange: () => void;
+    options: Array<{
+        name: string;
+        value: any;
+    }>;
+    value: any;
+    onChange: (target: any) => void;
 }
 
-function Select({ label, options, onChange }: Props) {
+function Select({ label, options, value, onChange }: Props) {
     const classes = useStyles();
     const CustomInput = withStyles(() => {
         return {
@@ -39,6 +43,9 @@ function Select({ label, options, onChange }: Props) {
                     background: "#E3E3E3 0% 0% no-repeat padding-box",
                     paddingTop: '1rem'
                 },
+                "& .MuiSelect-icon": {
+                    color: 'black'
+                }
             },
         };
     })(InputBase);
@@ -55,12 +62,13 @@ function Select({ label, options, onChange }: Props) {
                 <BaseSelect
                     className={classes.root}
                     input={<CustomInput />}
-                    onChange={onChange}
+                    value={value}
+                    onChange={(event) => onChange(event.target)}
                     fullWidth
                 >
                     {
                         options.map((op, index) => (
-                            <MenuItem key={index} value={op} className={classes.options}>{op}</MenuItem>
+                            <MenuItem key={index} selected={index === 0 ? true : false} value={op.value as string} className={classes.options}>{op.name}</MenuItem>
                         ))
                     }
                 </BaseSelect>
@@ -78,6 +86,8 @@ Select.propTypes = {
      * What type the input have
      */
     options: PropTypes.array,
+
+    value: PropTypes.any,
     /**
      * Optional click handler
      */
@@ -87,6 +97,7 @@ Select.propTypes = {
 Select.defaultProps = {
     label: undefined,
     options: [],
+    value: undefined,
     onChange: undefined,
 };
 

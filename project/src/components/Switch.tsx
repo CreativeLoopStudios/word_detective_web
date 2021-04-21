@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 import { Switch as MuiSwitch } from '@material-ui/core/'
 import PropTypes from 'prop-types'
 
 export type Props = {
     checked: boolean;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void;
+    onChange: (event: ChangeEvent<HTMLInputElement>, checked: boolean) => void;
 }
 
 function Switch({ checked, onChange }: Props) {

@@ -19,13 +19,14 @@ export type Props = {
   hoverColor?: string;
   size?: 'small' | 'medium' | 'large';
   label: string;
+  disabled?: boolean;
   onClick: (event: MouseEvent) => void;
 };
 
 /**
  * Primary UI component for user interaction
  */
-function Button({ kind, variant, backgroundColor, hoverColor, size, label, onClick }: Props) {
+function Button({ kind, variant, backgroundColor, hoverColor, size, label, disabled, onClick }: Props) {
   const classes = useStyles();
 
   const CustomButton = withStyles(({ palette }: Theme) => {
@@ -51,6 +52,7 @@ function Button({ kind, variant, backgroundColor, hoverColor, size, label, onCli
       size={size}
       className={classes.root}
       onClick={onClick}
+      disabled={disabled}
     >
       {label}
     </CustomButton>
@@ -83,6 +85,10 @@ Button.propTypes = {
    */
   label: PropTypes.string.isRequired,
   /**
+   * If Button is disabled
+   */
+  disabled: PropTypes.bool,
+  /**
    * Optional click handler
    */
   onClick: PropTypes.func,
@@ -93,6 +99,7 @@ Button.defaultProps = {
   backgroundColor: null,
   hoverColor: undefined,
   size: 'medium',
+  disabled: false,
   onClick: undefined,
   variant: 'contained',
 };

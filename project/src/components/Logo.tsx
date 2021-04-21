@@ -65,7 +65,7 @@ function Logo({ variant, color, size }: LogoProps) {
 }
 
 Logo.propTypes = {
-    variant: PropTypes.oneOf(['round', 'box']),
+    variant: PropTypes.oneOf(['round', 'rect']),
     color: PropTypes.string,
     size: PropTypes.oneOf(Object.keys(Sizes)),
 };

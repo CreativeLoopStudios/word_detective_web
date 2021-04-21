@@ -1,5 +1,8 @@
 import React from 'react';
+
 import { Grid, makeStyles, Paper } from "@material-ui/core";
+
+import Logo from './Logo';
 
 const useStyles = makeStyles(() => ({
     paper: {
@@ -40,7 +43,7 @@ function MainContainer({ sidebar, children }: Props) {
     return (
         <Paper elevation={1} className={classes.paper}>
             <Grid container>
-                <Grid item xs={12}>
+                <Grid item xs={sidebar ? 8 : 12}>
                     {children}
                 </Grid>
             </Grid>
@@ -49,6 +52,7 @@ function MainContainer({ sidebar, children }: Props) {
                 sidebar &&
                 <div className={classes.sidebar}>
                     <div className={classes.sidebarContent}>
+                        <Logo variant="rect" size="small" />
                         {sidebar}
                     </div>
                 </div>
