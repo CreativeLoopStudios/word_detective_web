@@ -1,27 +1,26 @@
 import React, { useState, useEffect, useContext, useCallback, MouseEvent } from "react";
-import { makeStyles, Grid, TextField, Snackbar } from "@material-ui/core";
-import { Alert } from '@material-ui/lab';
+
 import { useHistory, useParams } from "react-router-dom";
-import { withFirebase } from "../firebase/context";
-import SessionContext from "../context/Session";
-import { ROOMS_COLLECTION } from "../firebase/collections";
-import GameState from "../state_of_play";
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
+
+import { Grid, Snackbar } from "@material-ui/core";
+import { Alert } from '@material-ui/lab';
+
 import { database, firestore } from "firebase/app";
-import PlayerStatus from "../player_status";
-import { CreateRoom } from "../screens";
-
+import { withFirebase } from "../firebase/context";
+import { ROOMS_COLLECTION } from "../firebase/collections";
 import Firebase from "../firebase";
-import { HeartbeatData, Player } from "../types";
-import { Button, Label, MainContainer } from "../components";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flex: 1,
-    },
-}));
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
+import { SET_PLAYER_NAME, SET_HEARTBEAT_DATA } from '../actions';
+import SessionContext from "../context/Session";
+
+import GameState from "../state_of_play";
+import PlayerStatus from "../player_status";
+import { HeartbeatData, Player } from "../types";
+
+import { CreateRoom } from "../screens";
+import { Button, Label, MainContainer } from "../components";
 
 type Props = {
     firebase: Firebase
@@ -29,7 +28,6 @@ type Props = {
 
 function Lobby({ firebase }: Props) {
     const { roomId } = useParams<{ roomId: string }>();
-    const classes = useStyles();
     const history = useHistory();
 
     const sessionContext = useContext(SessionContext);
@@ -225,7 +223,13 @@ function Lobby({ firebase }: Props) {
 
     return (
         <MainContainer
-            sidebar={<div></div>}
+            sidebar={
+                <Grid container>
+                    <Grid item>
+                        <Label kind="secondary">Nome do jogador:</Label>
+                    </Grid>
+                </Grid>
+            }
         >
             <Grid container spacing={3}>
                 <Grid item xs={12}>

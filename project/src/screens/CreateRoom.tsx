@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 
 import {
-    makeStyles,
     Grid
 } from "@material-ui/core";
 
@@ -14,8 +13,6 @@ import { Category, Room } from "../types";
 
 import { Switch, Button, Select, Label, Checkbox } from "../components";
 
-const useStyles = makeStyles(() => ({}));
-
 type Props = {
     roomId: string;
     firebase: Firebase;
@@ -23,7 +20,6 @@ type Props = {
 }
 
 function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
-    const classes = useStyles();
 
     const categoriesLimit = 3;
     const numberOfPlayersOptions = [

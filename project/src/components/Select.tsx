@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode } from "react";
+import React from "react";
 import { InputBase, Select as BaseSelect, Grid, makeStyles, withStyles, MenuItem } from "@material-ui/core";
 import PropTypes from "prop-types";
 
@@ -43,6 +43,9 @@ function Select({ label, options, value, onChange }: Props) {
                     background: "#E3E3E3 0% 0% no-repeat padding-box",
                     paddingTop: '1rem'
                 },
+                "& .MuiSelect-icon": {
+                    color: 'black'
+                }
             },
         };
     })(InputBase);
@@ -65,7 +68,7 @@ function Select({ label, options, value, onChange }: Props) {
                 >
                     {
                         options.map((op, index) => (
-                            <MenuItem key={index} selected={index == 0 ? true : false} value={op.value as string} className={classes.options}>{op.name}</MenuItem>
+                            <MenuItem key={index} selected={index === 0 ? true : false} value={op.value as string} className={classes.options}>{op.name}</MenuItem>
                         ))
                     }
                 </BaseSelect>

@@ -12,7 +12,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import { Lobby, Game, Login } from "./screens";
 import theme from "./themes";
-import { Background, Footer, MainContainer } from "./components";
+import { Background, Footer } from "./components";
 
 const useStyles = makeStyles((theme) => ({
     root: {

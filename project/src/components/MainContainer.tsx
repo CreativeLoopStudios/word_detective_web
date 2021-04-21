@@ -43,7 +43,7 @@ function MainContainer({ sidebar, children }: Props) {
     return (
         <Paper elevation={1} className={classes.paper}>
             <Grid container>
-                <Grid item xs={12}>
+                <Grid item xs={sidebar ? 8 : 12}>
                     {children}
                 </Grid>
             </Grid>
