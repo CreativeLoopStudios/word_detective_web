@@ -3,11 +3,6 @@ import React from 'react';
 import Label from './Label';
 import PlayerIcon from './PlayerIcon';
 
-const ROLE_NAMES = {
-    WM: "Word Master",
-    WD: "Word Detective",
-}
-
 export type Props = {
     name: string,
     isWordMaster: boolean,
