@@ -10,14 +10,17 @@ export type Props = {
 
 export default function PlayerHeader({ name, isWordMaster }: Props) {
     const roleName = `Word ${isWordMaster ? 'Master' : 'Detective'}`;
+
     return (
         <Grid container spacing={2} justify="flex-start" align-items="center">
-            <Grid item>
+            <Grid item style={{ marginTop: 6 }}>
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
-            <Grid item style={{marginTop: 3}}>
-                <Label kind="primary" size="h4" bold={true}>{ name }</Label>
-                <Label kind="secondary" size="h4" bold={true}> - { roleName }</Label>
+            <Grid item>
+                <Label inline={true} kind="primary" size="h4" bold={true}>{ name }</Label>
+            </Grid>
+            <Grid item>
+                <Label inline={true} kind="secondary" size="h4" bold={true}>{ roleName }</Label>
             </Grid>
         </Grid>
     )
