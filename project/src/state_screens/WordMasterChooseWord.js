@@ -1,68 +1,95 @@
 import React from "react";
-import { makeStyles, Button, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
+import { Button, Label } from "../components";
 
-const useStyles = makeStyles((theme) => ({
-    word: {
-        margin: 16,
-    },
-}));
+function Heading({ children }) {
+    return <Label size='h4' kind='secondary' bold={true}>{children}</Label>
+}
+
+function HelperText({ children }) {
+    return <Label size='body1' kind='primary'>{children}</Label>
+}
+
+function CustomButton({ label, key, onClick }) {
+    return (
+        <Button
+            variant="contained"
+            kind="primary"
+            backgroundColor='#dd0000'
+            hoverColor='#ff0000'
+            key={key}
+            onClick={onClick}
+            label={label}
+        />
+    )
+}
 
 function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory, onClickWord }) {
-    const classes = useStyles();
-
     return (
         <>
             {isWordMaster && (
                 <Grid item xs={12}>
-                    {
-                        categories.length > 0 && words.length === 0 && (
-                            <>
-                                <h2>Escolha uma categoria:</h2>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                            <HelperText>Escolha abaixo uma das categorias e em seguida uma palavra de sua preferência.</HelperText>
+                        </Grid>
+                        {
+                            categories.length > 0 && (
+                                <>
+                                    <Grid item xs={12}>
+                                        <Heading>Escolha a categoria</Heading>
+                                    </Grid>
 
-                                <div>
-                                    {categories.map((category) => (
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            key={category.id}
-                                            className={classes.word}
-                                            onClick={() => onClickCategory(category)}
-                                        >
-                                            {category.name}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </>
-                        )
-                    }
+                                    <Grid item xs={12}>
+                                        <Grid container spacing={2}>
+                                            {categories.map((category) => (
+                                                <Grid item>
+                                                    <CustomButton 
+                                                        key={category.id}
+                                                        onClick={() => onClickCategory(category)}
+                                                        label={category.name}
+                                                    />
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Grid>
+                                </>
+                            )
+                        }
+                        {
+                            categories.length > 0 && words.length > 0 && (
+                                <>
+                                    <Grid item xs={12}>
+                                        <Heading>Escolha a palavra</Heading>
+                                    </Grid>
 
-                    {
-                        categories.length > 0 && words.length > 0 && (
-                            <>
-                                <h2>Escolha uma palavra para os detetives:</h2>
+                                    <Grid item xs={12}>
+                                        <HelperText>Selecione uma palavra ou espere o tempo acabar para uma escolha aleatória.</HelperText>
+                                    </Grid>
 
-                                <div>
-                                    {words.map((word, idx) => (
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            key={idx}
-                                            className={classes.word}
-                                            onClick={() => onClickWord(word)}
-                                        >
-                                            {word}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </>
-                        )
-                    }
+                                    <Grid item xs={12}>
+                                        <Grid container spacing={2}>
+                                            {words.map((word, idx) => (
+                                                <Grid item>
+                                                    <CustomButton 
+                                                        key={idx}
+                                                        onClick={() => onClickWord(word)}
+                                                        label={word}
+                                                    />
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Grid>
+                                </>
+                            )
+                        }
+                    </Grid>
                 </Grid>
             )}
 
             {!isWordMaster && (
                 <Grid item xs={12}>
-                    <h3>Aguarde o Word Master escolher a palavra da rodada</h3>
+                    <HelperText>Aguarde o Word Master escolher a palavra da rodada</HelperText>
                 </Grid>
             )}
         </>

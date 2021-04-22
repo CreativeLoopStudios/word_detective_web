@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { makeStyles, Grid } from "@material-ui/core";
+import { makeStyles, Grid, Box } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 //import * as firebase from "firebase/app";
 //import { database, firestore } from "firebase/app";
@@ -20,7 +20,7 @@ import {
     EndRound,
     EndGame,
 } from "../state_screens";
-import { PlayerInfo } from "../components";
+import { MainContainer, PlayerHeader, Timer } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
 
@@ -29,11 +29,12 @@ const TURNS_BEFORE_ROUND_ENDS = 5;
 const SCORE_TO_PLAYER_WHO_GUESSED = 2;
 const SCORE_TO_QUESTION_SELECTED = 1;
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: "flex",
-        flex: 1,
-    },
+const useStyles = makeStyles(() => ({
+    timer: {
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+    }
 }));
 
 const giveScoreToPlayer = (player, score) => {
@@ -76,6 +77,7 @@ const Game = (props) => {
     const [turns, setTurns] = useState(0);
 
     const { countdown, doCountdown } = props;
+    const [ countdownMax, setCountdownMax ] = useState(0);
     const { roomId } = useParams();
 
     const categoriesToChooseRef = useRef();
@@ -398,7 +400,7 @@ const Game = (props) => {
             case GameState.WORD_MASTER_CHOOSE_WORD:
                 // at this state, the word master is choosing the challenge word
                 timer = 15;
-                callback = isWordMaster && determineRandomWord;
+                //callback = isWordMaster && determineRandomWord;
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions
@@ -437,6 +439,7 @@ const Game = (props) => {
 
         if (timer > 0) {
             console.log(`counting from ${timer}`)
+            setCountdownMax(timer);
             doCountdown(timer, callback || null);
         }
 
@@ -453,79 +456,80 @@ const Game = (props) => {
 
     // render layout
     return (
-        <div className={classes.root}>
-            <Grid container spacing={3} direction="row">
-                <PlayerInfo
-                    wordMaster={wordMaster}
-                    wordDetectives={wordDetectives}
-                    category={categoryOfRound}
-                    word={isWordMaster ? wordOfRound : null}
-                    host={host}
-                    rounds={rounds}
-                />
-
+        <MainContainer>
+            <Grid container style={{position: 'relative'}}>
                 <Grid item xs={12}>
-                    <h1>Bom Jogo, {playerName}</h1>
+                    <Box mb={3}>
+                        <PlayerHeader isWordMaster={isWordMaster} name={playerName} />
+                    </Box>
                 </Grid>
 
-                {countdown > 0 && <h1>{countdown}</h1>}
+                <Grid item xs={12}>
+                    {countdown > 0 && (
+                        <Box className={classes.timer}>
+                            <Timer max={countdownMax} value={countdown} />
+                        </Box>
+                    )}
+                </Grid>
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
-                    <WordMasterChooseWord
-                        isWordMaster={isWordMaster}
-                        categories={categoriesToChoose}
-                        onClickCategory={chooseCategory}
-                        words={wordsToChoose}
-                        onClickWord={chooseWord}
-                    />
-                )}
+                <Grid item xs={12}>
+                    {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
+                        <WordMasterChooseWord
+                            isWordMaster={isWordMaster}
+                            categories={categoriesToChoose}
+                            onClickCategory={chooseCategory}
+                            words={wordsToChoose}
+                            onClickWord={chooseWord}
+                        />
+                    )}
 
-                {currentGameState ===
-                    GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
-                    <WordDetectivesAskQuestions
-                        isWordMaster={isWordMaster}
-                        sendQuestion={sendQuestionToWordMaster}
-                        clues={clues}
-                        questions={questions}
-                    />
-                )}
+                    {currentGameState ===
+                        GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
+                        <WordDetectivesAskQuestions
+                            isWordMaster={isWordMaster}
+                            sendQuestion={sendQuestionToWordMaster}
+                            clues={clues}
+                            questions={questions}
+                        />
+                    )}
 
-                {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
-                    <WordMasterChooseQuestions
-                        isWordMaster={isWordMaster}
-                        questions={questions}
-                        sendAnswer={sendAnswerOfWordMaster}
-                    />
-                )}
+                    {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
+                        <WordMasterChooseQuestions
+                            isWordMaster={isWordMaster}
+                            questions={questions}
+                            sendAnswer={sendAnswerOfWordMaster}
+                        />
+                    )}
 
-                {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
-                    <ShowQuestionsChosed
-                        isWordMaster={isWordMaster}
-                        question={
-                            questions[questionAnswered.index]
-                                ? questions[questionAnswered.index].question
-                                : "error"
-                        }
-                        answer={questionAnswered.answer}
-                        sendHunchToDiscoverWord={sendHunchToDiscoverWord}
-                        clues={clues}
-                        hunches={hunches}
-                    />
-                )}
+                    {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
+                        <ShowQuestionsChosed
+                            isWordMaster={isWordMaster}
+                            question={
+                                questions[questionAnswered.index]
+                                    ? questions[questionAnswered.index].question
+                                    : "error"
+                            }
+                            answer={questionAnswered.answer}
+                            sendHunchToDiscoverWord={sendHunchToDiscoverWord}
+                            clues={clues}
+                            hunches={hunches}
+                        />
+                    )}
 
-                {currentGameState === GameState.WM_DISCONNECTED && (
-                    <span>O WordMaster desconectou! Iniciando nova rodada...</span>
-                )}
+                    {currentGameState === GameState.WM_DISCONNECTED && (
+                        <span>O WordMaster desconectou! Iniciando nova rodada...</span>
+                    )}
 
-                {currentGameState === GameState.END_ROUND && (
-                    <EndRound word={wordOfRound} playerWhoDiscovered={playerWhoDiscoveredWord} />
-                )}
+                    {currentGameState === GameState.END_ROUND && (
+                        <EndRound word={wordOfRound} playerWhoDiscovered={playerWhoDiscoveredWord} />
+                    )}
 
-                {currentGameState === GameState.END_GAME && (
-                    <EndGame players={playersByScore} />
-                )}
+                    {currentGameState === GameState.END_GAME && (
+                        <EndGame players={playersByScore} />
+                    )}
+                </Grid>
             </Grid>
-        </div>
+        </MainContainer>
     );
 }
 
