@@ -51,12 +51,12 @@ function Lobby({ firebase }: Props) {
         return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
     }, [firebase, roomId]);
 
-    const handleSubmit = (evt: MouseEvent) => {
+    function handleSubmit(evt: MouseEvent): void {
         evt.preventDefault();
         updateRoom({ state: GameState.WORD_MASTER_CHOOSE_WORD });
     }
 
-    const commitPlayerName = (newName: string) => {
+    function commitPlayerName(newName: string): void {
         sessionContext.dispatch({
             type: SET_PLAYER_NAME,
             payload: newName
@@ -67,9 +67,13 @@ function Lobby({ firebase }: Props) {
         updateRoom({
             [`/players/${playerId}/name`]: newName
         });
-    };
+    }
 
-    const onChangeRoomConfig = (isConfigured: boolean): void => {
+    function onFinishEditingPlayerName(text: string): void {
+        commitPlayerName(text);
+    }
+
+    function onChangeRoomConfig(isConfigured: boolean): void {
         setIsRoomConfigured(isConfigured);
     }
 
@@ -221,10 +225,6 @@ function Lobby({ firebase }: Props) {
         }
     }, [gameState, roomId, history])
 
-    function handlePlayerName(text: string): void {
-        setPlayerName(text);
-    }
-
     return (
         <MainContainer
             sidebar={
@@ -234,7 +234,7 @@ function Lobby({ firebase }: Props) {
                             label="Nome do jogador:"
                             type="text"
                             value={playerName}
-                            onChange={handlePlayerName}
+                            onFinishEditing={onFinishEditingPlayerName}
                         />
                     </Grid>
                 </Grid>
@@ -249,20 +249,6 @@ function Lobby({ firebase }: Props) {
                 {isHost && <Grid item xs={12}>
                     <CreateRoom roomId={roomId} onChangeRoomConfig={onChangeRoomConfig} />
                 </Grid>}
-
-
-                {/* <Grid item xs={12}>
-                    <Grid container>
-                        <Grid item>
-                            <TextField fullWidth label="Nome" value={playerName || ''} onChange={(ev) => setPlayerName(ev.target.value)} />
-                        </Grid>
-                        <Grid item>
-                            <Button variant="outlined" color="secondary" onClick={() => commitPlayerName(playerName)}>
-                                Mudar
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Grid> */}
 
                 <Grid container item xs={12} spacing={2}>
                     <Grid item xs={12}>
