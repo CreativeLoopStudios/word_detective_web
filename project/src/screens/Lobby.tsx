@@ -20,7 +20,7 @@ import PlayerStatus from "../player_status";
 import { HeartbeatData, Player } from "../types";
 
 import { CreateRoom } from "../screens";
-import { Button, Label, MainContainer } from "../components";
+import { Button, EditInput, Label, MainContainer } from "../components";
 
 type Props = {
     firebase: Firebase
@@ -221,12 +221,21 @@ function Lobby({ firebase }: Props) {
         }
     }, [gameState, roomId, history])
 
+    function handlePlayerName(text: string): void {
+        setPlayerName(text);
+    }
+
     return (
         <MainContainer
             sidebar={
                 <Grid container>
                     <Grid item>
-                        <Label kind="secondary">Nome do jogador:</Label>
+                        <EditInput
+                            label="Nome do jogador:"
+                            type="text"
+                            value={playerName}
+                            onChange={handlePlayerName}
+                        />
                     </Grid>
                 </Grid>
             }

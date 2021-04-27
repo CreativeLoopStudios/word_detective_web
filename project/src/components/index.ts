@@ -15,6 +15,7 @@ import Switch from './Switch';
 import AlertBox from './AlertBox';
 import QuestionsBox from './QuestionsBox';
 import PlayerHeader from './PlayerHeader';
+import EditInput from './EditInput';
 
 export {
     PlayerInfo,
@@ -34,4 +35,5 @@ export {
     AlertBox,
     QuestionsBox,
     PlayerHeader,
+    EditInput
 };
