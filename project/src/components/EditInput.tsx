@@ -71,7 +71,7 @@ function EditInput({ label, placeholder, type, value, onFinishEditing }: Props) 
                     </div>
                 }
                 <Grid item container alignItems="center">
-                    <Grid item xs={11}>
+                    <Grid item xs={8}>
                         <CustomInput
                             id="input"
                             className={classes.root}
