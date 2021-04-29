@@ -25,7 +25,7 @@ function PlayerRanking({ players }: Props) {
     return (
         <Grid container className={classes.container}>
             {
-                players.map((player, index) => (
+                players.sort((a: Player, b: Player) => a.role > b.role ? 0 : 1).map((player, index) => (
                     <PlayerRankingItem
                         key={index}
                         isWordMaster={player.role === 'word_master'}
