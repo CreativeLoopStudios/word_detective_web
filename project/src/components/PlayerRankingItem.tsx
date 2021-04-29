@@ -1,13 +1,9 @@
 import React from 'react';
 
-import { Grid, makeStyles } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
+
 import PlayerIcon from './PlayerIcon'
-import { Label } from '.';
-
-
-const useStyles = makeStyles({
-    item: {},
-});
+import Label from './Label';
 
 export type Props = {
     isWordMaster: boolean;
@@ -16,13 +12,13 @@ export type Props = {
 }
 
 function PlayerRankingItem({ isWordMaster, playerName, score }: Props) {
-    const classes = useStyles();
-
     return (
-        <Grid container item className={classes.item} alignItems="center">
-            <PlayerIcon isWordMaster={isWordMaster} />
+        <Grid container item alignItems="center">
+            <Grid item xs={4}>
+                <PlayerIcon isWordMaster={isWordMaster} />
+            </Grid>
 
-            <Grid container direction="column" item xs={9}>
+            <Grid container direction="column" item xs={8}>
                 <Grid item>
                     <Label kind="secondary">{playerName}</Label>
                 </Grid>

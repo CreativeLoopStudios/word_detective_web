@@ -17,11 +17,11 @@ Default.args = {
   sidebar: [
     <PlayerRanking
       players={[
-        { isWordMaster: true, playerName: "Player 1", score: 10 },
-        { isWordMaster: false, playerName: "Player 2", score: 5 },
-        { isWordMaster: false, playerName: "Player 3", score: 12 },
-        { isWordMaster: false, playerName: "Player 4", score: 20 },
-        { isWordMaster: false, playerName: "Player 5", score: 1 }
+        { id: '', creationDate: 0, name: "Player 1", playedAsWordMaster: false, role: 'word_master', score: 10, status: 'connected' },
+        { id: '', creationDate: 0, name: "Player 2", playedAsWordMaster: false, role: 'word_detective', score: 5, status: 'connected' },
+        { id: '', creationDate: 0, name: "Player 3", playedAsWordMaster: false, role: 'word_detective', score: 12, status: 'connected' },
+        { id: '', creationDate: 0, name: "Player 4", playedAsWordMaster: false, role: 'word_detective', score: 20, status: 'connected' },
+        { id: '', creationDate: 0, name: "Player 5", playedAsWordMaster: false, role: 'word_detective', score: 1, status: 'connected' }
       ]}
     />
   ],

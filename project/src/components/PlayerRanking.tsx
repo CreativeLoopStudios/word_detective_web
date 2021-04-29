@@ -6,6 +6,8 @@ import { Grid, makeStyles } from "@material-ui/core";
 
 import PlayerRankingItem from './PlayerRankingItem';
 
+import { Player } from '../types';
+
 const useStyles = makeStyles(() => ({
     container: {
         height: '100%',
@@ -14,24 +16,20 @@ const useStyles = makeStyles(() => ({
 }));
 
 export type Props = {
-    players: Array<{
-        isWordMaster: boolean;
-        playerName: string;
-        score: number;
-    }>;
+    players: Array<Player>;
 }
 
 function PlayerRanking({ players }: Props) {
     const classes = useStyles();
     
     return (
-        <Grid container className={classes.container} spacing={2}>
+        <Grid container className={classes.container}>
             {
                 players.map((player, index) => (
                     <PlayerRankingItem
                         key={index}
-                        isWordMaster={player.isWordMaster}
-                        playerName={player.playerName}
+                        isWordMaster={player.role === 'word_master'}
+                        playerName={player.name}
                         score={player.score}
                     />
                 ))

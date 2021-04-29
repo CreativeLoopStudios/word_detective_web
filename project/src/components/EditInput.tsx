@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
 
-import { Theme, InputBase, Grid, makeStyles, withStyles, IconButton, TextField } from "@material-ui/core";
+import { Theme, InputBase, Grid, makeStyles, withStyles, IconButton } from "@material-ui/core";
 import { Edit as EditIcon, Check as CheckIcon } from '@material-ui/icons';
 
 import PropTypes from "prop-types";
@@ -70,8 +70,8 @@ function EditInput({ label, placeholder, type, value, onFinishEditing }: Props) 
                         <label htmlFor="input">{label}</label>
                     </div>
                 }
-                <Grid item container>
-                    <Grid item xs={11}>
+                <Grid item container alignItems="center">
+                    <Grid item xs={8}>
                         <CustomInput
                             id="input"
                             className={classes.root}
