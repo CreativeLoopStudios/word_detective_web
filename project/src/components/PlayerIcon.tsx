@@ -31,8 +31,8 @@ const useStyles = makeStyles({
         borderRadius: 100,
         border: border,
         padding: '0.5rem',
-        width: '1.8rem',
-        height: '1.8rem'
+        width: '3rem',
+        height: '3rem'
     })
 });
 
@@ -50,9 +50,7 @@ export default function PlayerIcon({ isWordMaster }: Props) {
     });
 
     return (
-            <Grid item xs={3}>
-                <div className={classes.circle}></div>
-            </Grid>
+        <div className={classes.circle}></div>
     );
 }
 

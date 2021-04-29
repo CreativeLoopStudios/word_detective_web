@@ -20,7 +20,7 @@ import PlayerStatus from "../player_status";
 import { HeartbeatData, Player } from "../types";
 
 import { CreateRoom } from "../screens";
-import { Button, EditInput, Label, MainContainer } from "../components";
+import { Button, EditInput, Label, MainContainer, PlayerRanking } from "../components";
 
 type Props = {
     firebase: Firebase
@@ -228,13 +228,21 @@ function Lobby({ firebase }: Props) {
     return (
         <MainContainer
             sidebar={
-                <Grid container>
-                    <Grid item>
+                <Grid container spacing={6}>
+                    <Grid item xs={12}>
                         <EditInput
                             label="Nome do jogador:"
                             type="text"
                             value={playerName}
                             onFinishEditing={onFinishEditingPlayerName}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Label kind="secondary" size="h4" bold>Lobby</Label>
+
+                        <PlayerRanking
+                            players={players}
                         />
                     </Grid>
                 </Grid>
