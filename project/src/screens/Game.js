@@ -20,7 +20,7 @@ import {
     EndRound,
     EndGame,
 } from "../state_screens";
-import { MainContainer, PlayerHeader, Timer } from "../components";
+import { MainContainer, PlayerHeader, PlayerRanking, Timer } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
 
@@ -456,7 +456,17 @@ const Game = (props) => {
 
     // render layout
     return (
-        <MainContainer>
+        <MainContainer
+            sidebar={
+                <Grid container>
+                    <Grid item xs={12}>
+                        <PlayerRanking
+                            players={playersByScore}
+                        />
+                    </Grid>
+                </Grid>
+            }
+        >
             <Grid container style={{position: 'relative'}}>
                 <Grid item xs={12}>
                     <Box mb={3}>

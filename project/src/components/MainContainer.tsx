@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid, makeStyles, Paper } from "@material-ui/core";
+import { Box, Grid, makeStyles, Paper } from "@material-ui/core";
 
 import Logo from './Logo';
 
@@ -28,7 +28,13 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center'
     },
     sidebarContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
         padding: '2rem'
+    },
+    logo: {
+        flex: 1
     }
 }));
 
@@ -52,7 +58,9 @@ function MainContainer({ sidebar, children }: Props) {
                 sidebar &&
                 <div className={classes.sidebar}>
                     <div className={classes.sidebarContent}>
-                        <Logo variant="rect" size="small" />
+                        <div className={classes.logo}>
+                            <Logo variant="rect" size="small" />
+                        </div>
                         {sidebar}
                     </div>
                 </div>

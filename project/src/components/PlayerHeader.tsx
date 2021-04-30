@@ -1,5 +1,7 @@
-import { Grid } from '@material-ui/core';
 import React from 'react';
+
+import { Grid } from '@material-ui/core';
+
 import Label from './Label';
 import PlayerIcon from './PlayerIcon';
 
@@ -17,10 +19,10 @@ export default function PlayerHeader({ name, isWordMaster }: Props) {
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
             <Grid item>
-                <Label inline={true} kind="primary" size="h4" bold={true}>{ name }</Label>
+                <Label inline kind="primary" size="h4" bold>{name}</Label>
             </Grid>
             <Grid item>
-                <Label inline={true} kind="secondary" size="h4" bold={true}>{ roleName }</Label>
+                <Label inline kind="secondary" size="h4" bold>{roleName}</Label>
             </Grid>
         </Grid>
     )

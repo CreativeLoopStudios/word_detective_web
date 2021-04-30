@@ -37,7 +37,7 @@ function Timer({ value, max, color }: Props) {
 
     return (
     <Box position="relative" display="inline-flex">
-        <CircularProgress className={classes.progress} variant="static" value={timerVal} size={90} thickness={7} />
+        <CircularProgress className={classes.progress} variant="determinate" value={timerVal} size={90} thickness={7} />
         <Box
         top={0}
         left={0}

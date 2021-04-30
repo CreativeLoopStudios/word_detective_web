@@ -10,8 +10,12 @@ import { Player } from '../types';
 
 const useStyles = makeStyles(() => ({
     container: {
-        height: '100%',
-        overflow: 'auto'
+        maxHeight: '100%',
+        overflowY: 'auto',
+        position: 'relative',
+        '& div': {
+            marginTop: '0.2rem'
+        }
     }
 }));
 
@@ -23,7 +27,7 @@ function PlayerRanking({ players }: Props) {
     const classes = useStyles();
     
     return (
-        <Grid container className={classes.container}>
+        <div className={classes.container}>
             {
                 players.sort((a: Player, b: Player) => a.role > b.role ? 0 : 1).map((player, index) => (
                     <PlayerRankingItem
@@ -34,7 +38,7 @@ function PlayerRanking({ players }: Props) {
                     />
                 ))
             }
-        </Grid>
+        </div>
     );
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback, MouseEvent } from 
 
 import { useHistory, useParams } from "react-router-dom";
 
-import { Grid, Snackbar } from "@material-ui/core";
+import { Box, Grid, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 
 import { database, firestore } from "firebase/app";
@@ -228,24 +228,28 @@ function Lobby({ firebase }: Props) {
     return (
         <MainContainer
             sidebar={
-                <Grid container spacing={6}>
-                    <Grid item xs={12}>
+                <>
+                    <Box flex={2}>
                         <EditInput
                             label="Nome do jogador:"
                             type="text"
                             value={playerName}
                             onFinishEditing={onFinishEditingPlayerName}
                         />
-                    </Grid>
+                    </Box>
 
-                    <Grid item xs={12}>
+                    <Box flex={1}>
                         <Label kind="secondary" size="h4" bold>Lobby</Label>
+                    </Box>
 
-                        <PlayerRanking
-                            players={players}
-                        />
-                    </Grid>
-                </Grid>
+                    <Box flex={10} position="relative">
+                        <Box height="100%" position="absolute" width="100%">
+                            <PlayerRanking
+                                players={players}
+                            />
+                        </Box>
+                    </Box>
+                </>
             }
         >
             <Grid container spacing={3}>

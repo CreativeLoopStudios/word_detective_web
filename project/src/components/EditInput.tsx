@@ -17,7 +17,6 @@ const useStyles = makeStyles(() => ({
         color: 'white',
         fontFamily: "gothic, sans-serif",
         fontSize: '0.9rem',
-        marginBottom: '1rem',
         textAlign: 'left'
     },
     icon: {
