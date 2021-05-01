@@ -16,6 +16,7 @@ import AlertBox from './AlertBox';
 import QuestionsBox from './QuestionsBox';
 import PlayerHeader from './PlayerHeader';
 import EditInput from './EditInput';
+import ScrollableContainer from './ScrollableContainer';
 
 export {
     PlayerInfo,
@@ -35,5 +36,6 @@ export {
     AlertBox,
     QuestionsBox,
     PlayerHeader,
-    EditInput
+    EditInput,
+    ScrollableContainer
 };

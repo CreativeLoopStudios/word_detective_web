@@ -20,7 +20,7 @@ import PlayerStatus from "../player_status";
 import { HeartbeatData, Player } from "../types";
 
 import { CreateRoom } from "../screens";
-import { Button, EditInput, Label, MainContainer, PlayerRanking } from "../components";
+import { Button, EditInput, Label, MainContainer, PlayerRanking, ScrollableContainer } from "../components";
 
 type Props = {
     firebase: Firebase
@@ -242,13 +242,11 @@ function Lobby({ firebase }: Props) {
                         <Label kind="secondary" size="h4" bold>Lobby</Label>
                     </Box>
 
-                    <Box flex={10} position="relative">
-                        <Box height="100%" position="absolute" width="100%">
-                            <PlayerRanking
-                                players={players}
-                            />
-                        </Box>
-                    </Box>
+                    <ScrollableContainer flex={10}>
+                        <PlayerRanking
+                            players={players}
+                        />
+                    </ScrollableContainer>
                 </>
             }
         >

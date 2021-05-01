@@ -9,11 +9,12 @@ export type Props = {
     isWordMaster: boolean;
     playerName: string;
     score: number;
+    className: string;
 }
 
-function PlayerRankingItem({ isWordMaster, playerName, score }: Props) {
+function PlayerRankingItem({ isWordMaster, playerName, score, className }: Props) {
     return (
-        <Grid container alignItems="center" xs={12}>
+        <Grid container alignItems="center" xs={12} className={className}>
             <Grid item xs={4}>
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
