@@ -467,19 +467,11 @@ const Game = (props) => {
                 </>
             }
         >
-            <Grid container style={{position: 'relative'}}>
+            <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Box mb={3}>
                         <PlayerHeader isWordMaster={isWordMaster} name={playerName} />
                     </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                    {countdown > 0 && (
-                        <Box className={classes.timer}>
-                            <Timer max={countdownMax} value={countdown} />
-                        </Box>
-                    )}
                 </Grid>
 
                 <Grid item xs={12}>
@@ -536,6 +528,12 @@ const Game = (props) => {
 
                     {currentGameState === GameState.END_GAME && (
                         <EndGame players={playersByScore} />
+                    )}
+                </Grid>
+
+                <Grid container item xs={12} justify="flex-end">
+                    {countdown > 0 && (
+                        <Timer max={countdownMax} value={countdown} />
                     )}
                 </Grid>
             </Grid>

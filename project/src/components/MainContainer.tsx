@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
-        padding: '4rem'
+        padding: '3rem 4rem'
     },
     sidebar: {
         background: 'black',
