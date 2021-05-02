@@ -400,7 +400,7 @@ const Game = (props) => {
             case GameState.WORD_MASTER_CHOOSE_WORD:
                 // at this state, the word master is choosing the challenge word
                 timer = 15;
-                //callback = isWordMaster && determineRandomWord;
+                callback = isWordMaster && determineRandomWord;
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions

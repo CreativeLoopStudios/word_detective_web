@@ -43,9 +43,8 @@ function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory
                                     <Grid item xs={12}>
                                         <Grid container spacing={2}>
                                             {categories.map((category) => (
-                                                <Grid item>
+                                                <Grid item key={category.id}>
                                                     <CustomButton 
-                                                        key={category.id}
                                                         onClick={() => onClickCategory(category)}
                                                         label={category.name}
                                                     />
@@ -70,9 +69,8 @@ function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory
                                     <Grid item xs={12}>
                                         <Grid container spacing={2}>
                                             {words.map((word, idx) => (
-                                                <Grid item>
+                                                <Grid item key={idx}>
                                                     <CustomButton 
-                                                        key={idx}
                                                         onClick={() => onClickWord(word)}
                                                         label={word}
                                                     />
