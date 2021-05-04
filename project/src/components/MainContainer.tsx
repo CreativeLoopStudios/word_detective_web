@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Grid, makeStyles, Paper } from "@material-ui/core";
+import { Grid, makeStyles, Paper } from "@material-ui/core";
 
 import Logo from './Logo';
 

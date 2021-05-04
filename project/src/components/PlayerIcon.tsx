@@ -1,5 +1,5 @@
-import { Grid, makeStyles } from '@material-ui/core';
-import React from 'react'
+import { makeStyles } from '@material-ui/core';
+import React, { useState } from 'react'
 
 import openBook from '../assets/open-book.png';
 import detective from '../assets/detective.png';
@@ -41,9 +41,11 @@ export type Props = {
 }
 
 export default function PlayerIcon({ isWordMaster }: Props) {
+    const [backgroundColorIndex, _] = useState<number>(Math.randomInt(0, 3));
+
     const classes = useStyles({
         backgroundImage: (isWordMaster) ? openBook : detective,
-        backgroundColor: (isWordMaster) ? 'red' : BackgroundColors[Math.randomInt(0, 3)],
+        backgroundColor: (isWordMaster) ? 'red' : BackgroundColors[backgroundColorIndex],
         backgroundSize: (isWordMaster) ? '1.8rem' : '2.5rem',
         backgroundPosition: (isWordMaster) ? 'center' : 'bottom',
         border: (isWordMaster) ? '2px solid yellow' : 'none',
