@@ -63,7 +63,7 @@ describe('useCountdown', () => {
     it('should stop timer', () => {
         const callback = jest.fn();
         const { result } = renderHook(() => useCountdown());
-    
+        
         act(() => result.current.start(10, callback));
 
         act(() => { jest.advanceTimersByTime(5000) });
