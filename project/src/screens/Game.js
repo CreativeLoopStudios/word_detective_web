@@ -11,7 +11,6 @@ import {
 import { Math } from "../utils";
 import GameState from "../state_of_play";
 import PlayerStatus from "../player_status";
-import { withCountdown } from "../hocs";
 import {
     WordMasterChooseWord,
     WordDetectivesAskQuestions,
@@ -23,6 +22,7 @@ import {
 import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
+import { useCountdown } from "../hooks";
 
 const WORDS_TO_CHOOSE = 5;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -50,6 +50,8 @@ const Game = (props) => {
     const { playerId, playerName } = sessionContext.state;
     const { firebase } = props;
 
+    const { countdown, start: startCountdown, stop: stopCountdown } = useCountdown();
+
     const [categoriesToChoose, setCategoriesToChoose] = useState([]);
     const [categorySelected, setCategorySelected] = useState({});
     const [wordsToChoose, setWordsToChoose] = useState([]);
@@ -76,7 +78,6 @@ const Game = (props) => {
     const [rounds, setRounds] = useState(0);
     const [turns, setTurns] = useState(0);
 
-    const { countdown, doCountdown } = props;
     const [ countdownMax, setCountdownMax ] = useState(0);
     const { roomId } = useParams();
 
@@ -404,7 +405,7 @@ const Game = (props) => {
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions
-                timer = 30
+                timer = 3000
                 callback = isHost && (async () => {
                     await updateRoom({
                         state: GameState.WORD_MASTER_CHOOSE_QUESTION,
@@ -440,11 +441,11 @@ const Game = (props) => {
         if (timer > 0) {
             console.log(`counting from ${timer}`)
             setCountdownMax(timer);
-            doCountdown(timer, callback || null);
+            startCountdown(timer, callback || null);
         }
 
         setCurrentCountdownState(currentGameState);
-    }, [endRound, updateRoom, endRoundWithoutPoints, doCountdown, determineRandomWord, newRound, resetTurn, 
+    }, [endRound, updateRoom, endRoundWithoutPoints, startCountdown, determineRandomWord, newRound, resetTurn, 
         setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, currentCountdownState]);
 
     // render loading
@@ -541,4 +542,4 @@ const Game = (props) => {
     );
 }
 
-export default withCountdown(withFirebase(Game));
+export default withFirebase(Game);
