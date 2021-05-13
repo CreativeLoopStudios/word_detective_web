@@ -404,7 +404,7 @@ const Game = (props) => {
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions
-                timer = 30
+                timer = 3000
                 callback = isHost && (async () => {
                     await updateRoom({
                         state: GameState.WORD_MASTER_CHOOSE_QUESTION,
