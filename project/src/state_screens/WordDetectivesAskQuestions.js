@@ -3,6 +3,7 @@ import Clues from '../components/Clues';
 import SearchIcon from "@material-ui/icons/Search";
 import { makeStyles, Button, Grid, TextField, InputAdornment } from "@material-ui/core";
 import { useFocusOnRender } from "../hooks";
+import { Input, Label } from "../components";
 
 const useStyles = makeStyles((theme) => ({
     word: {
@@ -10,6 +11,19 @@ const useStyles = makeStyles((theme) => ({
     },
     icon: {
         fontSize: 80
+    },
+    input: {
+        '& input[type=text]': {
+            textAlign: 'left',
+            paddingLeft: '1rem'
+        },
+        '& label': {
+            fontSize: '1.7rem',
+            fontWeight: 'bold'
+        },
+        '& #label__div': {
+            textAlign: 'left'
+        }
     }
 }));
 
@@ -38,18 +52,14 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
         setQuestionAlreadyAsked(isAlreadyAsked);
     };
 
-    const handleKeyDown = (event) => {
-        if (event.key === "Enter") {
+    const handleKeyDown = (key) => {
+        if (key === "Enter") {
             handleQuestionSend(questionInput);
         }
     };
 
     return (
         <>
-            <Grid item xs={12}>
-                <SearchIcon color="primary" className={classes.icon} />
-            </Grid>
-
             {isWordMaster && (
                 <Grid item xs={12}>
                     <h3>Perguntas sendo feitas pelos Word Detectives, confira abaixo assim que forem feitas:</h3>
@@ -66,40 +76,36 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
             )}
 
             {!isWordMaster && (
-                <>
-                {clues && (
-                    <Grid item xs={12}>
-                        <Clues clues={clues} />
+                <Grid item container spacing={2}>
+                    <Grid item>
+                        <Label>Faça abaixo perguntas para tentar descobrir qual é a palavra escolhida pelo Word master. Depois de escolhida a melhor pergunta, você pode dar quantos paplites quiser.</Label>
                     </Grid>
-                )}
-                <Grid item xs={12}>
-                    <TextField
-                        id="standard-basic"
-                        inputRef={questionInputRef}
-                        label="Qual sua pergunta para o Word Master?"
-                        placeholder="Escreva a pergunta de sim/não para o Word Master..."
-                        InputProps={{
-                            endAdornment: <InputAdornment position="start">?</InputAdornment>
-                        }}
-                        fullWidth
-                        value={questionInput}
-                        onChange={(event) =>
-                            setQuestionInput(event.target.value)
-                        }
-                        onKeyDown={handleKeyDown}
-                        helperText={isQuestionAlreadyAsked && "Pergunta já feita!"}
-                        error={isQuestionAlreadyAsked}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        className={classes.word}
-                        onClick={() => handleQuestionSend(questionInput)}
-                    >
-                        Enviar
-                    </Button>
+
+                    <Grid item>
+                        <Label inline kind="secondary" size="h5" bold>Pistas:</Label>
+                    </Grid>
+
+                    {clues && (
+                        <Grid item xs={12}>
+                            <Clues clues={clues} />
+                        </Grid>
+                    )}
+
+                    <Grid item xs={12}>
+                        <Input
+                            className={classes.input}
+                            inputRef={questionInputRef}
+                            label="Faça as perguntas"
+                            placeholder="Escreva a sua pergunta para o Word Master"
+                            type="text"
+                            value={questionInput}
+                            onChange={(text) => setQuestionInput(text)}
+                            onKeyDown={(key) => handleKeyDown(key)}
+                            helperText={isQuestionAlreadyAsked && "Pergunta já feita!"}
+                            error={isQuestionAlreadyAsked}
+                        />
+                    </Grid>
                 </Grid>
-                </>
             )}
         </>
     );

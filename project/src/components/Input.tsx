@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, KeyboardEvent, Ref } from "react";
 import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
 import PropTypes from "prop-types";
 
@@ -22,9 +22,14 @@ const useStyles = makeStyles(() => ({
 export type Props = {
     label?: string;
     placeholder?: string;
+    className?: string;
     type: 'text' | 'password' | 'number';
     value: string | number;
+    inputRef?: Ref<any>;
+    helperText?: string;
+    error?: boolean;
     onChange: (text: string) => void;
+    onKeyDown?: (key: string) => void;
 }
 
 const CustomInput = withStyles(() => {
@@ -41,26 +46,29 @@ const CustomInput = withStyles(() => {
     };
 })(InputBase);
 
-function Input({ label, placeholder, type, value, onChange }: Props) {
+function Input({ label, placeholder, className, type, value, inputRef, helperText, error, onChange, onKeyDown }: Props) {
     const classes = useStyles();
 
     return (
-        <Grid container direction="column">
+        <Grid container direction="column" className={className}>
             {
                 label &&
-                <Grid item xs={12} className={classes.label}>
+                <Grid item xs={12} className={classes.label} id="label__div">
                     <label htmlFor="input">{label}</label>
                 </Grid>
             }
             <Grid item xs={12}>
                 <CustomInput
                     id="input"
+                    inputRef={inputRef}
                     className={classes.root}
                     placeholder={placeholder}
                     type={type}
                     onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
+                    onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => onKeyDown && onKeyDown(event.key)}
                     value={value}
                     fullWidth
+                    error={error}
                 />
             </Grid>
         </Grid>
@@ -81,10 +89,13 @@ Input.propTypes = {
      */
     type: PropTypes.oneOf(["text", "password", "number"]),
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    helperText: PropTypes.string,
+    error: PropTypes.bool,
     /**
      * Optional click handler
      */
     onChange: PropTypes.func,
+    onKeyDown: PropTypes.func
 };
 
 Input.defaultProps = {
@@ -92,7 +103,10 @@ Input.defaultProps = {
     placeholder: undefined,
     type: "text",
     value: undefined,
+    helperText: "",
+    error: false,
     onChange: undefined,
+    onKeyDown: undefined
 };
 
 export default Input;
