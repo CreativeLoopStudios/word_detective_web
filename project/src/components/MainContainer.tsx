@@ -8,7 +8,7 @@ const useStyles = makeStyles(() => ({
     paper: {
         maxWidth: 900,
         minWidth: 500,
-        minHeight: 300,
+        minHeight: 500,
         borderRadius: '1rem',
         backgroundColor: 'rgba(33,33,33,.8)',
         display: 'flex',

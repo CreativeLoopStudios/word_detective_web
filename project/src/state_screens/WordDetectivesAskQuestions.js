@@ -62,7 +62,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
         <>
             {isWordMaster && (
                 <Grid item xs={12}>
-                    <h3>Perguntas sendo feitas pelos Word Detectives, confira abaixo assim que forem feitas:</h3>
+                    <Label inline kind="secondary" size="h5" bold>Perguntas dos Word Detectives:</Label>
                     <ul>
                         {questions.map((q, index) => (
                             <div key={index}>
