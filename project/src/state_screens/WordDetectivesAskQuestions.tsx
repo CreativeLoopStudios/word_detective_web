@@ -1,17 +1,14 @@
 import React, { useState } from "react";
-import Clues from '../components/Clues';
-import SearchIcon from "@material-ui/icons/Search";
-import { makeStyles, Button, Grid, TextField, InputAdornment } from "@material-ui/core";
+
+import { makeStyles, Grid } from "@material-ui/core";
+
 import { useFocusOnRender } from "../hooks";
-import { Input, Label } from "../components";
+
+import { Input, Label, Clues } from "../components";
+
+import { Clue, Question } from '../types';
 
 const useStyles = makeStyles((theme) => ({
-    word: {
-        margin: 16,
-    },
-    icon: {
-        fontSize: 80
-    },
     input: {
         '& input[type=text]': {
             textAlign: 'left',
@@ -27,20 +24,27 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clues }) {
+type Props = {
+    questions: Array<Question>;
+    sendQuestion: (text: string) => void;
+    isWordMaster: boolean;
+    clues: Array<Clue>;
+};
+
+function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clues }: Props) {
     const classes = useStyles();
 
     const questionInputRef = useFocusOnRender(null)
     const [questionInput, setQuestionInput] = useState("");
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
 
-    const normalizeText = (text) => {
+    const normalizeText = (text: string) => {
         return text.toLowerCase()
                    .normalize("NFD") // remove accents
                    .replace(/[^\w]+/g, ""); // remove everything that is not alphanumeric, like punctuation.
     };
 
-    const handleQuestionSend = (text) => {
+    const handleQuestionSend = (text: string) => {
         const normalizedQuestions = questions.map(q => normalizeText(q.question));
         const normalizedText = normalizeText(text);
         const isAlreadyAsked = normalizedQuestions.includes(normalizedText);
@@ -52,7 +56,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
         setQuestionAlreadyAsked(isAlreadyAsked);
     };
 
-    const handleKeyDown = (key) => {
+    const handleKeyDown = (key: string) => {
         if (key === "Enter") {
             handleQuestionSend(questionInput);
         }
@@ -66,7 +70,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                     <ul>
                         {questions.map((q, index) => (
                             <div key={index}>
-                                <li className={classes.question}>
+                                <li>
                                     {q.question}
                                 </li>
                             </div>
@@ -101,7 +105,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                             value={questionInput}
                             onChange={(text) => setQuestionInput(text)}
                             onKeyDown={(key) => handleKeyDown(key)}
-                            helperText={isQuestionAlreadyAsked && "Pergunta já feita!"}
+                            helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
                             error={isQuestionAlreadyAsked}
                         />
                     </Grid>

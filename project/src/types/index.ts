@@ -8,6 +8,16 @@ export type Player = {
     status: 'connected' | 'disconnected';
 };
 
+export type Question = {
+    player: string;
+    question: string;
+};
+
+export type Clue = {
+    answer: string;
+    question: Question;
+};
+
 export type Category = {
     id: string;
     description: string;
