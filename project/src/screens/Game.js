@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { makeStyles, Grid, Box } from "@material-ui/core";
+import { Grid, Box } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 //import * as firebase from "firebase/app";
 //import { database, firestore } from "firebase/app";
@@ -29,14 +29,6 @@ const TURNS_BEFORE_ROUND_ENDS = 5;
 const SCORE_TO_PLAYER_WHO_GUESSED = 2;
 const SCORE_TO_QUESTION_SELECTED = 1;
 
-const useStyles = makeStyles(() => ({
-    timer: {
-        position: 'absolute',
-        right: 0,
-        bottom: 0,
-    }
-}));
-
 const giveScoreToPlayer = (player, score) => {
     return {
         [`/players/${player.id}/score`]: player.score + score
@@ -44,8 +36,6 @@ const giveScoreToPlayer = (player, score) => {
 };
 
 const Game = (props) => {
-    const classes = useStyles();
-
     const sessionContext = useContext(SessionContext);
     const { playerId, playerName } = sessionContext.state;
     const { firebase } = props;

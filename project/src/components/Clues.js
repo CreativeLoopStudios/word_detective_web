@@ -12,19 +12,16 @@ function Clue (props) {
     const classes = useStyles();
 
     return (
-      <>
-          <h3>Pistas:</h3>
-          <ul>
-          {
-              (props.clues || []).map((clue, idx) => (
-                  <li key={idx}>
-                      <span className={classes.question}>{clue.question.question}</span>
-                      <span>{clue.answer}</span>
-                  </li>
-              ))
-          }
-          </ul>
-      </>
+      <ul>
+        {
+            (props.clues || []).map((clue, idx) => (
+                <li key={idx}>
+                    <span className={classes.question}>{clue.question.question}</span>
+                    <span>{clue.answer}</span>
+                </li>
+            ))
+        }
+      </ul>
     )
 }
 
