@@ -4,7 +4,7 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender } from "../hooks";
 
-import { Input, Label, Clues } from "../components";
+import { Input, Label, Clues, QuestionsBox } from "../components";
 
 import { Clue, Question } from '../types';
 
@@ -65,17 +65,17 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
     return (
         <>
             {isWordMaster && (
-                <Grid item xs={12}>
-                    <Label inline kind="secondary" size="h5" bold>Perguntas dos Word Detectives:</Label>
-                    <ul>
-                        {questions.map((q, index) => (
-                            <div key={index}>
-                                <li>
-                                    {q.question}
-                                </li>
-                            </div>
-                        ))}
-                    </ul>
+                <Grid container item spacing={2}>
+                    <Grid item>
+                        <Label>Aproveite para ler as perguntas na medida que forem sendo enviadas, a próxima fase você irá respondê-las!</Label>
+                    </Grid>
+
+                    <Grid item>
+                        <QuestionsBox
+                            questions={questions.map(q => q.question)}
+                            buttonsDisabled
+                        />
+                    </Grid>
                 </Grid>
             )}
 
