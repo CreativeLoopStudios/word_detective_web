@@ -9,11 +9,12 @@ import Label from './Label';
 
 export type Props = {
     questions: Array<string>;
-    onClickAfirmative: (question: string) => void;
-    onClickNegative: (question: string) => void;
+    buttonsDisabled?: boolean;
+    onClickAffirmative?: (question: string) => void;
+    onClickNegative?: (question: string) => void;
 }
 
-function QuestionsBox({ questions, onClickAfirmative, onClickNegative }: Props) {
+function QuestionsBox({ questions, buttonsDisabled, onClickAffirmative, onClickNegative }: Props) {
     return (
         <Grid container item alignItems="center" spacing={4}>
             {
@@ -25,10 +26,10 @@ function QuestionsBox({ questions, onClickAfirmative, onClickNegative }: Props) 
 
                         <Grid container item spacing={2}>
                             <Grid item>
-                                <Button label="SIM" backgroundColor="#575475" size="small" onClick={(e: MouseEvent) => onClickAfirmative(question)} />
+                                <Button label="SIM" disabled={buttonsDisabled} backgroundColor="#575475" size="small" onClick={(e: MouseEvent) => onClickAffirmative && onClickAffirmative(question)} />
                             </Grid>
                             <Grid item>
-                                <Button label="NÃO" backgroundColor="#FF0D0D" size="small" onClick={(e: MouseEvent) => onClickNegative(question)} />
+                                <Button label="NÃO" disabled={buttonsDisabled} backgroundColor="#FF0D0D" size="small" onClick={(e: MouseEvent) => onClickNegative && onClickNegative(question)} />
                             </Grid>
                         </Grid>
                     </Grid>
@@ -40,12 +41,14 @@ function QuestionsBox({ questions, onClickAfirmative, onClickNegative }: Props) 
 
 QuestionsBox.propTypes = {
     questions: PropTypes.array,
-    onClickAfirmative: PropTypes.func,
+    buttonsDisabled: PropTypes.bool,
+    onClickAffirmative: PropTypes.func,
     onClickNegative: PropTypes.func,
 };
 QuestionsBox.defaultProps = {
     questions: [],
-    onClickAfirmative: undefined,
+    buttonsDisabled: false,
+    onClickAffirmative: undefined,
     onClickNegative: undefined
 };
 

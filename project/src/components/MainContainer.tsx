@@ -13,8 +13,9 @@ const useStyles = makeStyles(() => ({
         backgroundColor: 'rgba(33,33,33,.8)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
+        position: 'relative'
+    },
+    container: {
         padding: '3rem 4rem'
     },
     sidebar: {
@@ -49,7 +50,7 @@ function MainContainer({ sidebar, children }: Props) {
     return (
         <Paper elevation={1} className={classes.paper}>
             <Grid container>
-                <Grid item xs={sidebar ? 8 : 12}>
+                <Grid item xs={sidebar ? 8 : 12} className={classes.container}>
                     {children}
                 </Grid>
             </Grid>
