@@ -461,7 +461,12 @@ const Game = (props) => {
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Box mb={3}>
-                        <PlayerHeader isWordMaster={isWordMaster} name={playerName} />
+                        <PlayerHeader
+                            isWordMaster={isWordMaster}
+                            name={playerName}
+                            category={categoryOfRound.name}
+                            word={wordOfRound}
+                        />
                     </Box>
                 </Grid>
 

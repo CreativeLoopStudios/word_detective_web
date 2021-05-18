@@ -19,16 +19,17 @@ export type Props = {
   variant?: 'contained' | 'outlined';
   backgroundColor?: string;
   hoverColor?: string;
+  width?: string;
   size?: 'small' | 'medium' | 'large';
   label: string;
   disabled?: boolean;
-  onClick: (event: MouseEvent) => void;
+  onClick?: (event: MouseEvent) => void;
 };
 
 /**
  * Primary UI component for user interaction
  */
-function Button({ kind, variant, backgroundColor, hoverColor, size, label, disabled, onClick }: Props) {
+function Button({ kind, variant, backgroundColor, hoverColor, width, size, label, disabled, onClick }: Props) {
   const classes = useStyles();
 
   const CustomButton = withStyles(({ palette }: Theme) => {
@@ -40,6 +41,7 @@ function Button({ kind, variant, backgroundColor, hoverColor, size, label, disab
         borderColor: mainColor,
         backgroundColor: bg,
         color: variant === "contained" ? palette.getContrastText(bg) : mainColor,
+        width: width,
         '&:hover': {
           backgroundColor: hc,
         },
@@ -78,6 +80,7 @@ Button.propTypes = {
    * What background color to use when hovering
    */
   hoverColor: PropTypes.string,
+  width: PropTypes.string,
   /**
    * How large should the button be?
    */
@@ -100,6 +103,7 @@ Button.defaultProps = {
   kind: 'primary',
   backgroundColor: null,
   hoverColor: undefined,
+  width: undefined,
   size: 'medium',
   disabled: false,
   onClick: undefined,
