@@ -4,6 +4,7 @@ import { Grid, makeStyles } from '@material-ui/core';
 
 import Label from './Label';
 import PlayerIcon from './PlayerIcon';
+import Button from './Button';
 
 const useStyles = makeStyles(() => ({
     alignCenter: {
@@ -13,11 +14,13 @@ const useStyles = makeStyles(() => ({
 }));
 
 export type Props = {
-    name: string,
-    isWordMaster: boolean,
+    name: string;
+    category?: string;
+    word?: string;
+    isWordMaster: boolean;
 };
 
-export default function PlayerHeader({ name, isWordMaster }: Props) {
+export default function PlayerHeader({ name, category, word, isWordMaster }: Props) {
     const classes = useStyles();
     const roleName = `Word ${isWordMaster ? 'Master' : 'Detective'}`;
 
@@ -35,6 +38,39 @@ export default function PlayerHeader({ name, isWordMaster }: Props) {
             <Grid item className={classes.alignCenter}>
                 <Label inline kind="secondary" size="h5" bold>{roleName}</Label>
             </Grid>
+
+            {
+                (isWordMaster && category && word) &&
+                <Grid container item alignItems="center" xs={12} spacing={2}>
+                    <Grid item>
+                        <Label size="body2" kind="secondary">Categoria:</Label>
+                    </Grid>
+
+                    <Grid item>
+                        <Button
+                            kind="primary"
+                            label={category}
+                            backgroundColor="#FF0D0D"
+                            hoverColor="#ff8e8e"
+                            size="small"
+                            width="7rem"
+                        />
+                    </Grid>
+
+                    <Grid item>
+                        <Label size="body2" kind="secondary">Palavra:</Label>
+                    </Grid>
+
+                    <Grid item>
+                        <Button
+                            kind="secondary"
+                            label={word}
+                            size="small"
+                            width="7rem"
+                        />
+                    </Grid>
+                </Grid>
+            }
         </Grid>
     )
 }
