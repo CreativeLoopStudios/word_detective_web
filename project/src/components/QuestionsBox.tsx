@@ -7,29 +7,31 @@ import PropTypes from 'prop-types';
 import Button from './Button';
 import Label from './Label';
 
+import { Question } from '../types';
+
 export type Props = {
-    questions: Array<string>;
+    questions: Array<Question>;
     buttonsDisabled?: boolean;
-    onClickAffirmative?: (question: string) => void;
-    onClickNegative?: (question: string) => void;
+    onClickAffirmative?: (question: Question, index: number) => void;
+    onClickNegative?: (question: Question, index: number) => void;
 }
 
 function QuestionsBox({ questions, buttonsDisabled, onClickAffirmative, onClickNegative }: Props) {
     return (
         <Grid container item alignItems="center" spacing={4}>
             {
-                questions.map((question, index) => (
+                questions.map((q, index) => (
                     <Grid container item key={index} spacing={1}>
                         <Grid item>
-                            <Label kind="secondary" size="h5">{question}</Label>
+                            <Label kind="secondary" size="h5">{q.question}</Label>
                         </Grid>
 
                         <Grid container item spacing={2}>
                             <Grid item>
-                                <Button label="SIM" disabled={buttonsDisabled} backgroundColor="#575475" size="small" onClick={(e: MouseEvent) => onClickAffirmative && onClickAffirmative(question)} />
+                                <Button label="SIM" disabled={buttonsDisabled} backgroundColor="#575475" size="small" onClick={(e: MouseEvent) => onClickAffirmative && onClickAffirmative(q, index)} />
                             </Grid>
                             <Grid item>
-                                <Button label="NÃO" disabled={buttonsDisabled} backgroundColor="#FF0D0D" size="small" onClick={(e: MouseEvent) => onClickNegative && onClickNegative(question)} />
+                                <Button label="NÃO" disabled={buttonsDisabled} backgroundColor="#FF0D0D" size="small" onClick={(e: MouseEvent) => onClickNegative && onClickNegative(q, index)} />
                             </Grid>
                         </Grid>
                     </Grid>

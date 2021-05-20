@@ -16,7 +16,7 @@ const Template: Story<QuestionsBoxProps> = (args) => <QuestionsBox {...args} />
 export const Default = Template.bind({});
 Default.args = {
   questions: [
-    'Tem forma animal?'
+    { player: "", question: 'Tem forma animal?' }
   ]
 };
 Default.parameters = {
@@ -29,14 +29,13 @@ export const WithMainContainer = TemplateMainContainer.bind({});
 WithMainContainer.args = {
   children: [
     <QuestionsBox questions={[
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
-      'Tem forma animal?',
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' },
+      { player: "", question: 'Tem forma animal?' }
     ]} />
   ]
 };
