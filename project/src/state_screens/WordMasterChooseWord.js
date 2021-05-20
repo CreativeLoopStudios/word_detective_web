@@ -31,7 +31,7 @@ function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory
                 <Grid item xs={12}>
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <HelperText>Escolha abaixo uma das categorias e em seguida uma palavra de sua preferência.</HelperText>
+                            <HelperText>Escolha abaixo uma das categorias e em seguida uma palavra de sua preferência</HelperText>
                         </Grid>
                         {
                             categories.length > 0 && (
@@ -63,7 +63,7 @@ function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory
                                     </Grid>
 
                                     <Grid item xs={12}>
-                                        <HelperText>Selecione uma palavra ou espere o tempo acabar para uma escolha aleatória.</HelperText>
+                                        <HelperText>Selecione uma palavra ou espere o tempo acabar para uma escolha aleatória</HelperText>
                                     </Grid>
 
                                     <Grid item xs={12}>
