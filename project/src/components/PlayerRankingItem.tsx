@@ -19,7 +19,7 @@ function PlayerRankingItem({ isWordMaster, playerName, score, className }: Props
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
 
-            <Grid container direction="column" item xs={8}>
+            <Grid container item direction="column" xs={8}>
                 <Grid item>
                     <Label kind="secondary">{playerName}</Label>
                 </Grid>

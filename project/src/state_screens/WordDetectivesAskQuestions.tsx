@@ -72,7 +72,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
                     <Grid item>
                         <QuestionsBox
-                            questions={questions.map(q => q.question)}
+                            questions={questions}
                             buttonsDisabled
                         />
                     </Grid>
