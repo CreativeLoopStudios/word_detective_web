@@ -40,3 +40,7 @@ export type HeartbeatData = {
     writeTime: number;
     readTime: number;
 };
+
+export type Hunch = {
+    text: string;
+};

@@ -1,19 +1,10 @@
 import React from "react";
 
-import { makeStyles, Button, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 
 import { Question } from "../types";
-import { Label, QuestionsBox } from "../components";
 
-const useStyles = makeStyles((theme) => ({
-    successButton: {
-        backgroundColor: "green",
-        color: "white",
-    },
-    question: {
-        fontSize: 24,
-    },
-}));
+import { Label, QuestionsBox } from "../components";
 
 type Props = {
     isWordMaster: boolean;
@@ -22,8 +13,6 @@ type Props = {
 };
 
 function WordMasterChooseQuestions({ isWordMaster, questions, sendAnswer }: Props) {
-    const classes = useStyles();
-
     return (
         <>
             {isWordMaster && (
@@ -33,7 +22,7 @@ function WordMasterChooseQuestions({ isWordMaster, questions, sendAnswer }: Prop
                     </Grid>
 
                     <Grid item>
-                        <Label kind="secondary" size="h5" bold>Escolha uma pergunta:</Label>
+                        <Label kind="secondary" size="h5" bold>Escolha uma pergunta</Label>
                     </Grid>
 
                     <Grid item>
@@ -49,7 +38,7 @@ function WordMasterChooseQuestions({ isWordMaster, questions, sendAnswer }: Prop
             {!isWordMaster && (
                 <Grid container item xs={12} spacing={2}>
                     <Grid item>
-                        <Label kind="secondary">Abaixo, estão as perguntas enviadas ao Word Master:</Label>
+                        <Label kind="secondary">Abaixo, estão as perguntas enviadas ao Word Master</Label>
                     </Grid>
 
                     <Grid item>

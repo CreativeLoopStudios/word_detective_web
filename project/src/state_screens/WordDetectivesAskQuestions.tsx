@@ -38,13 +38,13 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
     const [questionInput, setQuestionInput] = useState("");
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
 
-    const normalizeText = (text: string) => {
+    function normalizeText(text: string) {
         return text.toLowerCase()
                    .normalize("NFD") // remove accents
                    .replace(/[^\w]+/g, ""); // remove everything that is not alphanumeric, like punctuation.
-    };
+    }
 
-    const handleQuestionSend = (text: string) => {
+    function handleQuestionSend(text: string) {
         const normalizedQuestions = questions.map(q => normalizeText(q.question));
         const normalizedText = normalizeText(text);
         const isAlreadyAsked = normalizedQuestions.includes(normalizedText);
@@ -54,13 +54,13 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
             sendQuestion(text);
         }
         setQuestionAlreadyAsked(isAlreadyAsked);
-    };
+    }
 
-    const handleKeyDown = (key: string) => {
+    function handleKeyDown(key: string) {
         if (key === "Enter") {
             handleQuestionSend(questionInput);
         }
-    };
+    }
 
     return (
         <>
@@ -86,7 +86,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                     </Grid>
 
                     <Grid item>
-                        <Label inline kind="secondary" size="h5" bold>Pistas:</Label>
+                        <Label inline kind="secondary" size="h5" bold>Pistas de outros turnos</Label>
                     </Grid>
 
                     {clues && (
