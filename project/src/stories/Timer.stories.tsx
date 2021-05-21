@@ -22,8 +22,7 @@ const Template: Story<Props> = (args) => (
 
 export const Default = Template.bind({});
 Default.args = {
-  value: 14,
-  max: 15
+  max: 15,
 }
 Default.parameters = {
     backgrounds: { default: 'dark' }

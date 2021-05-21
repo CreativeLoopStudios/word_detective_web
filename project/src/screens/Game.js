@@ -22,7 +22,6 @@ import {
 import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
-import { useCountdown } from "../hooks";
 
 const WORDS_TO_CHOOSE = 5;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -39,8 +38,6 @@ const Game = (props) => {
     const sessionContext = useContext(SessionContext);
     const { playerId, playerName } = sessionContext.state;
     const { firebase } = props;
-
-    const { countdown, start: startCountdown, stop: stopCountdown } = useCountdown();
 
     const [categoriesToChoose, setCategoriesToChoose] = useState([]);
     const [categorySelected, setCategorySelected] = useState({});
@@ -68,8 +65,11 @@ const Game = (props) => {
     const [rounds, setRounds] = useState(0);
     const [turns, setTurns] = useState(0);
 
-    const [ countdownMax, setCountdownMax ] = useState(0);
+    const [timerConfig, setTimerConfig] = useState(
+        {countdownMax: 0, timer: 0, timerCallback: null, key: 1})
+
     const { roomId } = useParams();
+
 
     const categoriesToChooseRef = useRef();
     categoriesToChooseRef.current = categoriesToChoose;
@@ -384,8 +384,8 @@ const Game = (props) => {
         }
         console.log(`game state machine: ${currentGameState}`);
 
-        let timer = 0;
         let callback = null;
+        let timer = 0;
 
         switch (currentGameState) {
             case GameState.WORD_MASTER_CHOOSE_WORD:
@@ -430,12 +430,11 @@ const Game = (props) => {
 
         if (timer > 0) {
             console.log(`counting from ${timer}`)
-            setCountdownMax(timer);
-            startCountdown(timer, callback || null);
+            setTimerConfig({countdownMax: timer, timer, timerCallback: callback || null, key: Math.random()});
         }
 
         setCurrentCountdownState(currentGameState);
-    }, [endRound, updateRoom, endRoundWithoutPoints, startCountdown, determineRandomWord, newRound, resetTurn, 
+    }, [endRound, updateRoom, endRoundWithoutPoints, setTimerConfig, determineRandomWord, newRound, resetTurn, 
         setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, currentCountdownState]);
 
     // render loading
@@ -528,9 +527,10 @@ const Game = (props) => {
                 </Grid>
 
                 <Grid container item xs={12} justify="flex-end">
-                    {countdown > 0 && (
-                        <Timer max={countdownMax} value={countdown} />
-                    )}
+                    <Timer max={timerConfig.countdownMax} 
+                           value={timerConfig.timer} 
+                           onExpire={timerConfig.timerCallback}
+                           key={timerConfig.key} />
                 </Grid>
             </Grid>
         </MainContainer>
