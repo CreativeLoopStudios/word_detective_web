@@ -18,10 +18,11 @@ export type Props = {
     inline?: boolean;
     underline?: boolean;
     italic?: boolean;
+    className?: string;
     children: React.ReactNode;
 }
 
-function Label({ kind, color, bold, size, inline, underline, italic, children }: Props) {
+function Label({ kind, color, bold, size, inline, underline, italic, className, children }: Props) {
     const classes = useStyles();
 
     const CustomTypography = withStyles(() => {
@@ -48,7 +49,7 @@ function Label({ kind, color, bold, size, inline, underline, italic, children }:
     return (
         <CustomTypography
             variant={size}
-            className={classes.root}>
+            className={`${classes.root} ${className}`}>
             {children}
         </CustomTypography>
     );

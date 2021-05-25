@@ -1,6 +1,10 @@
 import React, { ChangeEvent, KeyboardEvent, Ref } from "react";
+
 import { InputBase, Grid, makeStyles, withStyles } from "@material-ui/core";
+
 import PropTypes from "prop-types";
+
+import Label from "./Label";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -8,6 +12,12 @@ const useStyles = makeStyles(() => ({
         fontFamily: "gothic, sans-serif",
         '& input[type=number]': {
             paddingRight: '1rem'
+        },
+    },
+    rootContainer: {
+        '& .Mui-error': {
+            border: '2px solid red',
+            borderRadius: 30
         }
     },
     label: {
@@ -16,6 +26,9 @@ const useStyles = makeStyles(() => ({
         fontSize: '0.9rem',
         marginBottom: '1rem',
         textAlign: 'center'
+    },
+    helperText: {
+        marginLeft: '1.5rem'
     }
 }));
 
@@ -41,7 +54,7 @@ const CustomInput = withStyles(() => {
                 color: 'black',
                 textAlign: "center",
                 background: "#E3E3E3 0% 0% no-repeat padding-box",
-            },
+            }
         },
     };
 })(InputBase);
@@ -57,7 +70,7 @@ function Input({ label, placeholder, className, type, value, inputRef, helperTex
                     <label htmlFor="input">{label}</label>
                 </Grid>
             }
-            <Grid item xs={12}>
+            <Grid item xs={12} className={classes.rootContainer}>
                 <CustomInput
                     id="input"
                     inputRef={inputRef}
@@ -70,6 +83,10 @@ function Input({ label, placeholder, className, type, value, inputRef, helperTex
                     fullWidth
                     error={error}
                 />
+                {
+                    error &&
+                    <Label color="#ff0000" size="body2" className={classes.helperText}>{helperText}</Label>
+                }
             </Grid>
         </Grid>
     );
