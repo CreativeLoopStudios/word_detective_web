@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, CircularProgress, makeStyles } from "@material-ui/core";
 import { useCountdown } from '../hooks';
 
 export type Props = {
     max: number;
-    key: any;
     color?: string;
     onExpire?: () => void;
 }
@@ -26,18 +25,29 @@ const useStyles = makeStyles(() => ({
     })
 }));
 
-function Timer({ max, color, onExpire, key }: Props) {
+function Timer({ max, color, onExpire }: Props) {
     const classes = useStyles({ color: color || '#FF0D0D' });
     const { countdown, start, stop } = useCountdown();
-    const [key_, setKey] = useState(0);
 
-    if (key !== key_ && key !== 0) {
-        stop();
-    }
-    if (key !== key_ && max > 0) {
-        start(max, onExpire || (() => {}));
-        setKey(key);
-    }
+    useEffect(() => {
+        return () => {
+            console.log('stopping');
+            stop();
+        };
+    }, [stop]);
+
+    useEffect(() => {
+        if (max > 0) {
+            console.log('starting timer');
+            const onExpire_ = () => {
+                console.log('calling expire');
+                if (onExpire) {
+                    onExpire();
+                }
+            }
+            start(max, onExpire_ || (() => {}));
+        }
+    }, [max, start, onExpire]);
 
     const timerVal = countdown * 100 / max;
     return (
@@ -75,11 +85,6 @@ Timer.propTypes = {
      * Called when expired.
      */
     onExpire: PropTypes.func,
-
-    /**
-     * Change this to force reseting the timer.
-     */
-    key: PropTypes.any,
 };
 
 export default Timer;
