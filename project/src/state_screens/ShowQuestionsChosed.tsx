@@ -46,10 +46,10 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
     const [hunchInput, setHunchInput] = useState("");
     const [error, setError] = useState(false);
 
-    async function handleKeyDown(key: string) {
+    function handleKeyDown(key: string) {
         if (key === "Enter") {
             setHunchInput("");
-            const error = await sendHunchToDiscoverWord(hunchInput);
+            const error = sendHunchToDiscoverWord(hunchInput);
             setError(error);
         }
     };

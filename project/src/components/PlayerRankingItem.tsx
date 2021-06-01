@@ -14,7 +14,7 @@ export type Props = {
 
 function PlayerRankingItem({ isWordMaster, playerName, score, className }: Props) {
     return (
-        <Grid container alignItems="center" xs={12} className={className}>
+        <Grid container item alignItems="center" xs={12} className={className}>
             <Grid item xs={4}>
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
