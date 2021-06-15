@@ -16,7 +16,7 @@ import { Background, Footer } from "./components";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        marginTop: "10rem",
+        marginTop: "5rem",
     },
 }));
 
