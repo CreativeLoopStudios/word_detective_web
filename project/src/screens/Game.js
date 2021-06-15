@@ -449,7 +449,7 @@ const Game = (props) => {
         <MainContainer
             sidebar={
                 <>
-                    <ScrollableContainer flex={2}>
+                    <ScrollableContainer flex={4}>
                         <PlayerRanking
                             players={playersByScore}
                         />

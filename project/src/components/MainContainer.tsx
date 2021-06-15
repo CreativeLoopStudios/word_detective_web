@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid, makeStyles, Paper } from "@material-ui/core";
+import { Grid, GridItemsAlignment, GridJustification, makeStyles, Paper } from "@material-ui/core";
 
 import Logo from './Logo';
 
@@ -8,7 +8,7 @@ const useStyles = makeStyles(() => ({
     paper: {
         maxWidth: 900,
         minWidth: 500,
-        minHeight: 500,
+        minHeight: 700,
         borderRadius: '1rem',
         backgroundColor: 'rgba(33,33,33,.8)',
         display: 'flex',
@@ -42,14 +42,16 @@ const useStyles = makeStyles(() => ({
 export type Props = {
     sidebar?: React.ReactNode;
     children?: React.ReactNode;
+    justify?: GridJustification;
+    alignItems?: GridItemsAlignment;
 }
 
-function MainContainer({ sidebar, children }: Props) {
+function MainContainer({ sidebar, justify, alignItems, children }: Props) {
     const classes = useStyles();
     
     return (
         <Paper elevation={1} className={classes.paper}>
-            <Grid container>
+            <Grid container justify={justify} alignItems={alignItems}>
                 <Grid item xs={sidebar ? 8 : 12} className={classes.container}>
                     {children}
                 </Grid>
