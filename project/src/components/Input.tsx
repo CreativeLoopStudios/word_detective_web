@@ -82,6 +82,7 @@ function Input({ label, placeholder, className, type, value, inputRef, helperTex
                     value={value}
                     fullWidth
                     error={error}
+                    autoComplete="off"
                 />
                 {
                     error &&
