@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 
 import { Theme, InputBase, Grid, makeStyles, withStyles, IconButton } from "@material-ui/core";
 import { Edit as EditIcon, Check as CheckIcon } from '@material-ui/icons';
@@ -48,11 +48,15 @@ const CustomInput = withStyles(({ palette }: Theme) => {
 function EditInput({ label, placeholder, type, value, onFinishEditing }: Props) {
     const classes = useStyles();
 
+    const inputRef = useRef<HTMLInputElement>(null);
     const [inputValue, setInputValue] = useState<string>(value);
     const [isReadOnly, setReadOnly] = useState<boolean>(true);
 
     function handleEdit(): void {
         setReadOnly(false);
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
     }
 
     function handleFinishEditing(): void {
@@ -73,6 +77,7 @@ function EditInput({ label, placeholder, type, value, onFinishEditing }: Props) 
                     <Grid item xs={8}>
                         <CustomInput
                             id="input"
+                            inputRef={inputRef}
                             className={classes.root}
                             placeholder={placeholder}
                             type={type}
