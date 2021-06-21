@@ -28,6 +28,7 @@ function PlayerRanking({ players }: Props) {
                     <PlayerRankingItem
                         key={index}
                         isWordMaster={player.role === 'word_master'}
+                        isOnline={player.status === 'connected'}
                         playerName={player.name}
                         score={player.score}
                         className={classes.playerRankingItem}
