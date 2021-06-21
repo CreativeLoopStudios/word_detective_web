@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => ({
         borderRadius: '10rem',
         position: 'absolute',
         bottom: '0rem',
-        right: '0.5rem',
+        right: '1rem',
         border: '2px solid white'
     },
     circleOnline: {
@@ -41,13 +41,13 @@ function PlayerRankingItem({ isWordMaster, isOnline, playerName, score, classNam
 
     return (
         <Grid container item alignItems="center" xs={12} className={className}>
-            <Grid item xs={5} className={classes.icon}>
+            <Grid item xs={4} className={classes.icon}>
                 <PlayerIcon isWordMaster={isWordMaster} />
 
                 <div className={`${classes.circleStatus} ${isOnline ? classes.circleOnline : classes.circleOffline}`}></div>
             </Grid>
 
-            <Grid container item direction="column" xs={7}>
+            <Grid container item direction="column" xs={8}>
                 <Grid item>
                     <Label kind="secondary">{playerName}</Label>
                 </Grid>
