@@ -22,6 +22,7 @@ import {
 import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
+import Loading from "./Loading";
 
 const WORDS_TO_CHOOSE = 5;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -440,7 +441,7 @@ const Game = (props) => {
     // render loading
     if (loading) {
         return (
-            <p>Loading...</p>
+            <Loading />
         );
     }
 
