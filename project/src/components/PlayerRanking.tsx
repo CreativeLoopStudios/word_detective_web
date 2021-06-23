@@ -20,13 +20,18 @@ export type Props = {
 
 function PlayerRanking({ players }: Props) {
     const classes = useStyles();
-    
+
+    const wordMaster = players.find(p => p.role === "word_master");
+    const wordDetectives = players.filter(p => p.role === "word_detective");
+
+    const sortedPlayers = wordMaster ? [ wordMaster ].concat(wordDetectives) : players;
+
     return (
         <>
             {
-                players.sort((a: Player, b: Player) => a.role > b.role ? 0 : 1).map((player, index) => (
+                sortedPlayers.map((player) => (
                     <PlayerRankingItem
-                        key={index}
+                        key={player.id}
                         isWordMaster={player.role === 'word_master'}
                         isOnline={player.status === 'connected'}
                         playerName={player.name}
