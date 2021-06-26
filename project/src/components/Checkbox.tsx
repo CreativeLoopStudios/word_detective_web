@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 const useStyles = makeStyles(() => ({
     root: {
         '& span': {
-            color: '#00FF8A',
+            color: 'white',
             fontWeight: "bold",
             fontFamily: "gothic, sans-serif",
         },

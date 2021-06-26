@@ -253,7 +253,6 @@ function Lobby({ firebase }: Props) {
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <Label kind="secondary" size="h4" bold>Configuração da sala</Label>
-                    <Label color="#979797">ID da Sala: {roomId}</Label>
                 </Grid>
 
                 {isHost && <Grid item xs={12}>
