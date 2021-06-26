@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext, useCallback, MouseEvent } from 
 
 import { useHistory, useParams } from "react-router-dom";
 
-import { Box, Grid, Snackbar } from "@material-ui/core";
+import { Box, Grid, IconButton, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
+import { FileCopyOutlined as FileCopyIcon } from '@material-ui/icons';
 
 import { database, firestore } from "firebase/app";
 import { withFirebase } from "../firebase/context";
@@ -50,32 +51,6 @@ function Lobby({ firebase }: Props) {
     const updateRoom = useCallback((data) => {
         return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
     }, [firebase, roomId]);
-
-    function handleSubmit(evt: MouseEvent): void {
-        evt.preventDefault();
-        updateRoom({ state: GameState.WORD_MASTER_CHOOSE_WORD });
-    }
-
-    function commitPlayerName(newName: string): void {
-        sessionContext.dispatch({
-            type: SET_PLAYER_NAME,
-            payload: newName
-        });
-        setPlayerName(newName);
-        firebase.updateDisplayName(newName);
-
-        updateRoom({
-            [`/players/${playerId}/name`]: newName
-        });
-    }
-
-    function onFinishEditingPlayerName(text: string): void {
-        commitPlayerName(text);
-    }
-
-    function onChangeRoomConfig(isConfigured: boolean): void {
-        setIsRoomConfigured(isConfigured);
-    }
 
     // sign up user
     useEffect(() => {
@@ -225,11 +200,46 @@ function Lobby({ firebase }: Props) {
         }
     }, [gameState, roomId, history])
 
+    function handleSubmit(evt: MouseEvent): void {
+        evt.preventDefault();
+        updateRoom({ state: GameState.WORD_MASTER_CHOOSE_WORD });
+    }
+
+    function commitPlayerName(newName: string): void {
+        sessionContext.dispatch({
+            type: SET_PLAYER_NAME,
+            payload: newName
+        });
+        setPlayerName(newName);
+        firebase.updateDisplayName(newName);
+
+        updateRoom({
+            [`/players/${playerId}/name`]: newName
+        });
+    }
+
+    function onFinishEditingPlayerName(text: string): void {
+        commitPlayerName(text);
+    }
+
+    function onChangeRoomConfig(isConfigured: boolean): void {
+        setIsRoomConfigured(isConfigured);
+    }
+
+    function _renderScreenTitle() {
+        let title = "Configuração da sala";
+        if (!isHost) {
+            title = "Aguardando o início do jogo!";
+        }
+
+        return <Label kind="secondary" size="h5" bold>{title}</Label>;
+    }
+
     return (
         <MainContainer
             sidebar={
                 <>
-                    <Box flex={2}>
+                    <Box flex={1}>
                         <EditInput
                             label="Nome do jogador:"
                             type="text"
@@ -238,11 +248,7 @@ function Lobby({ firebase }: Props) {
                         />
                     </Box>
 
-                    <Box flex={1}>
-                        <Label kind="secondary" size="h4" bold>Lobby</Label>
-                    </Box>
-
-                    <ScrollableContainer flex={10}>
+                    <ScrollableContainer flex={8}>
                         <PlayerRanking
                             players={players}
                         />
@@ -252,26 +258,28 @@ function Lobby({ firebase }: Props) {
         >
             <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    <Label kind="secondary" size="h4" bold>Configuração da sala</Label>
+                    {_renderScreenTitle()}
                 </Grid>
 
                 {isHost && <Grid item xs={12}>
                     <CreateRoom roomId={roomId} onChangeRoomConfig={onChangeRoomConfig} />
                 </Grid>}
 
-                <Grid container item xs={12} spacing={2}>
+                <Grid container item xs={12}>
                     <Grid item xs={12}>
                         <Label size="h6">Compartilhe o link com seus amigos!</Label>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={11}>
                         <Label size="subtitle1" color="white" underline>{lobbyUrl}</Label>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={1}>
                         <CopyToClipboard text={lobbyUrl}
                             onCopy={() => setCopied(true)}>
-                            <Button variant="outlined" backgroundColor="white" label="Copiar" />
+                                <IconButton>
+                                    <FileCopyIcon />
+                                </IconButton>
                         </CopyToClipboard>
                     </Grid>
 
