@@ -127,7 +127,7 @@ function CreateRoom({ roomId, firebase, onChangeRoomConfig }: Props) {
     }, [currentCategories, newCategories]);
 
     return (
-        <Grid container spacing={3} direction="row">
+        <Grid container spacing={4}>
             <Grid item xs={12}>
                 <Label bold>N° de jogadores:</Label>
                 <Select
