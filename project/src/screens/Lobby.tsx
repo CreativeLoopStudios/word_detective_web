@@ -289,15 +289,15 @@ function Lobby({ firebase }: Props) {
                     </Snackbar>
                 </Grid>
 
-                <Grid item xs={12}>
-                    {isHost && players.length > 1 && isRoomConfigured && (
+                {isHost && players.length > 1 && isRoomConfigured && (
+                    <Grid container item xs={12} justify="center" alignItems="center">
                         <Button
                             variant="contained"
                             onClick={handleSubmit}
                             label="Começar!"
                         />
-                    )}
-                </Grid>
+                    </Grid>
+                )}
             </Grid>
         </MainContainer>
     );
