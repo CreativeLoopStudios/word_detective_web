@@ -51,7 +51,7 @@ export default function PlayerHeader({ name, category, word, isWordMaster }: Pro
                             kind="primary"
                             label={category}
                             backgroundColor="#FF0D0D"
-                            hoverColor="#ff8e8e"
+                            hoverBgColor="#ff8e8e"
                             size="small"
                             width="7rem"
                         />

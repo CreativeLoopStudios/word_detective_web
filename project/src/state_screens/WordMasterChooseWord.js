@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid } from "@material-ui/core";
 import { Button, Label } from "../components";
 
 function Heading({ children }) {
-    return <Label size='h4' kind='secondary' bold={true}>{children}</Label>
+    return <Label size='h5' kind='secondary' bold={true}>{children}</Label>
 }
 
 function HelperText({ children }) {
     return <Label size='body1' kind='primary'>{children}</Label>
+}
+
+function CategoryLabel({ children }) {
+    return <Label size='body1' kind='primary' bold>{children}</Label>
 }
 
 function CustomButton({ label, key, onClick }) {
@@ -15,65 +19,61 @@ function CustomButton({ label, key, onClick }) {
         <Button
             variant="contained"
             kind="primary"
-            backgroundColor='#dd0000'
-            hoverColor='#ff0000'
+            backgroundColor='white'
+            hoverBgColor='#34C1F8'
+            color='#34C1F8'
+            hoverColor="white"
+            size="small"
             key={key}
             onClick={onClick}
             label={label}
+            width="100%"
         />
     )
 }
 
-function WordMasterChooseWord({ isWordMaster, categories, words, onClickCategory, onClickWord }) {
+function WordMasterChooseWord({ isWordMaster, fetchWordChoices, onClickWord }) {
+    const [wordChoices, setWordChoices] = useState({});
+
+    useEffect(() => {
+        (async () => {
+            setWordChoices(await fetchWordChoices());
+        })();
+    }, [setWordChoices, fetchWordChoices]);
+
     return (
         <>
             {isWordMaster && (
                 <Grid item xs={12}>
                     <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <HelperText>Escolha abaixo uma das categorias e em seguida uma palavra de sua preferência</HelperText>
-                        </Grid>
                         {
-                            categories.length > 0 && (
-                                <>
-                                    <Grid item xs={12}>
-                                        <Heading>Escolha a categoria</Heading>
-                                    </Grid>
-
-                                    <Grid item xs={12}>
-                                        <Grid container spacing={2}>
-                                            {categories.map((category) => (
-                                                <Grid item key={category.id}>
-                                                    <CustomButton 
-                                                        onClick={() => onClickCategory(category)}
-                                                        label={category.name}
-                                                    />
-                                                </Grid>
-                                            ))}
-                                        </Grid>
-                                    </Grid>
-                                </>
-                            )
-                        }
-                        {
-                            categories.length > 0 && words.length > 0 && (
+                            Object.values(wordChoices).length > 0 && (
                                 <>
                                     <Grid item xs={12}>
                                         <Heading>Escolha a palavra</Heading>
                                     </Grid>
 
                                     <Grid item xs={12}>
-                                        <HelperText>Selecione uma palavra ou espere o tempo acabar para uma escolha aleatória</HelperText>
-                                    </Grid>
-
-                                    <Grid item xs={12}>
                                         <Grid container spacing={2}>
-                                            {words.map((word, idx) => (
-                                                <Grid item key={idx}>
-                                                    <CustomButton 
-                                                        onClick={() => onClickWord(word)}
-                                                        label={word}
-                                                    />
+                                            {wordChoices.map(([category, words]) => (
+                                                <Grid item key={category.id} xs={12}> 
+                                                    <Grid container alignItems="center" justify="center" spacing={1}>
+                                                        <Grid item xs={3}>
+                                                            <CategoryLabel>{category.name.toUpperCase()}</CategoryLabel>
+                                                        </Grid>
+
+                                                        {
+                                                            words.map(word => (
+                                                                <Grid item xs={3}>
+                                                                    <CustomButton 
+                                                                        key={word}
+                                                                        onClick={() => onClickWord(word, category)}
+                                                                        label={word}
+                                                                    />
+                                                                </Grid>
+                                                            ))
+                                                        }
+                                                    </Grid>
                                                 </Grid>
                                             ))}
                                         </Grid>

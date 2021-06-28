@@ -6,8 +6,8 @@ import Logo from './Logo';
 
 const useStyles = makeStyles(() => ({
     paper: {
-        maxWidth: 900,
-        minWidth: 500,
+        maxWidth: 1200,
+        minWidth: 1000,
         minHeight: 700,
         borderRadius: '1rem',
         backgroundColor: 'rgba(33,33,33,.8)',
@@ -20,7 +20,7 @@ const useStyles = makeStyles(() => ({
     },
     sidebar: {
         background: 'black',
-        width: '30%',
+        width: '25%',
         height: '100%',
         borderRadius: '0 1rem 1rem 0',
         position: 'absolute',
@@ -52,7 +52,7 @@ function MainContainer({ sidebar, justify, alignItems, children }: Props) {
     return (
         <Paper elevation={1} className={classes.paper}>
             <Grid container justify={justify} alignItems={alignItems}>
-                <Grid item xs={sidebar ? 8 : 12} className={classes.container}>
+                <Grid item xs={sidebar ? 9 : 12} className={classes.container}>
                     {children}
                 </Grid>
             </Grid>

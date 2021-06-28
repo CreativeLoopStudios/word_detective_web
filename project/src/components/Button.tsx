@@ -18,32 +18,36 @@ export type Props = {
   kind: 'primary' | 'secondary' | 'info';
   variant?: 'contained' | 'outlined';
   backgroundColor?: string;
-  hoverColor?: string;
+  hoverBgColor?: string;
   width?: string;
   size?: 'small' | 'medium' | 'large';
   label: string;
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
+  color?: string;
+  hoverColor?: string;
 };
 
 /**
  * Primary UI component for user interaction
  */
-function Button({ kind, variant, backgroundColor, hoverColor, width, size, label, disabled, onClick }: Props) {
+function Button({ kind, variant, backgroundColor, hoverBgColor, width, size, label, disabled, onClick, color, hoverColor }: Props) {
   const classes = useStyles();
 
   const CustomButton = withStyles(({ palette }: Theme) => {
     const mainColor: string = backgroundColor || palette[kind].main;
     const bg: string = variant === "contained" ?  mainColor : '';
-    const hc: string = hoverColor || palette[kind].light;
+    const hbgc: string = hoverBgColor || palette[kind].light;
+    color = color || (variant === "contained" ? palette.getContrastText(bg) : mainColor);
     return {
       root: {
         borderColor: mainColor,
         backgroundColor: bg,
-        color: variant === "contained" ? palette.getContrastText(bg) : mainColor,
-        width: width,
+        color,
+        width,
         '&:hover': {
-          backgroundColor: hc,
+          backgroundColor: hbgc,
+          color: hoverColor || color,
         },
       }
     }
@@ -77,9 +81,20 @@ Button.propTypes = {
    */
   backgroundColor: PropTypes.string,
   /**
+   * What color to use
+   */
+  color: PropTypes.string,
+  /**
    * What background color to use when hovering
    */
+  hoverBgColor: PropTypes.string,
+  /**
+   * What color to use when hovering
+   */
   hoverColor: PropTypes.string,
+  /**
+   * Button width
+   */
   width: PropTypes.string,
   /**
    * How large should the button be?
@@ -102,6 +117,8 @@ Button.propTypes = {
 Button.defaultProps = {
   kind: 'primary',
   backgroundColor: null,
+  color: undefined,
+  hoverBgColor: undefined,
   hoverColor: undefined,
   width: undefined,
   size: 'medium',

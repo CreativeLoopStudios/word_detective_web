@@ -24,7 +24,7 @@ import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
 import Loading from "./Loading";
 
-const WORDS_TO_CHOOSE = 5;
+const WORDS_TO_CHOOSE = 3;
 const TURNS_BEFORE_ROUND_ENDS = 5;
 const SCORE_TO_PLAYER_WHO_GUESSED = 2;
 const SCORE_TO_QUESTION_SELECTED = 1;
@@ -41,8 +41,6 @@ const Game = (props) => {
     const { firebase } = props;
 
     const [categoriesToChoose, setCategoriesToChoose] = useState([]);
-    const [categorySelected, setCategorySelected] = useState({});
-    const [wordsToChoose, setWordsToChoose] = useState([]);
 
     const [currentGameState, setCurrentGameState] = useState("");
     const [currentCountdownState, setCurrentCountdownState] = useState("");
@@ -150,7 +148,7 @@ const Game = (props) => {
         });
     };
 
-    const chooseWord = (word) => {
+    const chooseWord = (word, category) => {
         firebase.logEvent(FirebaseEvents.EVENTS.CHOSEN_WORD, {
             [FirebaseEvents.PROP.ROOM_ID]: roomId,
             [FirebaseEvents.PROP.ROUND]: rounds,
@@ -159,29 +157,32 @@ const Game = (props) => {
         return updateRoom({
             state: GameState.WORD_DETECTIVES_ASK_QUESTIONS,
             word_of_the_round: word,
-            category_of_the_round: categorySelected
+            category_of_the_round: category
         });
     };
 
-    const chooseCategory = async (category) => {
-        const words = (await firebase.getCollection(CATEGORIES_COLLECTION).doc(category.id).get()).data().words;
-
-        // takes a random sample without replacement
-        // how it works:
-        // 1. make an array with the length of all the words
-        // 2. map a random number (with very low prob of repetition) to each index
-        // 3. sort by those random numbers (this will shuffle all the indexes)
-        // 4. slice the array to get the sample
-        // 5. get the corresponding word for each index
-        const wordsToChooseFrom = [...Array(words.length)]
-            .map((_, idx) => [idx, Math.random()])
-            .sort((a, b) => a[1] - b[1])
-            .slice(0, WORDS_TO_CHOOSE)
-            .map(([idx, r]) => words[idx]);
-
-        setWordsToChoose(wordsToChooseFrom);
-        setCategorySelected(category);
-    };
+    const fetchWordChoices = async (categories) => {
+        return await Promise.all(
+            categories.map(async cat => {
+                const words = (await firebase.getCollection(CATEGORIES_COLLECTION).doc(cat.id).get()).data().words;
+                console.log(cat, words)
+                // takes a random sample without replacement
+                // how it works:
+                // 1. make an array with the length of all the words
+                // 2. map a random number (with very low prob of repetition) to each index
+                // 3. sort by those random numbers (this will shuffle all the indexes)
+                // 4. slice the array to get the sample
+                // 5. get the corresponding word for each index
+                const wordsToChooseFrom = [...Array(words.length)]
+                    .map((_, idx) => [idx, Math.random()])
+                    .sort((a, b) => a[1] - b[1])
+                    .slice(0, WORDS_TO_CHOOSE)
+                    .map(([idx, r]) => words[idx]);
+                
+                return [cat, wordsToChooseFrom];
+            })
+        )
+    }
 
     const endRound = useCallback(async (playerWhoGuessed) => {
         console.log(`ending round with ${playerWhoGuessed}`)
@@ -474,9 +475,7 @@ const Game = (props) => {
                     {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
                         <WordMasterChooseWord
                             isWordMaster={isWordMaster}
-                            categories={categoriesToChoose}
-                            onClickCategory={chooseCategory}
-                            words={wordsToChoose}
+                            fetchWordChoices={() => fetchWordChoices(categoriesToChoose)}
                             onClickWord={chooseWord}
                         />
                     )}
