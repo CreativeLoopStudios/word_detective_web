@@ -12,7 +12,7 @@ export default {
   component: Button,
   argTypes: {
     backgroundColor: { control: 'color' },
-    hoverColor: { control: 'color' },
+    hoverBgColor: { control: 'color' },
     variant: {
       control: { type: 'select', options: ['contained', 'outlined'] }
     }
