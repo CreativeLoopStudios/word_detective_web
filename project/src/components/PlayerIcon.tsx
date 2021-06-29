@@ -1,10 +1,12 @@
-import { makeStyles } from '@material-ui/core';
 import React, { useState } from 'react'
+
+import { makeStyles } from '@material-ui/core';
 
 import openBook from '../assets/open-book.png';
 import detective from '../assets/detective.png';
 
 import { Math } from "../utils"
+
 import PropTypes from 'prop-types';
 
 export const BackgroundColors = [

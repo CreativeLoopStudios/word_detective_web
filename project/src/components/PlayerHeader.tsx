@@ -6,6 +6,8 @@ import Label from './Label';
 import PlayerIcon from './PlayerIcon';
 import Button from './Button';
 
+import PropTypes from 'prop-types';
+
 const useStyles = makeStyles(() => ({
     alignCenter: {
         display: 'flex',
@@ -14,15 +16,15 @@ const useStyles = makeStyles(() => ({
 }));
 
 export type Props = {
-    name: string;
+    blueTitle?: string;
+    title: string;
     category?: string;
     word?: string;
     isWordMaster: boolean;
 };
 
-export default function PlayerHeader({ name, category, word, isWordMaster }: Props) {
+export default function PlayerHeader({ blueTitle, title, category, word, isWordMaster }: Props) {
     const classes = useStyles();
-    const roleName = `Word ${isWordMaster ? 'Master' : 'Detective'}`;
 
     return (
         <Grid container spacing={2}>
@@ -30,13 +32,14 @@ export default function PlayerHeader({ name, category, word, isWordMaster }: Pro
                 <PlayerIcon isWordMaster={isWordMaster} />
             </Grid>
             <Grid item className={classes.alignCenter}>
-                <Label inline kind="primary" size="h5" bold>{name}</Label>
-            </Grid>
-            <Grid item className={classes.alignCenter}>
-                <Label inline kind="secondary" size="h5" bold>-</Label>
-            </Grid>
-            <Grid item className={classes.alignCenter}>
-                <Label inline kind="secondary" size="h5" bold>{roleName}</Label>
+                {
+                    blueTitle &&
+                    <>
+                        <Label inline kind="primary" size="h4" bold>{blueTitle}</Label>
+                        <Label inline kind="primary" size="h4" bold>&nbsp;</Label>
+                    </>
+                }
+                <Label inline kind="secondary" size="h4" bold>{title}</Label>
             </Grid>
 
             {
@@ -74,3 +77,19 @@ export default function PlayerHeader({ name, category, word, isWordMaster }: Pro
         </Grid>
     )
 }
+
+PlayerHeader.propTypes = {
+    blueTitle: PropTypes.string,
+    title: PropTypes.string,
+    category: PropTypes.string,
+    word: PropTypes.string,
+    isWordMaster: PropTypes.bool
+};
+
+PlayerHeader.defaultProps = {
+    blueTitle: undefined,
+    title: undefined,
+    category: undefined,
+    word: undefined,
+    isWordMaster: false
+};

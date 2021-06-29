@@ -21,7 +21,8 @@ export const Default = Template.bind({});
 Default.parameters = {
     backgrounds: { default: 'dark' },
 }
+
 Default.args = {
-    name: "Player",
+    title: "Você é Word Master",
     isWordMaster: true,
 }

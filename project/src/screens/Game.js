@@ -439,6 +439,28 @@ const Game = (props) => {
     }, [endRound, updateRoom, endRoundWithoutPoints, setTimerConfig, determineRandomWord, newRound, resetTurn, 
         setCurrentCountdownState, currentGameState, isWordMaster, isHost, loading, currentCountdownState]);
 
+    function _renderPlayerHeader() {
+        let blueTitle = "";
+        let title = wordMaster.name;
+        let boolIsWordMaster = true;
+
+        if (currentGameState === GameState.WORD_MASTER_CHOOSE_WORD) {
+            blueTitle = "Você é";
+            title = isWordMaster ? "Word Master" : "Word Detective";
+            boolIsWordMaster = isWordMaster;
+        }
+
+        return (
+            <PlayerHeader
+                blueTitle={blueTitle}
+                title={title}
+                isWordMaster={boolIsWordMaster}
+                category={categoryOfRound.name}
+                word={wordOfRound}
+            />
+        )
+    }
+
     // render loading
     if (loading) {
         return (
@@ -462,12 +484,7 @@ const Game = (props) => {
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Box mb={3}>
-                        <PlayerHeader
-                            isWordMaster={isWordMaster}
-                            name={playerName}
-                            category={categoryOfRound.name}
-                            word={wordOfRound}
-                        />
+                        {_renderPlayerHeader()}
                     </Box>
                 </Grid>
 
