@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { makeStyles, Grid } from "@material-ui/core";
 
-import { useFocusOnRender } from "../hooks";
+import { useFocusOnRender, useInactivity } from "../hooks";
 
 import { Button, Clues, Input, Label } from '../components';
 
@@ -45,6 +45,7 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
     const hunchInputRef = useFocusOnRender(null)
     const [hunchInput, setHunchInput] = useState("");
     const [error, setError] = useState(false);
+    const { stop: cancelInactivity, inactive: isUserInactive } = useInactivity({ timeout: 5000 });
 
     function handleKeyDown(key: string) {
         if (key === "Enter") {
@@ -105,20 +106,33 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
             }
 
             {!isWordMaster && (
-                <Grid item xs={12}>
-                    <Input
-                        className={classes.input}
-                        inputRef={hunchInputRef}
-                        label="Faça quantos palpites quiser da palavra"
-                        placeholder="Escreva seu palpite"
-                        type="text"
-                        value={hunchInput}
-                        onChange={(text) => setHunchInput(text)}
-                        onKeyDown={(key) => handleKeyDown(key)}
-                        helperText={error ? 'Palpite incorreto' : ''}
-                        error={error}
-                    />
-                </Grid>
+                <>
+                    {isUserInactive && (
+                        <Grid item xs={12}>
+                            <h3>O tempo está passando!</h3>
+                        </Grid>
+                    )}
+                    <Grid item xs={12}>
+                        <Input
+                            className={classes.input}
+                            inputRef={hunchInputRef}
+                            label="Faça quantos palpites quiser da palavra"
+                            placeholder="Escreva seu palpite"
+                            type="text"
+                            value={hunchInput}
+                            onChange={text => {
+                                cancelInactivity(); 
+                                setHunchInput(text)
+                            }}
+                            onKeyDown={key => {
+                                cancelInactivity();
+                                handleKeyDown(key);
+                            }}
+                            helperText={error ? 'Palpite incorreto' : ''}
+                            error={error}
+                        />
+                    </Grid>
+                </>
             )}
         </Grid>
     );
