@@ -29,7 +29,7 @@ export default function useCountdown(timeInterval = 1000) {
                     callback();
                 }
             } else {
-                setCountdown(prevCountdown => prevCountdown - 1);
+                setCountdown(prevCountdown => prevCountdown - timeInterval / 1000);
             }
         }, timeInterval);
     }, [stop, timeInterval]);

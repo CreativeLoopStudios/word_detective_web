@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
 
 function Timer({ max, color, onExpire }: Props) {
     const classes = useStyles({ color: color || '#FF0D0D' });
-    const { countdown, start, stop } = useCountdown();
+    const { countdown, start, stop } = useCountdown(200);
 
     useEffect(() => {
         return () => {
@@ -49,7 +49,9 @@ function Timer({ max, color, onExpire }: Props) {
         }
     }, [max, start, onExpire]);
 
-    const timerVal = countdown * 100 / max;
+    let timerVal = countdown * 100 / max;
+    timerVal = timerVal < 0.5 ? 0 : parseFloat(timerVal.toPrecision(3));
+
     return (
     <Box position="relative" display="inline-flex">
         <CircularProgress className={classes.progress} variant="determinate" value={timerVal} size={90} thickness={7} />
@@ -63,7 +65,7 @@ function Timer({ max, color, onExpire }: Props) {
         alignItems="center"
         justifyContent="center"
         >
-            <span className={classes.root}>{countdown}</span>
+            <span className={classes.root}>{Math.round(countdown)}</span>
         </Box>
     </Box>
     );
