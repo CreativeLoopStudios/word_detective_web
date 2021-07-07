@@ -2,9 +2,9 @@ import React, { useState } from "react";
 
 import { makeStyles, Grid } from "@material-ui/core";
 
-import { useFocusOnRender } from "../hooks";
+import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Input, Label, Clues, QuestionsBox } from "../components";
+import { Input, Label, Clues, QuestionsBox, AlertBox } from "../components";
 
 import { Clue, Question } from '../types';
 
@@ -37,6 +37,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
     const questionInputRef = useFocusOnRender(null)
     const [questionInput, setQuestionInput] = useState("");
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
+    const { stop: cancelInactivity, inactive: isUserInactive } = useInactivity({ timeout: 5000 });
 
     function normalizeText(text: string) {
         return text.toLowerCase()
@@ -95,6 +96,12 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                         </Grid>
                     )}
 
+                    {isUserInactive && (
+                        <Grid item xs={12}>
+                            <AlertBox label="Não pare de fazer perguntas! Você pode fazer quantas quiser!" />
+                        </Grid>
+                    )}
+
                     <Grid item xs={12}>
                         <Input
                             className={classes.input}
@@ -103,8 +110,14 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                             placeholder="Escreva a sua pergunta para o Word Master"
                             type="text"
                             value={questionInput}
-                            onChange={(text) => setQuestionInput(text)}
-                            onKeyDown={(key) => handleKeyDown(key)}
+                            onChange={text => {
+                                cancelInactivity();
+                                setQuestionInput(text);
+                            }}
+                            onKeyDown={key => {
+                                cancelInactivity();
+                                handleKeyDown(key);
+                            }}
                             helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
                             error={isQuestionAlreadyAsked}
                         />
