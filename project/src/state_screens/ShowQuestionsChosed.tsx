@@ -4,7 +4,7 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Button, Clues, Input, Label } from '../components';
+import { AlertBox, Button, Clues, Input, Label } from '../components';
 
 import { Clue, Hunch } from "../types";
 
@@ -109,7 +109,7 @@ function ShowQuestionsChosed({ question, answer, clues, isWordMaster, hunches, s
                 <>
                     {isUserInactive && (
                         <Grid item xs={12}>
-                            <h3>O tempo está passando!</h3>
+                            <AlertBox label="Não deixe de fazer palpites e tentar acertar a palavra!" />
                         </Grid>
                     )}
                     <Grid item xs={12}>

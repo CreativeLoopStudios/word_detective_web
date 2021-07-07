@@ -4,7 +4,7 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Input, Label, Clues, QuestionsBox } from "../components";
+import { Input, Label, Clues, QuestionsBox, AlertBox } from "../components";
 
 import { Clue, Question } from '../types';
 
@@ -98,7 +98,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
                     {isUserInactive && (
                         <Grid item xs={12}>
-                            <h3>O tempo está passando!</h3>
+                            <AlertBox label="Não pare de fazer perguntas! Você pode fazer quantas quiser!" />
                         </Grid>
                     )}
 
