@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { Grid, Box } from "@material-ui/core";
+import { Grid, Box, Collapse } from "@material-ui/core";
 import { withFirebase } from "../firebase/context";
 //import * as firebase from "firebase/app";
 //import { database, firestore } from "firebase/app";
@@ -23,6 +23,7 @@ import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer 
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
 import Loading from "./Loading";
+import { TransitionGroup } from 'react-transition-group';
 
 const WORDS_TO_CHOOSE = 3;
 const TURNS_BEFORE_ROUND_ENDS = 5;
@@ -33,6 +34,13 @@ const giveScoreToPlayer = (player, score) => {
     return {
         [`/players/${player.id}/score`]: player.score + score
     };
+};
+
+const ScreenTransition = ({ cond, children }) => {
+    return (
+        <Collapse in={cond} unmountOnExit timeout={800}>
+            <div>{children}</div>
+        </Collapse>)
 };
 
 const Game = (props) => {
@@ -489,46 +497,47 @@ const Game = (props) => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    {currentGameState === GameState.WORD_MASTER_CHOOSE_WORD && (
-                        <WordMasterChooseWord
-                            isWordMaster={isWordMaster}
-                            fetchWordChoices={() => fetchWordChoices(categoriesToChoose)}
-                            onClickWord={chooseWord}
-                        />
-                    )}
+                    <TransitionGroup>
+                        <ScreenTransition cond={currentGameState === GameState.WORD_MASTER_CHOOSE_WORD}>
+                            <WordMasterChooseWord
+                                isWordMaster={isWordMaster}
+                                fetchWordChoices={() => fetchWordChoices(categoriesToChoose)}
+                                onClickWord={chooseWord}
+                            />
+                        </ScreenTransition>
 
-                    {currentGameState ===
-                        GameState.WORD_DETECTIVES_ASK_QUESTIONS && (
-                        <WordDetectivesAskQuestions
-                            isWordMaster={isWordMaster}
-                            sendQuestion={sendQuestionToWordMaster}
-                            clues={clues}
-                            questions={questions}
-                        />
-                    )}
+                        <ScreenTransition cond={currentGameState === GameState.WORD_DETECTIVES_ASK_QUESTIONS}>
+                            <WordDetectivesAskQuestions
+                                isWordMaster={isWordMaster}
+                                sendQuestion={sendQuestionToWordMaster}
+                                clues={clues}
+                                questions={questions}
+                            />
+                        </ScreenTransition>
 
-                    {currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION && (
-                        <WordMasterChooseQuestions
-                            isWordMaster={isWordMaster}
-                            questions={questions}
-                            sendAnswer={sendAnswerOfWordMaster}
-                        />
-                    )}
+                        <ScreenTransition cond={currentGameState === GameState.WORD_MASTER_CHOOSE_QUESTION}>
+                            <WordMasterChooseQuestions
+                                isWordMaster={isWordMaster}
+                                questions={questions}
+                                sendAnswer={sendAnswerOfWordMaster}
+                            />
+                        </ScreenTransition>
 
-                    {currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered && (
-                        <ShowQuestionsChosed
-                            isWordMaster={isWordMaster}
-                            question={
-                                questions[questionAnswered.index]
-                                    ? questions[questionAnswered.index].question
-                                    : "error"
-                            }
-                            answer={questionAnswered.answer}
-                            sendHunchToDiscoverWord={sendHunchToDiscoverWord}
-                            clues={clues}
-                            hunches={hunches}
-                        />
-                    )}
+                        <ScreenTransition cond={currentGameState === GameState.SHOW_QUESTION_CHOSE && questionAnswered}>
+                            <ShowQuestionsChosed
+                                isWordMaster={isWordMaster}
+                                question={
+                                    questions[questionAnswered.index]
+                                        ? questions[questionAnswered.index].question
+                                        : "error"
+                                }
+                                answer={questionAnswered.answer}
+                                sendHunchToDiscoverWord={sendHunchToDiscoverWord}
+                                clues={clues}
+                                hunches={hunches}
+                            />
+                        </ScreenTransition>
+                    </TransitionGroup>
 
                     {currentGameState === GameState.WM_DISCONNECTED && (
                         <span>O WordMaster desconectou! Iniciando nova rodada...</span>
