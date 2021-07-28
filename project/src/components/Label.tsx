@@ -18,11 +18,12 @@ export type Props = {
     inline?: boolean;
     underline?: boolean;
     italic?: boolean;
+    uppercase?: boolean;
     className?: string;
     children: React.ReactNode;
 }
 
-function Label({ kind, color, bold, size, inline, underline, italic, className, children }: Props) {
+function Label({ kind, color, bold, size, inline, underline, italic, uppercase, className, children }: Props) {
     const classes = useStyles();
 
     const CustomTypography = withStyles(() => {
@@ -41,7 +42,8 @@ function Label({ kind, color, bold, size, inline, underline, italic, className, 
                 fontWeight: bold ? 'bold' : 'normal',
                 fontStyle: italic ? 'italic' : 'normal',
                 textDecoration: underline ? 'underline' : 'normal',
-                display: inline ? 'inline-block' : 'normal'
+                display: inline ? 'inline-block' : 'normal',
+                textTransform: uppercase ? 'uppercase' : 'none'
             }
         }
     })(Typography);
@@ -63,6 +65,7 @@ Label.propTypes = {
     inline: PropTypes.bool,
     underline: PropTypes.bool,
     italic: PropTypes.bool,
+    uppercase: PropTypes.bool
 };
 Label.defaultProps = {
     color: null,
@@ -71,7 +74,8 @@ Label.defaultProps = {
     size: 'body1',
     inline: false,
     underline: false,
-    italic: false
+    italic: false,
+    uppercase: false
 };
 
 export default Label;
