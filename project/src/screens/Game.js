@@ -19,7 +19,7 @@ import {
     EndRound,
     EndGame,
 } from "../state_screens";
-import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer } from "../components";
+import { MainContainer, PlayerHeader, PlayerRanking, Timer, ScrollableContainer, Label } from "../components";
 import { useParams } from "react-router-dom";
 import FirebaseEvents from "../firebase_events";
 import Loading from "./Loading";
@@ -405,7 +405,7 @@ const Game = (props) => {
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions
-                timer = 30
+                timer = 30;
                 callback = isHost && (async () => {
                     await updateRoom({
                         state: GameState.WORD_MASTER_CHOOSE_QUESTION,
@@ -463,8 +463,6 @@ const Game = (props) => {
                 blueTitle={blueTitle}
                 title={title}
                 isWordMaster={boolIsWordMaster}
-                category={categoryOfRound.name}
-                word={wordOfRound}
             />
         )
     }
@@ -490,10 +488,15 @@ const Game = (props) => {
             }
         >
             <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                     <Box mb={3}>
                         {_renderPlayerHeader()}
                     </Box>
+                </Grid>
+
+                <Grid container item xs={2} direction="column" alignItems="flex-end" justify="center">
+                    <Label kind="secondary" size="body1" bold>Rodada</Label>
+                    <Label kind="primary" size="h6" bold uppercase>{categoryOfRound.name}</Label>
                 </Grid>
 
                 <Grid item xs={12}>
