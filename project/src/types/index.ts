@@ -44,3 +44,8 @@ export type HeartbeatData = {
 export type Hunch = {
     text: string;
 };
+
+export type Message = {
+    text: string;
+    isMine: boolean;
+};

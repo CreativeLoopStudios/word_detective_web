@@ -6,21 +6,23 @@ import PropTypes from 'prop-types';
 
 import ChatBoxItem from './ChatBoxItem';
 
+import { Message } from '../types';
+
 const useStyles = makeStyles(() => ({
     chatbox: {
         backgroundColor: '#5C5C5C',
-        borderRadius: 30
+        borderRadius: 30,
+        minHeight: '20rem'
     },
     scrollbox: {
         overflowY: 'auto',
-        padding: '2rem 1rem'
+        height: '30rem',
+        padding: '1rem 1rem'
+    },
+    content: {
+        alignSelf: 'flex-end'
     }
 }));
-
-export type Message = {
-    text: string,
-    isMine: boolean
-}
 
 export type Props = {
     messages: Array<Message>;
@@ -32,13 +34,15 @@ function ChatBox({ messages, children }: Props) {
     
     return (
         <Grid container item className={classes.chatbox}>
-            <Grid container item xs={12} className={classes.scrollbox} direction="column">
+            <Grid item xs={12} className={classes.scrollbox}>
                 {messages.map((message) => (
                     <ChatBoxItem text={message.text} blueRight={message.isMine} />
                 ))}
             </Grid>
 
-            {children}
+            <Grid item xs={12} className={classes.content}>
+                {children}
+            </Grid>
         </Grid>
     );
 }

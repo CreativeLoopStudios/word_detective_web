@@ -13,7 +13,8 @@ const useStyles = makeStyles(() => ({
     message: {
         padding: '0.5rem 0.8rem',
         borderRadius: 30,
-        position: 'relative'
+        position: 'relative',
+        minWidth: '5rem'
     },
     backgroundLeft: {
         backgroundColor: 'white'
@@ -31,11 +32,11 @@ const useStyles = makeStyles(() => ({
     },
     arrowLeft: {
         borderTop: '10px solid white',
-        left: '1.5rem'
+        left: '1rem'
     },
     arrowRight: {
         borderTop: '10px solid #35C1FF',
-        right: '1.5rem'
+        right: '1rem'
     },
 }));
 

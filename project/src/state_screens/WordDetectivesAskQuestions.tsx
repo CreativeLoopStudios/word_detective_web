@@ -4,9 +4,9 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Input, Label, Clues, QuestionsBox, AlertBox } from "../components";
+import { Input, Label, Clues, QuestionsBox, AlertBox, ChatBox, ChatBoxFooter } from "../components";
 
-import { Clue, Question } from '../types';
+import { Clue, Message, Question } from '../types';
 
 const useStyles = makeStyles((theme) => ({
     input: {
@@ -36,6 +36,9 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
     const questionInputRef = useFocusOnRender(null)
     const [questionInput, setQuestionInput] = useState("");
+    const [messages, setMessages] = useState<Array<Message>>([
+        { text: 'Me faça as suas perguntas', isMine: false }
+    ]);
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
     const { stop: cancelInactivity, inactive: isUserInactive } = useInactivity({ timeout: 5000 });
 
@@ -59,8 +62,17 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
     function handleKeyDown(key: string) {
         if (key === "Enter") {
+            appendMessages(questionInput);
             handleQuestionSend(questionInput);
         }
+    }
+
+    function appendMessages(messageText: string) {
+        let message: Message = {
+            text: messageText,
+            isMine: true
+        };
+        setMessages(oldMessages => [ ...oldMessages, message ]);
     }
 
     return (
@@ -93,24 +105,27 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                     )}
 
                     <Grid item xs={12}>
-                        <Input
-                            className={classes.input}
-                            inputRef={questionInputRef}
-                            label="Faça as perguntas"
-                            placeholder="Escreva a sua pergunta para o Word Master"
-                            type="text"
-                            value={questionInput}
-                            onChange={text => {
-                                cancelInactivity();
-                                setQuestionInput(text);
-                            }}
-                            onKeyDown={key => {
-                                cancelInactivity();
-                                handleKeyDown(key);
-                            }}
-                            helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
-                            error={isQuestionAlreadyAsked}
-                        />
+                        <ChatBox messages={messages}>
+                            <ChatBoxFooter>
+                                <Input
+                                    className={classes.input}
+                                    inputRef={questionInputRef}
+                                    placeholder="Escreva a sua pergunta para o Word Master"
+                                    type="text"
+                                    value={questionInput}
+                                    onChange={text => {
+                                        cancelInactivity();
+                                        setQuestionInput(text);
+                                    }}
+                                    onKeyDown={key => {
+                                        cancelInactivity();
+                                        handleKeyDown(key);
+                                    }}
+                                    helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
+                                    error={isQuestionAlreadyAsked}
+                                />
+                            </ChatBoxFooter>
+                        </ChatBox>
                     </Grid>
 
                     {isUserInactive && (
