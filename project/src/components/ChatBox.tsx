@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { Grid, makeStyles } from "@material-ui/core";
 
@@ -31,13 +31,21 @@ export type Props = {
 
 function ChatBox({ messages, children }: Props) {
     const classes = useStyles();
-    
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (messagesEndRef && messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages])
+
     return (
         <Grid container item className={classes.chatbox}>
             <Grid item xs={12} className={classes.scrollbox}>
                 {messages.map((message) => (
                     <ChatBoxItem text={message.text} blueRight={message.isMine} />
                 ))}
+                <div ref={messagesEndRef}></div>
             </Grid>
 
             <Grid item xs={12} className={classes.content}>

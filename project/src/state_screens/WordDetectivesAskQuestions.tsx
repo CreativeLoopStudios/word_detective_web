@@ -55,6 +55,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
         if (!isAlreadyAsked) {
             setQuestionInput("");
+            appendMessages(questionInput);
             sendQuestion(text);
         }
         setQuestionAlreadyAsked(isAlreadyAsked);
@@ -62,7 +63,6 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
     function handleKeyDown(key: string) {
         if (key === "Enter") {
-            appendMessages(questionInput);
             handleQuestionSend(questionInput);
         }
     }
