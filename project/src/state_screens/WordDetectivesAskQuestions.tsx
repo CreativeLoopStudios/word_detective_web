@@ -83,22 +83,12 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
             {!isWordMaster && (
                 <Grid item container spacing={2}>
                     <Grid item>
-                        <Label>Faça abaixo perguntas para tentar descobrir qual é a palavra escolhida pelo Word master. Depois de escolhida a melhor pergunta, você pode dar quantos paplites quiser.</Label>
-                    </Grid>
-
-                    <Grid item>
                         <Label inline kind="secondary" size="h5" bold>Pistas de outros turnos</Label>
                     </Grid>
 
                     {clues && (
                         <Grid item xs={12}>
                             <Clues clues={clues} />
-                        </Grid>
-                    )}
-
-                    {isUserInactive && (
-                        <Grid item xs={12}>
-                            <AlertBox label="Não pare de fazer perguntas! Você pode fazer quantas quiser!" />
                         </Grid>
                     )}
 
@@ -122,6 +112,12 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                             error={isQuestionAlreadyAsked}
                         />
                     </Grid>
+
+                    {isUserInactive && (
+                        <Grid item xs={12}>
+                            <AlertBox label="Não pare de fazer perguntas! Você pode fazer quantas quiser!" />
+                        </Grid>
+                    )}
                 </Grid>
             )}
         </>
