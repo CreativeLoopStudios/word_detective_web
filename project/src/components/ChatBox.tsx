@@ -12,12 +12,12 @@ const useStyles = makeStyles(() => ({
     chatbox: {
         backgroundColor: '#5C5C5C',
         borderRadius: 30,
-        minHeight: '20rem'
+        minHeight: '15rem'
     },
     scrollbox: {
         overflowY: 'auto',
-        height: '30rem',
-        padding: '1rem 1rem'
+        height: '20rem',
+        padding: '2rem 2rem'
     },
     content: {
         alignSelf: 'flex-end'
