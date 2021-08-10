@@ -17,6 +17,8 @@ import QuestionsBox from './QuestionsBox';
 import PlayerHeader from './PlayerHeader';
 import EditInput from './EditInput';
 import ScrollableContainer from './ScrollableContainer';
+import ChatBox from './ChatBox';
+import ChatBoxFooter from './ChatBoxFooter';
 
 export {
     PlayerInfo,
@@ -37,5 +39,7 @@ export {
     QuestionsBox,
     PlayerHeader,
     EditInput,
-    ScrollableContainer
+    ScrollableContainer,
+    ChatBox,
+    ChatBoxFooter
 };

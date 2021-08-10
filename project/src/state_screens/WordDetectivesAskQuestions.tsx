@@ -4,9 +4,9 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Input, Label, Clues, QuestionsBox, AlertBox } from "../components";
+import { Input, Label, Clues, QuestionsBox, AlertBox, ChatBox, ChatBoxFooter } from "../components";
 
-import { Clue, Question } from '../types';
+import { Clue, Message, Question } from '../types';
 
 const useStyles = makeStyles((theme) => ({
     input: {
@@ -36,6 +36,9 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
     const questionInputRef = useFocusOnRender(null)
     const [questionInput, setQuestionInput] = useState("");
+    const [messages, setMessages] = useState<Array<Message>>([
+        { text: 'Me faça as suas perguntas', isMine: false }
+    ]);
     const [isQuestionAlreadyAsked, setQuestionAlreadyAsked] = useState(false);
     const { stop: cancelInactivity, inactive: isUserInactive } = useInactivity({ timeout: 5000 });
 
@@ -52,6 +55,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
 
         if (!isAlreadyAsked) {
             setQuestionInput("");
+            appendMessages(questionInput);
             sendQuestion(text);
         }
         setQuestionAlreadyAsked(isAlreadyAsked);
@@ -61,6 +65,14 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
         if (key === "Enter") {
             handleQuestionSend(questionInput);
         }
+    }
+
+    function appendMessages(messageText: string) {
+        let message: Message = {
+            text: messageText,
+            isMine: true
+        };
+        setMessages(oldMessages => [ ...oldMessages, message ]);
     }
 
     return (
@@ -83,10 +95,6 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
             {!isWordMaster && (
                 <Grid item container spacing={2}>
                     <Grid item>
-                        <Label>Faça abaixo perguntas para tentar descobrir qual é a palavra escolhida pelo Word master. Depois de escolhida a melhor pergunta, você pode dar quantos paplites quiser.</Label>
-                    </Grid>
-
-                    <Grid item>
                         <Label inline kind="secondary" size="h5" bold>Pistas de outros turnos</Label>
                     </Grid>
 
@@ -96,32 +104,35 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                         </Grid>
                     )}
 
+                    <Grid item xs={12}>
+                        <ChatBox messages={messages}>
+                            <ChatBoxFooter>
+                                <Input
+                                    className={classes.input}
+                                    inputRef={questionInputRef}
+                                    placeholder="Escreva a sua pergunta para o Word Master"
+                                    type="text"
+                                    value={questionInput}
+                                    onChange={text => {
+                                        cancelInactivity();
+                                        setQuestionInput(text);
+                                    }}
+                                    onKeyDown={key => {
+                                        cancelInactivity();
+                                        handleKeyDown(key);
+                                    }}
+                                    helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
+                                    error={isQuestionAlreadyAsked}
+                                />
+                            </ChatBoxFooter>
+                        </ChatBox>
+                    </Grid>
+
                     {isUserInactive && (
                         <Grid item xs={12}>
                             <AlertBox label="Não pare de fazer perguntas! Você pode fazer quantas quiser!" />
                         </Grid>
                     )}
-
-                    <Grid item xs={12}>
-                        <Input
-                            className={classes.input}
-                            inputRef={questionInputRef}
-                            label="Faça as perguntas"
-                            placeholder="Escreva a sua pergunta para o Word Master"
-                            type="text"
-                            value={questionInput}
-                            onChange={text => {
-                                cancelInactivity();
-                                setQuestionInput(text);
-                            }}
-                            onKeyDown={key => {
-                                cancelInactivity();
-                                handleKeyDown(key);
-                            }}
-                            helperText={isQuestionAlreadyAsked ? "Pergunta já feita!" : ""}
-                            error={isQuestionAlreadyAsked}
-                        />
-                    </Grid>
                 </Grid>
             )}
         </>
