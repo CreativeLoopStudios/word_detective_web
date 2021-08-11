@@ -400,12 +400,12 @@ const Game = (props) => {
         switch (currentGameState) {
             case GameState.WORD_MASTER_CHOOSE_WORD:
                 // at this state, the word master is choosing the challenge word
-                timer = 15;
+                timer = 20;
                 callback = isWordMaster && determineRandomWord;
                 break;
             case GameState.WORD_DETECTIVES_ASK_QUESTIONS:
                 // WDs are writing questions
-                timer = 30;
+                timer = 40;
                 callback = isHost && (async () => {
                     await updateRoom({
                         state: GameState.WORD_MASTER_CHOOSE_QUESTION,
@@ -413,7 +413,7 @@ const Game = (props) => {
                 });
                 break;
             case GameState.WORD_MASTER_CHOOSE_QUESTION:
-                timer = 20;
+                timer = 25;
                 callback = isHost && (() => {
                     console.log('triggering callback for choose question timeout');
                     return updateRoom({
@@ -423,7 +423,7 @@ const Game = (props) => {
                 });
                 break;
             case GameState.SHOW_QUESTION_CHOSE:
-                timer = 20;
+                timer = 25;
                 callback = isHost && resetTurn;
                 break;
             case GameState.END_ROUND:
@@ -471,7 +471,7 @@ const Game = (props) => {
         if (isWordMaster) {
             return (
                 <Grid container item xs={3} direction="column" alignItems="flex-end" justify="center">
-                    <Label kind="secondary" size="body1" bold>Palavra</Label>
+                    <Label kind="secondary" size="body1" bold>Sua palavra</Label>
                     <Label kind="primary" size="h6" bold uppercase>{wordOfRound}</Label>
                 </Grid>
             );
