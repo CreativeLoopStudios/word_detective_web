@@ -491,8 +491,17 @@ const Game = (props) => {
             sidebar={
                 <>
                     <ScrollableContainer flex={4}>
-                        <PlayerRanking
-                            players={playersByScore}
+                        <Box mb={3}>
+                            <PlayerRanking
+                                players={playersByScore}
+                            />
+                        </Box>
+
+                        <Timer
+                            max={timerConfig.countdownMax}
+                            value={timerConfig.timer}
+                            onExpire={timerConfig.timerCallback}
+                            key={timerConfig.key}
                         />
                     </ScrollableContainer>
                 </>
@@ -566,13 +575,6 @@ const Game = (props) => {
                     {currentGameState === GameState.END_GAME && (
                         <EndGame players={playersByScore} />
                     )}
-                </Grid>
-
-                <Grid container item xs={12} justify="flex-end">
-                    <Timer max={timerConfig.countdownMax} 
-                           value={timerConfig.timer} 
-                           onExpire={timerConfig.timerCallback}
-                           key={timerConfig.key} />
                 </Grid>
             </Grid>
         </MainContainer>
