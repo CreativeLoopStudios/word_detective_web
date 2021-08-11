@@ -6,7 +6,10 @@ const useStyles = makeStyles(() => ({
     container: {
         maxHeight: '100%',
         overflowY: 'auto',
-        position: 'relative'
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
     }
 }));
 
