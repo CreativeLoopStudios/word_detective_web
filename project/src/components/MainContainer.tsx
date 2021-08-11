@@ -16,7 +16,7 @@ const useStyles = makeStyles(() => ({
         position: 'relative'
     },
     container: {
-        padding: '3rem 4rem'
+        padding: '2rem 3rem'
     },
     sidebar: {
         background: 'black',
