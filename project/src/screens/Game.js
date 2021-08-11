@@ -467,6 +467,17 @@ const Game = (props) => {
         )
     }
 
+    function _renderRoundWord() {
+        if (isWordMaster) {
+            return (
+                <Grid container item xs={3} direction="column" alignItems="flex-end" justify="center">
+                    <Label kind="secondary" size="body1" bold>Palavra</Label>
+                    <Label kind="primary" size="h6" bold uppercase>{wordOfRound}</Label>
+                </Grid>
+            );
+        }
+    }
+
     // render loading
     if (loading) {
         return (
@@ -488,16 +499,18 @@ const Game = (props) => {
             }
         >
             <Grid container spacing={2}>
-                <Grid item xs={10}>
+                <Grid item xs>
                     <Box mb={3}>
                         {_renderPlayerHeader()}
                     </Box>
                 </Grid>
 
-                <Grid container item xs={2} direction="column" alignItems="flex-end" justify="center">
+                <Grid container item xs direction="column" alignItems="flex-end" justify="center">
                     <Label kind="secondary" size="body1" bold>Rodada</Label>
                     <Label kind="primary" size="h6" bold uppercase>{categoryOfRound.name}</Label>
                 </Grid>
+
+                {_renderRoundWord()}
 
                 <Grid item xs={12}>
                     <TransitionGroup>
