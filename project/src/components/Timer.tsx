@@ -14,12 +14,6 @@ type StyleProps = {
 }
 
 const useStyles = makeStyles(() => ({
-    root: {
-        fontFamily: 'gothic, sans-serif',
-        fontWeight: 'bold',
-        fontSize: '1.5rem',
-        color: 'white',
-    },
     progress: ({ color }: StyleProps) => ({
         color,
     })
@@ -45,7 +39,7 @@ function Timer({ max, color, onExpire }: Props) {
                     onExpire();
                 }
             }
-            start(max, onExpire_ || (() => {}));
+            start(max, onExpire_ || (() => { }));
         }
     }, [max, start, onExpire]);
 
@@ -53,21 +47,9 @@ function Timer({ max, color, onExpire }: Props) {
     timerVal = timerVal < 0.5 ? 0 : parseFloat(timerVal.toPrecision(3));
 
     return (
-    <Box position="relative" display="inline-flex">
-        <CircularProgress className={classes.progress} variant="determinate" value={timerVal} size={90} thickness={7} />
-        <Box
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        position="absolute"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        >
-            <span className={classes.root}>{Math.round(countdown)}</span>
+        <Box position="relative" display="inline-flex">
+            <CircularProgress className={classes.progress} variant="determinate" value={timerVal} size={90} thickness={7} />
         </Box>
-    </Box>
     );
 }
 
