@@ -71,6 +71,10 @@ function Input({ label, placeholder, className, type, value, inputRef, helperTex
                 </Grid>
             }
             <Grid item xs={12} className={classes.rootContainer}>
+                {
+                    error &&
+                    <Label color="#ff0000" bold size="body2" className={classes.helperText}>{helperText}</Label>
+                }
                 <CustomInput
                     id="input"
                     inputRef={inputRef}
@@ -84,10 +88,6 @@ function Input({ label, placeholder, className, type, value, inputRef, helperTex
                     error={error}
                     autoComplete="off"
                 />
-                {
-                    error &&
-                    <Label color="#ff0000" size="body2" className={classes.helperText}>{helperText}</Label>
-                }
             </Grid>
         </Grid>
     );
