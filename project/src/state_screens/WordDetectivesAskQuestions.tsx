@@ -54,11 +54,11 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
         const isAlreadyAsked = normalizedQuestions.includes(normalizedText);
 
         if (!isAlreadyAsked) {
-            setQuestionInput("");
             appendMessages(questionInput);
             sendQuestion(text);
         }
         setQuestionAlreadyAsked(isAlreadyAsked);
+        setQuestionInput("");
     }
 
     function handleKeyDown(key: string) {
