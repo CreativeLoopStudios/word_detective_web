@@ -4,8 +4,6 @@ import { Grid, makeStyles } from "@material-ui/core";
 
 import PropTypes from 'prop-types';
 
-import ChatBoxItem from './ChatBoxItem';
-
 import { Message } from '../types';
 
 const useStyles = makeStyles(() => ({
@@ -26,10 +24,11 @@ const useStyles = makeStyles(() => ({
 
 export type Props = {
     messages: Array<Message>;
+    renderItem: (message: Message) => React.ReactNode;
     children: React.ReactNode;
 }
 
-function ChatBox({ messages, children }: Props) {
+function ChatBox({ messages, renderItem, children }: Props) {
     const classes = useStyles();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -42,9 +41,7 @@ function ChatBox({ messages, children }: Props) {
     return (
         <Grid container item className={classes.chatbox}>
             <Grid item xs={12} className={classes.scrollbox}>
-                {messages.map((message) => (
-                    <ChatBoxItem text={message.text} blueRight={message.isMine} />
-                ))}
+                {messages.map((message) => renderItem(message))}
                 <div ref={messagesEndRef}></div>
             </Grid>
 
@@ -56,11 +53,13 @@ function ChatBox({ messages, children }: Props) {
 }
 
 ChatBox.propTypes = {
-    messages: PropTypes.array
+    messages: PropTypes.array,
+    renderItem: PropTypes.func
 };
 
 ChatBox.defaultProps = {
-    messages: []
+    messages: [],
+    renderItem: undefined
 };
 
 export default ChatBox;

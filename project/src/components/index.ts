@@ -18,6 +18,8 @@ import PlayerHeader from './PlayerHeader';
 import EditInput from './EditInput';
 import ScrollableContainer from './ScrollableContainer';
 import ChatBox from './ChatBox';
+import ChatBoxItem from './ChatBoxItem';
+import ChatBoxQuestionItem from './ChatBoxQuestionItem';
 import ChatBoxFooter from './ChatBoxFooter';
 
 export {
@@ -41,5 +43,7 @@ export {
     EditInput,
     ScrollableContainer,
     ChatBox,
+    ChatBoxItem,
+    ChatBoxQuestionItem,
     ChatBoxFooter
 };

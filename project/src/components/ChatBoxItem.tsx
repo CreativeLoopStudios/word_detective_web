@@ -32,11 +32,11 @@ const useStyles = makeStyles(() => ({
     },
     arrowLeft: {
         borderTop: '10px solid white',
-        left: '1rem'
+        left: '1.5rem'
     },
     arrowRight: {
         borderTop: '10px solid #35C1FF',
-        right: '1rem'
+        right: '1.5rem'
     },
 }));
 
@@ -48,10 +48,10 @@ export type Props = {
 function ChatBoxItem({ blueRight, text }: Props) {
     const classes = useStyles();
 
-    var customMessageClass: string = classes.backgroundLeft;
-    var customArrowClass: string = classes.arrowLeft;
-    var kind: 'primary' | 'secondary' = 'primary';
-    var justify: GridJustification = 'flex-start';
+    let customMessageClass: string = classes.backgroundLeft;
+    let customArrowClass: string = classes.arrowLeft;
+    let kind: 'primary' | 'secondary' = 'primary';
+    let justify: GridJustification = 'flex-start';
 
     if (blueRight) {
         customMessageClass = classes.backgroundRight;

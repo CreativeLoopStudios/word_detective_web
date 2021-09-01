@@ -4,7 +4,7 @@ import { makeStyles, Grid } from "@material-ui/core";
 
 import { useFocusOnRender, useInactivity } from "../hooks";
 
-import { Input, Label, Clues, QuestionsBox, AlertBox, ChatBox, ChatBoxFooter } from "../components";
+import { Input, Label, Clues, QuestionsBox, AlertBox, ChatBox, ChatBoxItem, ChatBoxFooter } from "../components";
 
 import { Clue, Message, Question } from '../types';
 
@@ -80,7 +80,7 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
             {isWordMaster && (
                 <Grid container item spacing={2}>
                     <Grid item>
-                        <Label>Aproveite para ler as perguntas na medida que forem sendo enviadas, a próxima fase você irá respondê-las!</Label>
+                        <Label>Aproveite para ler as perguntas na medida em que forem sendo enviadas, a próxima fase você irá respondê-las!</Label>
                     </Grid>
 
                     <Grid item>
@@ -105,7 +105,11 @@ function WordDetectivesAskQuestions({ questions, sendQuestion, isWordMaster, clu
                     )}
 
                     <Grid item xs={12}>
-                        <ChatBox messages={messages}>
+                        <ChatBox
+                            messages={messages}
+                            renderItem={(message: Message) => (
+                                <ChatBoxItem text={message.text} blueRight={message.isMine} />
+                            )}>
                             <ChatBoxFooter>
                                 <Input
                                     className={classes.input}
