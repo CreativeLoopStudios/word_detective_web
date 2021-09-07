@@ -2,10 +2,11 @@ const admin = require('firebase-admin');
 
 const serviceAccount = require("./serviceAccountKey.json");
 const CATEGORIES_KEY = 'categories';
+const PROJECT_ID = process.env.PROJECT_ID;
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://whoami-dev-d4380.firebaseio.com"
+    databaseURL: `https://${PROJECT_ID}-default-rtdb.firebaseio.com`
 });
 
 const db = admin.firestore();
