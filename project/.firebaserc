@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "whoami-dev-d4380"
+    "dev": "wd-devc8728333",
+    "prod": "wd-devc8728333"
   }
 }
