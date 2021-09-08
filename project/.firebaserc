@@ -1,6 +1,7 @@
 {
   "projects": {
     "dev": "wd-devc8728333",
-    "prod": "wd-devc8728333"
-  }
+    "prod": "wd-prod4ff8391f"
+  },
+  "targets": {}
 }

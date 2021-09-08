@@ -2,7 +2,7 @@ variable "project_name" {
   type = map
   default = {
     dev = "wd-dev"
-    prod = "wd-dev"
+    prod = "wd-prod"
   }
 }
 variable "billing_account" {
