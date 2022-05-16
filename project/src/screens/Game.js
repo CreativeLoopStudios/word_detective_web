@@ -470,7 +470,7 @@ const Game = (props) => {
     function _renderRoundWord() {
         if (isWordMaster) {
             return (
-                <Grid container item xs={3} direction="column" alignItems="flex-end" justify="center">
+                <Grid container item xs={3} direction="column" alignItems="flex-end" justifyContent="center">
                     <Label kind="secondary" size="body1" bold>Sua palavra</Label>
                     <Label kind="primary" size="h6" bold uppercase>{wordOfRound}</Label>
                 </Grid>
@@ -514,7 +514,7 @@ const Game = (props) => {
                     </Box>
                 </Grid>
 
-                <Grid container item xs direction="column" alignItems="flex-end" justify="center">
+                <Grid container item xs direction="column" alignItems="flex-end" justifyContent="center">
                     <Label kind="secondary" size="body1" bold>Rodada</Label>
                     <Label kind="primary" size="h6" bold uppercase>{categoryOfRound.name}</Label>
                 </Grid>

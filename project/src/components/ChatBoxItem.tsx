@@ -61,7 +61,7 @@ function ChatBoxItem({ blueRight, text }: Props) {
     }
 
     return (
-        <Grid container item justify={justify} className={classes.messageContainer}>
+        <Grid container item justifyContent={justify} className={classes.messageContainer}>
             <Grid item className={`${classes.message} ${customMessageClass}`}>
                 <Label kind={kind} bold size="subtitle1">{text}</Label>
 

@@ -39,7 +39,7 @@ function App() {
                 <Background>
                     <CssBaseline />
                     <Container disableGutters className={classes.root}>
-                        <Grid container justify="center" spacing={2}>
+                        <Grid container justifyContent="center" spacing={2}>
                             <Grid item xs={9}>
                                 <Switch>
                                     <Route path="/:roomId/game">
