@@ -13,3 +13,9 @@ After the word is selected the Word Detectives (the other players) have the obje
 After a question is answered the detectives will have the opportunity to guess the secret word.
 
 The rounds will continue in loop like that and the first detective to correctly guess the word will gain points together with the Word Master. The points won by the Word Master will depend how fast (in rounds) the detectives guessed the secret word.
+
+## :floppy_disk: Directory Structure
+
+### [category-creator](./category-creator)
+
+### [game](./project)
