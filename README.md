@@ -24,6 +24,10 @@ The rounds will continue in loop like that and the first detective to correctly 
 
 ## Tests
 
+## Demo
+
+You can test the game [here](https://whoami-dev-d4380.web.app/).
+
 ## Screenshots
 
 ## Credits
