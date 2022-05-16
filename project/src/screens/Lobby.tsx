@@ -6,7 +6,7 @@ import { Box, Grid, IconButton, Snackbar } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 import { FileCopyOutlined as FileCopyIcon } from '@material-ui/icons';
 
-import { database, firestore } from "firebase/app";
+import firebase from "firebase/compat/app";
 import { withFirebase } from "../firebase/context";
 import { ROOMS_COLLECTION } from "../firebase/collections";
 import Firebase from "../firebase";
@@ -42,7 +42,7 @@ function Lobby({ firebase }: Props) {
     const [isHost, setIsHost] = useState<boolean>(false);
     const [playerName, setPlayerName] = useState<string>(sessionContext.state.playerName);
     const [heartbeatData, setHeartbeatData] = useState<HeartbeatData | null>(null);
-    const [localClockStart, setLocalClockStart] = useState<firestore.Timestamp | null>(null);
+    const [localClockStart, setLocalClockStart] = useState<firebase.firestore.Timestamp | null>(null);
     const [gameState, setGameState] = useState(null);
     const [heartbeats, setHeartbeats] = useState<any>({});
     const [isRoomConfigured, setIsRoomConfigured] = useState<boolean>(false);
@@ -90,19 +90,19 @@ function Lobby({ firebase }: Props) {
     useEffect(() => {
         if (!heartbeatData && playerId) {
             updateRoom({
-                [`heartbeats/${playerId}`]: database.ServerValue.TIMESTAMP
+                [`heartbeats/${playerId}`]: firebase.getServerTimestamp()
             });
-            const now = firestore.Timestamp.now();
+            const now = firebase.getTimestampNow();
             setLocalClockStart(now);
             console.log('setting heartbeat to', now);
         }
-    }, [heartbeatData, playerId, setLocalClockStart, updateRoom]);
+    }, [firebase, heartbeatData, playerId, setLocalClockStart, updateRoom]);
 
     // finish setting my heartbeat info
     useEffect(() => {
         // finish setting my heartbeat
         if (!heartbeatData && playerId && playerId in heartbeats && heartbeats[playerId] && localClockStart) {
-            const localClockEnd = firestore.Timestamp.now();
+            const localClockEnd = firebase.getTimestampNow();
             const lastValue = heartbeats[playerId];
             console.log('heartbeat snapshot')
 
@@ -161,7 +161,7 @@ function Lobby({ firebase }: Props) {
                     id: playerId,
                     name: playerName,
                     score: 0,
-                    creationDate: database.ServerValue.TIMESTAMP,
+                    creationDate: firebase.getServerTimestamp(),
                     status: PlayerStatus.CONNECTED,
                     playedAsWordMaster: false,
                 }
