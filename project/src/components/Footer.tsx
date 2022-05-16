@@ -34,8 +34,8 @@ function Footer({ onClickDiscord, onClickFacebook, onClickInstagram, onClickYout
     
     return (
         <div>
-            <Grid container justify="center" spacing={1}>
-                <Grid container item xs={12} justify="center" spacing={2}>
+            <Grid container justifyContent="center" spacing={1}>
+                <Grid container item xs={12} justifyContent="center" spacing={2}>
                     <Grid item>
                         <img src={discordIcon} className={classes.icon} alt="social discord" onClick={onClickDiscord} />
                     </Grid>
@@ -53,7 +53,7 @@ function Footer({ onClickDiscord, onClickFacebook, onClickInstagram, onClickYout
                     </Grid>
                 </Grid>
 
-                <Grid container item xs={12} justify="center">
+                <Grid container item xs={12} justifyContent="center">
                     <img src={creativeLoopLogo} className={classes.logo} alt="creative loop logo" onClick={onClickLogo} />
                 </Grid>
             </Grid>

@@ -51,7 +51,7 @@ function MainContainer({ sidebar, justify, alignItems, children }: Props) {
     
     return (
         <Paper elevation={1} className={classes.paper}>
-            <Grid container justify={justify} alignItems={alignItems}>
+            <Grid container justifyContent={justify} alignItems={alignItems}>
                 <Grid item xs={sidebar ? 9 : 12} className={classes.container}>
                     {children}
                 </Grid>

@@ -78,7 +78,7 @@ function WordMasterChooseWord({ isWordMaster, fetchWordChoices, onClickWord }) {
                                                     <Grid
                                                         container
                                                         alignItems="center"
-                                                        justify="center"
+                                                        justifyContent="center"
                                                         spacing={1}
                                                     >
                                                         <Grid item xs={3}>

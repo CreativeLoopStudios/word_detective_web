@@ -43,7 +43,7 @@ function Login({ firebase }: Props) {
                     <Logo variant="round" size="medium" />
                 </Grid>
 
-                <Grid container item justify="center">
+                <Grid container item justifyContent="center">
                     <Grid item xs={4}>
                         <Input
                             placeholder=""

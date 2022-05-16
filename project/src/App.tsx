@@ -24,13 +24,13 @@ function App() {
     const classes = useStyles();
 
     useEffect(() => {
-        // window.addEventListener("beforeunload", (ev) => {
-        //     ev.preventDefault();
-        //     const confirmationMessage =
-        //         "Você tem certeza que gostaria de sair?";
-        //     ev.returnValue = confirmationMessage;
-        //     return confirmationMessage;
-        // });
+        window.addEventListener("beforeunload", (ev) => {
+            ev.preventDefault();
+            const confirmationMessage =
+                "Você tem certeza que gostaria de sair?";
+            ev.returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
     }, []);
 
     return (
@@ -39,7 +39,7 @@ function App() {
                 <Background>
                     <CssBaseline />
                     <Container disableGutters className={classes.root}>
-                        <Grid container justify="center" spacing={2}>
+                        <Grid container justifyContent="center" spacing={2}>
                             <Grid item xs={9}>
                                 <Switch>
                                     <Route path="/:roomId/game">

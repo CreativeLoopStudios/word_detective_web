@@ -1,8 +1,8 @@
-import app, { analytics, database, firestore } from "firebase/app";
-import "firebase/firestore";
-import "firebase/database";
-import "firebase/analytics";
-import "firebase/auth";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import "firebase/compat/database";
+import "firebase/compat/analytics";
+import "firebase/compat/auth";
 import { ROOMS_COLLECTION } from "./collections";
 import PlayerStatus from "../player_status";
 import { SET_PLAYER_ID, SET_FIREBASE_USER } from '../actions';
@@ -19,32 +19,40 @@ const firebaseConfig = {
 };
 
 class Firebase {
-    db: firestore.Firestore;
-    realtimeDb: database.Database;
-    analytics: analytics.Analytics;
+    db: firebase.firestore.Firestore;
+    realtimeDb: firebase.database.Database;
+    analytics: firebase.analytics.Analytics;
 
     constructor() {
-        app.initializeApp(firebaseConfig);
-        this.db = app.firestore();
-        this.realtimeDb = app.database();
-        this.analytics = app.analytics();
+        firebase.initializeApp(firebaseConfig);
+        this.db = firebase.firestore();
+        this.realtimeDb = firebase.database();
+        this.analytics = firebase.analytics();
     }
 
-    getCollection = (collection_name: string): firestore.CollectionReference => {
+    getCollection = (collection_name: string): firebase.firestore.CollectionReference => {
         return this.db.collection(collection_name);
     };
 
-    getCollectionByDocId = (collection_name: string, id: string): firestore.DocumentReference => {
+    getCollectionByDocId = (collection_name: string, id: string): firebase.firestore.DocumentReference => {
         return this.db.collection(collection_name).doc(id);
     };
 
-    getRlCollection = (collection_name: string, id: string): database.Reference => {
+    getRlCollection = (collection_name: string, id: string): firebase.database.Reference => {
         if (id) return this.realtimeDb.ref(collection_name + '/' + id);
         return this.realtimeDb.ref(collection_name);
     };
 
-    getItemById = async (collection_name: string, id: string): Promise<firestore.DocumentSnapshot> => {
+    getItemById = async (collection_name: string, id: string): Promise<firebase.firestore.DocumentSnapshot> => {
         return await this.db.collection(collection_name).doc(id).get();
+    };
+
+    getTimestampNow = () => {
+        return firebase.firestore.Timestamp.now();
+    };
+
+    getServerTimestamp = () => {
+        return firebase.database.ServerValue.TIMESTAMP;
     };
 
     pushToList = async (collection_name: string, id: string, key: string, value: any): Promise<void> => {
@@ -94,8 +102,8 @@ class Firebase {
 
     signIn = async (sessionCtx: any): Promise<string | null> => {
         console.log('Setting up playerId');
-        const userCred = await app.auth().signInAnonymously();
-        const currentUser = app.auth().currentUser;
+        const userCred = await firebase.auth().signInAnonymously();
+        const currentUser = firebase.auth().currentUser;
         if (currentUser) {
             await currentUser.updateProfile({
                 displayName: sessionCtx.state.playerName
@@ -119,7 +127,7 @@ class Firebase {
     };
 
     updateDisplayName = async (newName: string): Promise<void> => {
-        const currentUser = app.auth().currentUser;
+        const currentUser = firebase.auth().currentUser;
         if (currentUser) {
             await currentUser.updateProfile({
                 displayName: newName

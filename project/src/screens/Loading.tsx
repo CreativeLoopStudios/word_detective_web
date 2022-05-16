@@ -7,7 +7,7 @@ import { MainContainer } from "../components";
 function Loading() {
     return (
         <MainContainer alignItems="center">
-            <Grid container justify="center">
+            <Grid container justifyContent="center">
                 <Grid item>
                     <CircularProgress variant="indeterminate" size={90} thickness={7} />
                 </Grid>
