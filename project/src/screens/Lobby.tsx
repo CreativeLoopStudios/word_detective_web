@@ -49,7 +49,7 @@ function Lobby({ firebase }: Props) {
     const [isPlayerAdded, setIsPlayerAdded] = useState<boolean>(false);
 
     const updateRoom = useCallback((data) => {
-        return firebase.updateRlById(ROOMS_COLLECTION, roomId, data);
+        return firebase.updateRlById(ROOMS_COLLECTION, roomId!, data);
     }, [firebase, roomId]);
 
     // sign up user
@@ -128,7 +128,7 @@ function Lobby({ firebase }: Props) {
     useEffect(() => {
         if (!isPlayerAdded) return;
 
-        const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId);
+        const collectionRef = firebase.getRlCollection(ROOMS_COLLECTION, roomId!);
         collectionRef.on('value', (snapshot) => {
             const room = snapshot.val();
             if (!room) {
@@ -169,7 +169,7 @@ function Lobby({ firebase }: Props) {
                 .then(() => {
                     setIsPlayerAdded(true);
                 });
-            firebase.onDisconnect(roomId, playerId);
+            firebase.onDisconnect(roomId!, playerId);
         }
     }, [players, playerId, updateRoom, firebase, playerName, roomId]);
 
