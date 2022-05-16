@@ -19,3 +19,13 @@ The rounds will continue in loop like that and the first detective to correctly 
 ### [category-creator](./category-creator)
 
 ### [game](./project)
+
+## Developing
+
+## Tests
+
+## Screenshots
+
+## Credits
+
+## License
