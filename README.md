@@ -56,6 +56,8 @@ REACT_APP_ID=<FIREBASE_APP_ID>
 REACT_APP_MEASUREMENT_ID=<FIREBASE_APP_MEASUREMENT_ID>
 ```
 
+The project is using [Storybook](https://github.com/storybookjs/storybook) to test components. Just run `npm run storybook` to launch it.
+
 ## Tests
 
 There are only a few tests at the moment, but you can run them with `npm run test`.
