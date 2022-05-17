@@ -18,18 +18,64 @@ The rounds will continue in loop like that and the first detective to correctly 
 
 ### [category-creator](./category-creator)
 
+A tool to add new words and categories to the database.
+
 ### [game](./project)
+
+The main React project.
+
+```text
+project/src
+├── assets          : images and other media used by project
+├── components      : components following the Storybook structure
+├── context         : React context
+├── firebase        : Firebase operations
+├── hooks           : reusable hooks
+├── screens         : main game screens
+├── state_screens   : screen slices that are shared among screens
+├── stories         : Storybook stories
+├── themes          : Material UI themes
+├── types           : common Typescript types
+└── utils           : shared code
+```
 
 ## Developing
 
+To get started is very easy. Just install with `npm install` and run with `npm start`.
+
+You'll need to create a `.env` file like this one with firebase config:
+
+```text
+REACT_APP_API_KEY=<FIREBASE_API_KEY>
+REACT_APP_AUTH_DOMAIN=<FIREBASE_AUTH_DOMAIN>
+REACT_APP_DATABASE_URL=<FIREBASE_DATABASE_URL>
+REACT_APP_PROJECT_ID=<FIREBASE_PROJECT_ID>
+REACT_APP_STORAGE_BUCKET=<FIREBASE_STORAGE_BUCKET>
+REACT_APP_MESSAGING_SENDER_ID=<FIREBASE_MESSAGING_SENDER_ID>
+REACT_APP_ID=<FIREBASE_APP_ID>
+REACT_APP_MEASUREMENT_ID=<FIREBASE_APP_MEASUREMENT_ID>
+```
+
 ## Tests
+
+There are only a few tests at the moment, but you can run them with `npm run test`.
 
 ## Demo
 
-You can test the game [here](https://whoami-dev-d4380.web.app/).
+You can test the game [here](https://whoami-dev-d4380.web.app/). Note that you'll need a friend to play with you or you can open a private window to simulate a second player.
 
 ## Screenshots
 
+![](./screens/home.png)
+*Home Screen*
+
+![](./screens/lobby.png)
+*Lobby Screen*
+
+![](./screens/questions.png)
+*Asking Questions*
+
 ## Credits
 
-## License
+- [@panoramix360](https://github.com/panoramix360)
+- [@gbottari](https://github.com/gbottari)
